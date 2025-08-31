@@ -6,9 +6,126 @@ This guide provides frontend developers with the information needed to integrate
 
 The Plantopia Recommendation Engine provides personalized plant recommendations based on user preferences and environmental data. The backend processes user inputs, analyzes plant data, and returns tailored recommendations.
 
-## API Endpoint
+## API Endpoints
 
-The backend is a Python script that can be executed via command line. The main entry point is `main.py`.
+The backend can be accessed via two methods:
+
+1. **Command Line Interface** - for direct execution
+2. **REST API** - for integration with frontend applications
+
+### REST API
+
+The FastAPI backend runs on port 8000 by default. To start the API server:
+
+```bash
+uvicorn api:app --reload
+```
+
+Or alternatively:
+
+```bash
+python api.py
+```
+
+#### POST `/recommendations`
+
+Generate plant recommendations based on user preferences and location.
+
+**Request Body:**
+
+```json
+{
+  "suburb": "Richmond",
+  "n": 5,
+  "climate_zone": null,
+  "user_preferences": {
+    "user_id": "anon_mvp",
+    "site": {
+      "location_type": "balcony",
+      "area_m2": 2.0,
+      "sun_exposure": "part_sun",
+      "wind_exposure": "moderate",
+      "containers": true,
+      "container_sizes": ["small", "medium"]
+    },
+    "preferences": {
+      "goal": "mixed",
+      "edible_types": ["herbs", "leafy"],
+      "ornamental_types": ["flowers"],
+      "colors": ["purple", "white"],
+      "fragrant": true,
+      "maintainability": "low",
+      "watering": "medium",
+      "time_to_results": "quick",
+      "season_intent": "start_now",
+      "pollen_sensitive": false
+    },
+    "practical": {
+      "budget": "medium",
+      "has_basic_tools": true,
+      "organic_only": false
+    },
+    "environment": {
+      "climate_zone": "temperate",
+      "month_now": "",
+      "uv_index": 0.0,
+      "temperature_c": 8.0,
+      "humidity_pct": 75,
+      "wind_speed_kph": 15
+    }
+  }
+}
+```
+
+**Response:**
+
+The API returns the same JSON structure as the command-line version:
+
+```json
+{
+  "recommendations": [
+    {
+      "plant_name": "Basil",
+      "scientific_name": "Ocimum basilicum",
+      "plant_category": "herb",
+      "score": 95.2,
+      "why": [
+        "Sowable now in cool climate (August, September, October).",
+        "Part sun tolerant; matches your site conditions.",
+        "Hardy plant; aligns with your maintenance preference.",
+        "Fragrant traits match your preferences."
+      ],
+      "fit": {
+        "sun_need": "part_sun",
+        "time_to_maturity_days": 60,
+        "maintainability": "hardy",
+        "container_ok": true,
+        "indoor_ok": true,
+        "habit": "compact"
+      },
+      "sowing": {
+        "climate_zone": "cool",
+        "months": ["August", "September", "October"],
+        "method": "sow_direct",
+        "depth_mm": 5,
+        "spacing_cm": 20,
+        "season_label": "Start now"
+      },
+      "media": {
+        "image_path": "herb_plant_images/basil.jpg"
+      }
+    }
+  ],
+  "notes": [],
+  "suburb": "Richmond",
+  "climate_zone": "cool",
+  "month_now": "August"
+}
+```
+
+### Command Line Interface
+
+The backend is also a Python script that can be executed via command line. The main entry point is `main.py`.
 
 ### Command Line Interface
 
