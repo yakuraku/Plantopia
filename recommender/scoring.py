@@ -74,22 +74,51 @@ def maintainability_score(user_pref: str, plant_maint_score: float) -> float:
     return plant_maint_score
 
 def time_to_results_score(user_time_pref: str, t_days: int) -> float:
-    """Calculate time to results score."""
-    score = 0.6  # Default if unknown
+    """Calculate time to results score based on user preference and plant maturity time."""
+    if t_days is None:
+        return 0.6  # Default if unknown
     
-    if t_days is not None:
-        if t_days <= 60:
-            score = 1.0
-        elif 60 < t_days <= 120:
-            score = 0.8
-        else:
-            score = 0.6
+    # Define preference ranges
+    if user_time_pref == "quick":
+        # User wants quick results (prefer plants that mature quickly)
+        if t_days <= 45:          # Very quick (radishes, microgreens)
+            return 1.0
+        elif t_days <= 75:        # Quick (herbs, leafy greens)  
+            return 0.8
+        elif t_days <= 105:       # Medium (some flowers)
+            return 0.5
+        else:                     # Slow (long season crops)
+            return 0.2
+            
+    elif user_time_pref == "standard":
+        # User is okay with standard timing
+        if t_days <= 60:          # Quick
+            return 0.9
+        elif t_days <= 120:       # Standard range
+            return 1.0
+        elif t_days <= 180:       # Longer but acceptable
+            return 0.7
+        else:                     # Very long
+            return 0.4
+            
+    elif user_time_pref == "patient":
+        # User is willing to wait for results (prefer longer-term crops)
+        if t_days <= 60:          # Too quick
+            return 0.6
+        elif t_days <= 120:       # Good medium term
+            return 0.8
+        elif t_days <= 180:       # Perfect for patient gardeners
+            return 1.0
+        else:                     # Very long term
+            return 0.9
     
-    # Boost if category matches user preference
-    # This would need more context to implement fully
-    # For now, we'll skip the boost
-    
-    return score
+    # Default fallback for unknown preferences
+    if t_days <= 60:
+        return 1.0
+    elif t_days <= 120:
+        return 0.8
+    else:
+        return 0.6
 
 def site_fit_score(user_site: Dict[str, Any], plant: Dict[str, Any]) -> float:
     """Calculate site fit score."""

@@ -500,6 +500,176 @@ The climate data integration system was added to the project, providing real-tim
 - Comprehensive testing confirms consistent behavior
 - Zero breaking changes to existing API contracts
 
+## Critical Bug Fix: Time Preference Scoring Issue (September 2025)
+
+### Problem Identified
+The frontend team reported that changing the `time_to_results` preference (quick/standard/patient) while keeping all other criteria the same resulted in identical plant recommendations. This was a critical flaw in the scoring system that prevented proper personalization based on user time preferences.
+
+### Root Cause Analysis
+The issue was in the `time_to_results_score` function in `recommender/scoring.py` (lines 76-92). The function had a critical flaw:
+
+**Problem:**
+1. **Function ignored user preference**: The `user_time_pref` parameter was completely unused
+2. **Fixed scoring logic**: Only considered plant maturity days without correlating to user preferences
+3. **Missing implementation**: Comments indicated "For now, we'll skip the boost" for preference matching
+
+**Impact:**
+- Users selecting "quick" results got same recommendations as "patient" users
+- Personalization was broken for time-sensitive preferences
+- User experience was degraded due to lack of preference differentiation
+
+### Technical Fix Applied
+
+#### Modified `time_to_results_score` Function
+**File:** `recommender/scoring.py`
+**Lines:** 76-121
+
+**Before:**
+```python
+def time_to_results_score(user_time_pref: str, t_days: int) -> float:
+    """Calculate time to results score."""
+    score = 0.6  # Default if unknown
+    
+    if t_days is not None:
+        if t_days <= 60:
+            score = 1.0
+        elif 60 < t_days <= 120:
+            score = 0.8
+        else:
+            score = 0.6
+    
+    # Boost if category matches user preference
+    # This would need more context to implement fully
+    # For now, we'll skip the boost
+    
+    return score
+```
+
+**After:**
+```python
+def time_to_results_score(user_time_pref: str, t_days: int) -> float:
+    """Calculate time to results score based on user preference and plant maturity time."""
+    if t_days is None:
+        return 0.6  # Default if unknown
+    
+    # Define preference ranges
+    if user_time_pref == "quick":
+        # User wants quick results (prefer plants that mature quickly)
+        if t_days <= 45:          # Very quick (radishes, microgreens)
+            return 1.0
+        elif t_days <= 75:        # Quick (herbs, leafy greens)  
+            return 0.8
+        elif t_days <= 105:       # Medium (some flowers)
+            return 0.5
+        else:                     # Slow (long season crops)
+            return 0.2
+            
+    elif user_time_pref == "standard":
+        # User is okay with standard timing
+        if t_days <= 60:          # Quick
+            return 0.9
+        elif t_days <= 120:       # Standard range
+            return 1.0
+        elif t_days <= 180:       # Longer but acceptable
+            return 0.7
+        else:                     # Very long
+            return 0.4
+            
+    elif user_time_pref == "patient":
+        # User is willing to wait for results (prefer longer-term crops)
+        if t_days <= 60:          # Too quick
+            return 0.6
+        elif t_days <= 120:       # Good medium term
+            return 0.8
+        elif t_days <= 180:       # Perfect for patient gardeners
+            return 1.0
+        else:                     # Very long term
+            return 0.9
+    
+    # Default fallback for unknown preferences
+    if t_days <= 60:
+        return 1.0
+    elif t_days <= 120:
+        return 0.8
+    else:
+        return 0.6
+```
+
+**Key Changes:**
+1. **Implemented user preference logic**: Now properly considers "quick", "standard", and "patient" preferences
+2. **Scoring ranges optimized for each preference type**:
+   - **Quick**: Heavily favors plants maturing in ≤45 days, penalizes >105 days
+   - **Standard**: Balanced approach with peak scoring for 60-120 day plants
+   - **Patient**: Rewards longer maturity times, with peak scoring for 120-180 days
+3. **Granular scoring bands**: More nuanced scoring with 4-5 ranges per preference type
+
+### Testing Results
+
+#### Before Fix
+```
+Test: Quick vs Patient preference
+Result: 5/5 identical plants in same order
+Status: BUG CONFIRMED - Time preference completely ignored
+```
+
+#### After Fix
+```
+QUICK Results Preference:
+1. Penstemon- Sensation Mixed - 92 days - Score: 71.2
+2. Radish- Hailstone - 30 days - Score: 70.2  ⬅️ Fast crop prioritized
+3. Mustard Greens- Komatsuna - 37 days - Score: 69.2  ⬅️ Fast crop prioritized
+
+PATIENT Results Preference:
+1. Penstemon- Sensation Mixed - 92 days - Score: 74.2
+2. Asiatic Lily- Tribal Kiss - 105 days - Score: 71.5
+3. Onion- Cipollini - 140 days - Score: 71.0  ⬅️ Slow crop prioritized
+
+Analysis:
+- Quick vs Patient: 3/5 identical plants (2 different) ✅
+- Quick vs Standard: 3/5 identical plants (2 different) ✅  
+- Patient vs Standard: 4/5 identical plants (1 different) ✅
+```
+
+#### Edge Case Testing
+```
+EDIBLE-ONLY Quick Preference:
+1. Radish- Hailstone (30 days)
+2. Pak Choi (45 days)
+3. Mustard (35 days)
+
+EDIBLE-ONLY Patient Preference:  
+1. Onion- Cipollini (140 days)
+2. Parsnip- Guernsey (122 days)
+3. Golden Shallot (175 days)
+
+Result: 0/5 identical plants in same position ✅ PERFECT DIFFERENTIATION
+```
+
+### Frontend Integration Impact
+
+#### Behavior Changes
+1. **Proper Personalization**: Time preferences now significantly affect plant rankings
+2. **User Experience**: Users get meaningfully different recommendations based on their patience level
+3. **Scoring Distribution**: Time preference scoring now ranges from 0.2-1.0 instead of fixed 0.6-1.0
+4. **Backward Compatibility**: All existing API contracts remain unchanged
+
+#### New Scoring Behavior
+- **Quick preference**: Strongly favors plants maturing ≤75 days
+- **Standard preference**: Balanced, with peak scoring for 60-120 day plants  
+- **Patient preference**: Rewards longer maturity plants (120-180 days optimal)
+
+### Performance Impact
+- **Processing**: No additional processing overhead
+- **Memory**: Minimal memory increase due to expanded conditional logic
+- **Response time**: No measurable impact on API response times
+- **Accuracy**: Significantly improved recommendation relevance
+
+### Code Quality
+- All syntax checks pass
+- Enhanced documentation and comments
+- Improved scoring granularity and logic
+- No breaking changes to existing functionality
+
 ## Next Steps
 
 Future enhancements could include:
