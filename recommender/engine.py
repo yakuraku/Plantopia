@@ -305,11 +305,12 @@ def score_and_rank(candidates: List[Dict[str, Any]], user: Dict[str, Any],
     return scored
 
 def category_diversity(result_list: List[Tuple[float, Dict[str, Any], Dict[str, float]]], 
-                      max_per_cat: int = 2) -> List[Tuple[float, Dict[str, Any], Dict[str, float]]]:
-    """Limit number of plants per category."""
+                      max_per_cat: int = 2, target_count: int = 5) -> List[Tuple[float, Dict[str, Any], Dict[str, float]]]:
+    """Limit number of plants per category, but ensure we reach target count if possible."""
     category_count = {}
     filtered = []
     
+    # First pass: apply diversity cap
     for item in result_list:
         _, plant, _ = item
         category = plant.get("plant_category", "unknown")
@@ -320,6 +321,12 @@ def category_diversity(result_list: List[Tuple[float, Dict[str, Any], Dict[str, 
         if category_count[category] < max_per_cat:
             category_count[category] += 1
             filtered.append(item)
+    
+    # Second pass: if we haven't reached target, add more plants regardless of category
+    if len(filtered) < target_count:
+        for item in result_list:
+            if item not in filtered and len(filtered) < target_count:
+                filtered.append(item)
     
     return filtered
 

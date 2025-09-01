@@ -139,8 +139,8 @@ async def get_recommendations(request: RecommendationRequest):
         # Score and rank
         scored_plants = score_and_rank(final_candidates, user_prefs, env, weights)
         
-        # Apply diversity cap
-        diverse_plants = category_diversity(scored_plants, max_per_cat=2)
+        # Apply diversity cap but ensure we reach target count
+        diverse_plants = category_diversity(scored_plants, max_per_cat=2, target_count=request.n)
         
         # Take top N
         top_plants = diverse_plants[:request.n]
