@@ -5,9 +5,37 @@ from typing import Optional, Dict, Any, List
 import json
 import tempfile
 import os
+import base64
 
 from recommender.engine import load_all_plants, select_environment, get_user_preferences, hard_filter, relax_if_needed, score_and_rank, assemble_output, category_diversity
 from recommender.scoring import weights
+
+def image_to_base64(image_path: str) -> str:
+    """Convert image file to base64 string."""
+    try:
+        if not image_path or not os.path.exists(image_path):
+            return ""
+        
+        with open(image_path, "rb") as image_file:
+            # Read image and encode to base64
+            image_data = image_file.read()
+            base64_string = base64.b64encode(image_data).decode('utf-8')
+            
+            # Determine MIME type based on file extension
+            file_ext = os.path.splitext(image_path)[1].lower()
+            if file_ext in ['.jpg', '.jpeg']:
+                mime_type = 'image/jpeg'
+            elif file_ext == '.png':
+                mime_type = 'image/png'
+            elif file_ext == '.gif':
+                mime_type = 'image/gif'
+            else:
+                mime_type = 'image/jpeg'  # default
+            
+            return f"data:{mime_type};base64,{base64_string}"
+    except Exception as e:
+        print(f"Error converting image {image_path} to base64: {e}")
+        return ""
 
 app = FastAPI(
     title="Plantopia Recommendation Engine API",
@@ -119,6 +147,19 @@ async def get_recommendations(request: RecommendationRequest):
         
         # Assemble output
         output = assemble_output(top_plants, user_prefs, env, [])
+        
+        # Convert image paths to base64
+        for recommendation in output.get("recommendations", []):
+            if "media" in recommendation and "image_path" in recommendation["media"]:
+                image_path = recommendation["media"]["image_path"]
+                base64_image = image_to_base64(image_path)
+                
+                # Update media object with both path and base64
+                recommendation["media"] = {
+                    "image_path": image_path,  # Keep original path for reference
+                    "image_base64": base64_image,  # Add base64 data
+                    "has_image": bool(base64_image)
+                }
         
         # Add suburb and climate info
         output["suburb"] = request.suburb
