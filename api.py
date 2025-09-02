@@ -186,6 +186,42 @@ async def get_recommendations(request: RecommendationRequest):
                 pass
         raise HTTPException(status_code=500, detail=f"Error processing request: {str(e)}")
 
+@app.get("/plants")
+async def get_all_plants():
+    """
+    Get all plants from the database (vegetables, herbs, and flowers).
+    Returns all plant data with images converted to base64.
+    """
+    try:
+        # Load plant data from all CSV files
+        csv_paths = {
+            "flower": "flower_plants_data.csv",
+            "herb": "herbs_plants_data.csv",
+            "vegetable": "vegetable_plants_data.csv"
+        }
+        
+        all_plants = load_all_plants(csv_paths)
+        
+        # Convert image paths to base64 for each plant
+        for plant in all_plants:
+            image_path = plant.get("image_path", "")
+            base64_image = image_to_base64(image_path)
+            
+            # Update plant object with base64 image data
+            plant["media"] = {
+                "image_path": image_path,
+                "image_base64": base64_image,
+                "has_image": bool(base64_image)
+            }
+        
+        return {
+            "plants": all_plants,
+            "total_count": len(all_plants)
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error loading plants: {str(e)}")
+
 @app.post("/plant-score")
 async def get_plant_score(request: PlantScoreRequest):
     try:

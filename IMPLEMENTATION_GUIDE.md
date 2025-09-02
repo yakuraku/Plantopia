@@ -13,9 +13,10 @@ The backend can be accessed via two methods:
 1. **Command Line Interface** - for direct execution
 2. **REST API** - for integration with frontend applications
 
-The REST API provides two main endpoints:
+The REST API provides three main endpoints:
 - `/recommendations` - Get multiple plant recommendations based on user preferences
 - `/plant-score` - Get detailed scoring information for a specific plant
+- `/plants` - Get all plants from the database (vegetables, herbs, and flowers)
 
 ### REST API
 
@@ -34,6 +35,51 @@ python api.py
 #### POST `/recommendations`
 
 Generate plant recommendations based on user preferences and location.
+
+#### GET `/plants`
+
+Get all plants from the database (vegetables, herbs, and flowers) with their associated images.
+
+**Parameters:** None
+
+**Response:**
+
+```json
+{
+  "plants": [
+    {
+      "plant_name": "Basil",
+      "scientific_name": "Ocimum basilicum",
+      "plant_category": "herb",
+      "plant_type": "Annual herb to 50cm; Culinary use; Aromatic leaves",
+      "days_to_maturity": 60,
+      "plant_spacing": 20,
+      "sowing_depth": 5,
+      "position": "Full sun to part sun, moist well drained soil",
+      "season": "Spring and summer",
+      "germination": "7-14 days @ 18-25°C",
+      "sowing_method": "Sow direct or raise seedlings",
+      "hardiness_life_cycle": "Frost tender Annual",
+      "characteristics": "Aromatic, culinary herb",
+      "description": "Sweet basil is one of the most popular culinary herbs...",
+      "additional_information": "Culinary use; Container growing",
+      "seed_type": "Open pollinated, untreated, non-GMO variety of seed",
+      "image_filename": "herb_plant_images/basil.jpg",
+      "cool_climate_sowing_period": "September, October, November",
+      "temperate_climate_sowing_period": "August, September, October, November, December",
+      "subtropical_climate_sowing_period": "March, April, May, June, July, August, September",
+      "tropical_climate_sowing_period": "April, May, June, July, August",
+      "arid_climate_sowing_period": "March, April, May, August, September, October",
+      "media": {
+        "image_path": "herb_plant_images/basil.jpg",
+        "image_base64": "data:image/jpeg;base64,...",
+        "has_image": true
+      }
+    }
+  ],
+  "total_count": 450
+}
+```
 
 #### POST `/plant-score`
 
@@ -495,6 +541,62 @@ The endpoint supports flexible plant name matching:
 - Returns HTTP 404 if the plant is not found
 - Returns HTTP 500 for other errors (malformed request, missing files, etc.)
 
+## New Feature: All Plants Endpoint
+
+The `/plants` endpoint provides access to the complete plant database, including vegetables, herbs, and flowers. This is useful when you need to:
+
+1. **Browse All Plants**: Display a comprehensive catalog of all available plants
+2. **Search and Filter**: Implement client-side search and filtering functionality
+3. **Plant Details**: Show detailed information about plants without needing user preferences
+4. **Catalog Views**: Create category-based views (vegetables, herbs, flowers)
+
+### Key Features
+
+- **Complete Database**: Returns all plants from vegetable_plants_data.csv, herbs_plants_data.csv, and flower_plants_data.csv
+- **Rich Data**: Includes all plant attributes like scientific names, growing requirements, sowing periods, etc.
+- **Image Support**: All plant images are converted to base64 for easy frontend integration
+- **Performance**: Single endpoint call returns all data - no pagination needed for MVP
+- **Categories**: Each plant includes its category (vegetable, herb, flower) for easy filtering
+
+### Data Structure
+
+Each plant object includes:
+- **Basic Info**: plant_name, scientific_name, plant_category, plant_type
+- **Growing Details**: days_to_maturity, plant_spacing, sowing_depth, position requirements
+- **Timing**: season, germination period, climate-specific sowing periods
+- **Care Instructions**: sowing_method, hardiness_life_cycle, characteristics
+- **Descriptions**: detailed description and additional_information
+- **Media**: image_path, base64 encoded image data, and availability flag
+
+### Frontend Integration Examples
+
+```javascript
+// Fetch all plants
+const response = await fetch('/plants');
+const data = await response.json();
+console.log(`Total plants: ${data.total_count}`);
+
+// Filter by category
+const herbs = data.plants.filter(plant => plant.plant_category === 'herb');
+const vegetables = data.plants.filter(plant => plant.plant_category === 'vegetable');
+const flowers = data.plants.filter(plant => plant.plant_category === 'flower');
+
+// Search by name
+const searchTerm = 'basil';
+const results = data.plants.filter(plant => 
+  plant.plant_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  plant.scientific_name.toLowerCase().includes(searchTerm.toLowerCase())
+);
+
+// Display plant with image
+plants.forEach(plant => {
+  if (plant.media.has_image) {
+    // Use plant.media.image_base64 as src for img tag
+    console.log(`${plant.plant_name} has an image`);
+  }
+});
+```
+
 ## Integration Steps
 
 1. **Collect User Data**: Gather user preferences through the frontend interface
@@ -502,6 +604,7 @@ The endpoint supports flexible plant name matching:
 3. **Execute Backend**: 
    - Use `/recommendations` for getting multiple plant suggestions
    - Use `/plant-score` for getting detailed information about a specific plant
+   - Use `/plants` for getting all plants in the database for browsing/searching
 4. **Parse Results**: Process the JSON output to display recommendations or plant scores in the UI
 5. **Display Information**: Show plants with their attributes, sowing instructions, and reasoning
 
