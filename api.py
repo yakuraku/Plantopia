@@ -8,7 +8,7 @@ import os
 import base64
 
 from recommender.engine import load_all_plants, select_environment, get_user_preferences, hard_filter, relax_if_needed, score_and_rank, assemble_output, category_diversity
-from recommender.scoring import weights
+from recommender.scoring import weights, calculate_scores
 
 def image_to_base64(image_path: str) -> str:
     """Convert image file to base64 string."""
@@ -99,6 +99,12 @@ class RecommendationRequest(BaseModel):
     climate_zone: Optional[str] = None
     user_preferences: UserRequest
 
+class PlantScoreRequest(BaseModel):
+    plant_name: str
+    suburb: str = "Richmond"
+    climate_zone: Optional[str] = None
+    user_preferences: UserRequest
+
 @app.get("/")
 async def root():
     return {"message": "Plantopia Recommendation Engine API"}
@@ -171,6 +177,114 @@ async def get_recommendations(request: RecommendationRequest):
         
         return output
         
+    except Exception as e:
+        # Clean up temporary file if it exists
+        if 'user_prefs_path' in locals():
+            try:
+                os.unlink(user_prefs_path)
+            except:
+                pass
+        raise HTTPException(status_code=500, detail=f"Error processing request: {str(e)}")
+
+@app.post("/plant-score")
+async def get_plant_score(request: PlantScoreRequest):
+    try:
+        # Create temporary files for user preferences
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as user_prefs_file:
+            json.dump(request.user_preferences.dict(), user_prefs_file)
+            user_prefs_path = user_prefs_file.name
+        
+        # Load plant data
+        csv_paths = {
+            "flower": "flower_plants_data.csv",
+            "herb": "herbs_plants_data.csv",
+            "vegetable": "vegetable_plants_data.csv"
+        }
+        
+        all_plants = load_all_plants(csv_paths)
+        
+        # Find the specific plant
+        target_plant = None
+        plant_name_lower = request.plant_name.lower().strip()
+        
+        for plant in all_plants:
+            plant_name = plant.get("plant_name", "").lower().strip()
+            scientific_name = plant.get("scientific_name", "").lower().strip()
+            
+            if (plant_name == plant_name_lower or 
+                scientific_name == plant_name_lower or
+                plant_name_lower in plant_name or
+                plant_name_lower in scientific_name):
+                target_plant = plant
+                break
+        
+        if not target_plant:
+            raise HTTPException(status_code=404, detail=f"Plant '{request.plant_name}' not found")
+        
+        # Load climate data
+        with open("climate_data.json", 'r', encoding='utf-8') as f:
+            climate_data = json.load(f)
+        
+        # Select environment
+        env = select_environment(request.suburb, climate_data, cli_override_climate_zone=request.climate_zone)
+        
+        # Load user preferences
+        user_prefs = get_user_preferences(user_prefs_path)
+        
+        # Calculate score for the specific plant
+        score, breakdown = calculate_scores(target_plant, user_prefs, env)
+        
+        # Get sowing information
+        sowing_months = target_plant.get("sowing_months_by_climate", {}).get(env["climate_zone"], [])
+        season_label = "Start now" if env["month_now"] in sowing_months else "Plan ahead"
+        
+        # Convert image path to base64 if available
+        image_base64 = ""
+        image_path = target_plant.get("image_path", "")
+        if image_path:
+            image_base64 = image_to_base64(image_path)
+        
+        # Assemble response
+        result = {
+            "plant_name": target_plant.get("plant_name"),
+            "scientific_name": target_plant.get("scientific_name"),
+            "plant_category": target_plant.get("plant_category"),
+            "score": round(score, 1),
+            "score_breakdown": {k: round(v, 3) for k, v in breakdown.items()},
+            "fit": {
+                "sun_need": target_plant.get("sun_need"),
+                "time_to_maturity_days": target_plant.get("time_to_maturity_days"),
+                "maintainability": target_plant.get("maintainability"),
+                "container_ok": target_plant.get("container_ok"),
+                "indoor_ok": target_plant.get("indoor_ok"),
+                "habit": target_plant.get("habit")
+            },
+            "sowing": {
+                "climate_zone": env["climate_zone"],
+                "months": sowing_months,
+                "method": target_plant.get("sowing_method"),
+                "depth_mm": target_plant.get("sowing_depth_mm"),
+                "spacing_cm": target_plant.get("spacing_cm"),
+                "season_label": season_label
+            },
+            "media": {
+                "image_path": image_path,
+                "image_base64": image_base64,
+                "has_image": bool(image_base64)
+            },
+            "suburb": request.suburb,
+            "climate_zone": env["climate_zone"],
+            "month_now": env["month_now"]
+        }
+        
+        # Clean up temporary file
+        os.unlink(user_prefs_path)
+        
+        return result
+        
+    except HTTPException:
+        # Re-raise HTTP exceptions (like 404)
+        raise
     except Exception as e:
         # Clean up temporary file if it exists
         if 'user_prefs_path' in locals():

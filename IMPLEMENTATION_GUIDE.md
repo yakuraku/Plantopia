@@ -13,6 +13,10 @@ The backend can be accessed via two methods:
 1. **Command Line Interface** - for direct execution
 2. **REST API** - for integration with frontend applications
 
+The REST API provides two main endpoints:
+- `/recommendations` - Get multiple plant recommendations based on user preferences
+- `/plant-score` - Get detailed scoring information for a specific plant
+
 ### REST API
 
 The FastAPI backend runs on port 8000 by default. To start the API server:
@@ -30,6 +34,10 @@ python api.py
 #### POST `/recommendations`
 
 Generate plant recommendations based on user preferences and location.
+
+#### POST `/plant-score`
+
+Get the score for a specific plant based on user preferences and location.
 
 **Request Body:**
 
@@ -367,13 +375,135 @@ The engine returns recommendations in the following format:
 }
 ```
 
+**Plant Score Request Body:**
+
+```json
+{
+  "plant_name": "Basil",
+  "suburb": "Richmond",
+  "climate_zone": null,
+  "user_preferences": {
+    "user_id": "anon_mvp",
+    "site": {
+      "location_type": "balcony",
+      "area_m2": 2.0,
+      "sun_exposure": "part_sun",
+      "wind_exposure": "moderate",
+      "containers": true,
+      "container_sizes": ["small", "medium"]
+    },
+    "preferences": {
+      "goal": "mixed",
+      "edible_types": ["herbs", "leafy"],
+      "ornamental_types": ["flowers"],
+      "colors": ["purple", "white"],
+      "fragrant": true,
+      "maintainability": "low",
+      "watering": "medium",
+      "time_to_results": "quick",
+      "season_intent": "start_now",
+      "pollen_sensitive": false,
+      "pets_or_toddlers": false
+    },
+    "practical": {
+      "budget": "medium",
+      "has_basic_tools": true,
+      "organic_only": false
+    },
+    "environment": {
+      "climate_zone": "temperate",
+      "month_now": "",
+      "uv_index": 0.0,
+      "temperature_c": 8.0,
+      "humidity_pct": 75,
+      "wind_speed_kph": 15
+    }
+  }
+}
+```
+
+**Plant Score Response:**
+
+```json
+{
+  "plant_name": "Basil",
+  "scientific_name": "Ocimum basilicum",
+  "plant_category": "herb",
+  "score": 95.2,
+  "score_breakdown": {
+    "season": 1.0,
+    "sun": 0.7,
+    "maintainability": 0.8,
+    "time_to_results": 0.9,
+    "site_fit": 0.4,
+    "preferences": 0.6,
+    "wind_penalty": 1.0,
+    "eco_bonus": 0.0
+  },
+  "fit": {
+    "sun_need": "part_sun",
+    "time_to_maturity_days": 60,
+    "maintainability": "hardy",
+    "container_ok": true,
+    "indoor_ok": true,
+    "habit": "compact"
+  },
+  "sowing": {
+    "climate_zone": "cool",
+    "months": ["August", "September", "October"],
+    "method": "sow_direct",
+    "depth_mm": 5,
+    "spacing_cm": 20,
+    "season_label": "Start now"
+  },
+  "media": {
+    "image_path": "herb_plant_images/basil.jpg",
+    "image_base64": "data:image/jpeg;base64,...",
+    "has_image": true
+  },
+  "suburb": "Richmond",
+  "climate_zone": "cool",
+  "month_now": "August"
+}
+```
+
+## New Feature: Plant Score Endpoint
+
+The `/plant-score` endpoint allows you to get detailed scoring information for a specific plant. This is useful when users want to:
+
+1. **Check a specific plant**: See how well a particular plant matches their preferences and location
+2. **Compare plants**: Get detailed score breakdowns to understand why one plant scores higher than another
+3. **Understand scoring**: See the detailed breakdown of how the recommendation engine calculates scores
+
+### Key Features
+
+- **Plant Search**: Supports searching by plant name or scientific name (partial matches work)
+- **Detailed Scoring**: Returns a complete breakdown of all scoring factors
+- **Same Context**: Uses the same user preferences and environmental data as recommendations
+- **Rich Response**: Includes all plant details, sowing information, and media
+
+### Plant Name Matching
+
+The endpoint supports flexible plant name matching:
+- Exact plant name match: "Basil"
+- Exact scientific name match: "Ocimum basilicum"  
+- Partial matches: "bas" would match "Basil"
+- Case insensitive: "basil", "BASIL", "Basil" all work
+
+### Error Handling
+
+- Returns HTTP 404 if the plant is not found
+- Returns HTTP 500 for other errors (malformed request, missing files, etc.)
+
 ## Integration Steps
 
 1. **Collect User Data**: Gather user preferences through the frontend interface
 2. **Format JSON**: Structure the data according to the user preferences schema
-3. **Execute Backend**: Run the recommendation engine with the appropriate parameters
-4. **Parse Results**: Process the JSON output to display recommendations in the UI
-5. **Display Recommendations**: Show plants with their attributes, sowing instructions, and reasoning
+3. **Execute Backend**: 
+   - Use `/recommendations` for getting multiple plant suggestions
+   - Use `/plant-score` for getting detailed information about a specific plant
+4. **Parse Results**: Process the JSON output to display recommendations or plant scores in the UI
+5. **Display Information**: Show plants with their attributes, sowing instructions, and reasoning
 
 ## Error Handling
 

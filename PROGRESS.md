@@ -670,12 +670,213 @@ Result: 0/5 identical plants in same position ✅ PERFECT DIFFERENTIATION
 - Improved scoring granularity and logic
 - No breaking changes to existing functionality
 
+## New Feature: Plant Score Endpoint (September 2025)
+
+### Feature Request
+The frontend team requested a new feature where users can select a specific plant and get its detailed scoring information. This addresses the need for users to understand why certain plants are recommended and to compare individual plants against their preferences.
+
+### Implementation Details
+
+#### New API Endpoint: `/plant-score`
+**File:** `api.py`
+**Lines:** 102-106, 189-295
+
+Added new endpoint that accepts a plant name and returns detailed scoring breakdown for that specific plant.
+
+**New Request Model:**
+```python
+class PlantScoreRequest(BaseModel):
+    plant_name: str
+    suburb: str = "Richmond"
+    climate_zone: Optional[str] = None
+    user_preferences: UserRequest
+```
+
+**Endpoint Features:**
+1. **Flexible Plant Search**: Supports multiple matching strategies
+   - Exact plant name match: "Basil" → "Basil"
+   - Exact scientific name match: "Ocimum basilicum" → "Basil"
+   - Partial matches: "bas" → "Basil"
+   - Case insensitive: "basil", "BASIL", "Basil" all work
+
+2. **Comprehensive Response**: Returns detailed plant information
+   - Overall score and detailed breakdown by category
+   - Complete plant fit information (sun needs, maturity time, container compatibility)
+   - Sowing information for user's specific climate zone
+   - Media with base64 encoded images
+   - Environmental context (suburb, climate zone, current month)
+
+3. **Error Handling**:
+   - HTTP 404: Plant not found
+   - HTTP 500: Server errors (malformed request, missing files, etc.)
+   - Proper cleanup of temporary files
+
+#### Request Format
+```json
+{
+  "plant_name": "Basil",
+  "suburb": "Richmond", 
+  "climate_zone": null,
+  "user_preferences": {
+    // Same structure as recommendations endpoint
+    "user_id": "anon_mvp",
+    "site": { /* site preferences */ },
+    "preferences": { /* user preferences */ },
+    "practical": { /* practical preferences */ },
+    "environment": { /* environment data */ }
+  }
+}
+```
+
+#### Response Format
+```json
+{
+  "plant_name": "Basil",
+  "scientific_name": "Ocimum basilicum",
+  "plant_category": "herb",
+  "score": 95.2,
+  "score_breakdown": {
+    "season": 1.0,
+    "sun": 0.7,
+    "maintainability": 0.8,
+    "time_to_results": 0.9,
+    "site_fit": 0.4,
+    "preferences": 0.6,
+    "wind_penalty": 1.0,
+    "eco_bonus": 0.0
+  },
+  "fit": {
+    "sun_need": "part_sun",
+    "time_to_maturity_days": 60,
+    "maintainability": "hardy",
+    "container_ok": true,
+    "indoor_ok": true,
+    "habit": "compact"
+  },
+  "sowing": {
+    "climate_zone": "cool",
+    "months": ["August", "September", "October"],
+    "method": "sow_direct",
+    "depth_mm": 5,
+    "spacing_cm": 20,
+    "season_label": "Start now"
+  },
+  "media": {
+    "image_path": "herb_plant_images/basil.jpg",
+    "image_base64": "data:image/jpeg;base64,...",
+    "has_image": true
+  },
+  "suburb": "Richmond",
+  "climate_zone": "cool",
+  "month_now": "August"
+}
+```
+
+### Technical Implementation
+
+#### Backend Changes
+1. **New Import Added** (`api.py:11`):
+   ```python
+   from recommender.scoring import weights, calculate_scores
+   ```
+
+2. **Plant Search Logic** (`api.py:207-222`):
+   - Iterates through all loaded plants
+   - Matches against plant name and scientific name
+   - Uses case-insensitive comparison
+   - Supports partial matching for improved user experience
+
+3. **Score Calculation** (`api.py:234-235`):
+   - Uses existing `calculate_scores` function from scoring module
+   - Maintains consistency with recommendation scoring logic
+   - Returns both overall score and detailed breakdown
+
+4. **Response Assembly** (`api.py:247-278`):
+   - Constructs comprehensive response with all plant details
+   - Includes same data structure as recommendations for consistency
+   - Adds score breakdown for transparency
+
+### Documentation Updates
+
+#### Implementation Guide Enhanced
+**File:** `IMPLEMENTATION_GUIDE.md`
+
+**Added Sections:**
+1. **API Endpoints Overview** (lines 16-18): Updated to mention both endpoints
+2. **New Endpoint Documentation** (lines 34-36): Added `/plant-score` endpoint description
+3. **Request/Response Examples** (lines 374-464): Complete JSON examples for the new endpoint
+4. **Feature Description** (lines 470-506): Detailed explanation of functionality and use cases
+
+**Key Documentation Additions:**
+- Plant name matching capabilities and flexibility
+- Error handling scenarios (404, 500)
+- Integration steps updated to include both endpoints
+- Usage scenarios and benefits for users
+
+### Frontend Integration Notes
+
+#### Use Cases
+1. **Individual Plant Check**: Users can search for any plant to see how it fits their preferences
+2. **Plant Comparison**: Get detailed score breakdowns to understand ranking differences
+3. **Transparency**: Users can see exactly how the scoring algorithm evaluates each plant
+4. **Education**: Helps users understand what factors influence plant recommendations
+
+#### Integration Recommendations
+```javascript
+// Example frontend integration
+async function getPlantScore(plantName, userPreferences) {
+  const response = await fetch('/plant-score', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      plant_name: plantName,
+      suburb: 'Richmond',
+      user_preferences: userPreferences
+    })
+  });
+  
+  if (response.status === 404) {
+    console.log('Plant not found');
+    return null;
+  }
+  
+  return await response.json();
+}
+```
+
+#### Error Handling
+- **404 Response**: Plant name not found in database
+- **500 Response**: Server error or malformed request
+- **Success Response**: Complete plant scoring information
+
+### Performance Considerations
+- **Processing Time**: Similar to single plant in recommendations (~100-300ms)
+- **Memory Usage**: Minimal - loads same plant data as recommendations endpoint
+- **Scalability**: Handles concurrent requests efficiently
+- **Caching**: Uses same temporary file system as recommendations
+
+### Testing Status
+- **Endpoint Functionality**: ✅ Confirmed working
+- **Plant Search**: ✅ Multiple matching strategies tested  
+- **Response Format**: ✅ Consistent with existing API patterns
+- **Error Handling**: ✅ Proper HTTP status codes and cleanup
+- **Documentation**: ✅ Complete integration guide updated
+
+### Code Quality
+- **No Breaking Changes**: Existing functionality unchanged
+- **Consistent Patterns**: Follows same structure as recommendations endpoint
+- **Proper Error Handling**: Includes cleanup and appropriate HTTP status codes
+- **Documentation**: Comprehensive guide for frontend integration
+
 ## Next Steps
 
 Future enhancements could include:
 - Implementing caching for climate data
-- Adding historical climate data analysis
+- Adding historical climate data analysis  
 - Integrating soil quality data
 - Adding pollen count data
 - Performance optimization for high-count requests (n>20)
 - Enhanced category balancing algorithms
+- **Plant comparison endpoint**: Compare multiple plants side-by-side
+- **Plant search endpoint**: Search/filter plants by various criteria
+- **User preference optimization**: ML-based preference tuning based on user feedback
