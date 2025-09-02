@@ -58,7 +58,8 @@ Generate plant recommendations based on user preferences and location.
       "watering": "medium",
       "time_to_results": "quick",
       "season_intent": "start_now",
-      "pollen_sensitive": false
+      "pollen_sensitive": false,
+      "pets_or_toddlers": false
     },
     "practical": {
       "budget": "medium",
@@ -145,6 +146,126 @@ python main.py --suburb "Richmond" --n 5 --climate climate_data.json --prefs use
 | `--pretty` | Pretty print JSON output | No | (none) |
 | `--climate-zone` | Override climate zone | No | (none) |
 
+## Fields to Collect (controls & options)
+
+### A. Site & Space
+
+- `location_type` (radio): `indoors | balcony | courtyard | backyard | community_garden`
+- `area_m2` (number input with helper): default `2.0`
+- `sun_exposure` (radio): `full_sun (6–8h) | part_sun (3–5h) | bright_shade (1–3h) | low_light (<1h)`
+- `wind_exposure` (radio): `sheltered | moderate | windy`
+- `containers` (toggle): `true/false`
+- `container_sizes` (chips, multi): `small(≤15cm) | medium(16–25) | large(26–40) | very_large(>40)`
+
+### B. Goals & Types
+
+- `goal` (radio): `edible | ornamental | mixed`
+- If `goal` includes edible → `edible_types` (chips, multi): `leafy | fruiting | root | herbs | legumes`
+- If `goal` includes ornamental → `ornamental_types` (chips, multi): `flowers | foliage | climbers | groundcovers`
+
+### C. Care Preferences
+
+- `maintainability` (radio): `low | medium | high` (how much effort they'll spend)
+- `watering` (radio): `low | medium | high`
+- `time_to_results` (radio): `quick(≤60d) | standard(60–120d) | patient(>120d)`
+- `season_intent` (radio): `start_now | happy_to_wait`
+
+### D. Aesthetics (optional)
+
+- `colors` (chips, multi): `white, yellow, orange, pink, red, purple, blue`
+- `fragrant` (toggle): `true/false`
+
+### E. Safety & Practical (optional)
+
+- `pollen_sensitive` (toggle): `true/false`
+- `pets_or_toddlers` (toggle): `true/false` (future toxicity filter)
+- `budget` (radio): `low | medium | high`
+- `has_basic_tools` (toggle): `true/false`
+- `organic_only` (toggle): `true/false`
+
+## JSON Payload (send to backend)
+
+Send with the **selected suburb** (and lat/lon if available). Backend will map suburb → environment and default to **cool** for Melbourne/VIC.
+
+```json
+{
+  "suburb": "Richmond",
+  "site": {
+    "location_type": "balcony",
+    "area_m2": 2.0,
+    "sun_exposure": "part_sun",
+    "wind_exposure": "moderate",
+    "containers": true,
+    "container_sizes": ["small","medium"]
+  },
+  "preferences": {
+    "goal": "mixed",
+    "edible_types": ["herbs","leafy"],
+    "ornamental_types": ["flowers"],
+    "colors": ["purple","white"],
+    "fragrant": true,
+    "maintainability": "low",
+    "watering": "medium",
+    "time_to_results": "quick",
+    "season_intent": "start_now",
+    "pollen_sensitive": false,
+    "pets_or_toddlers": false
+  },
+  "practical": {
+    "budget": "medium",
+    "has_basic_tools": true,
+    "organic_only": false
+  }
+}
+```
+
+### Defaults if user skips everything
+
+```json
+{
+  "site": {
+    "location_type": "balcony",
+    "area_m2": 2.0,
+    "sun_exposure": "part_sun",
+    "wind_exposure": "moderate",
+    "containers": true,
+    "container_sizes": ["small","medium"]
+  },
+  "preferences": {
+    "goal": "mixed",
+    "edible_types": ["herbs","leafy"],
+    "ornamental_types": ["flowers"],
+    "colors": [],
+    "fragrant": false,
+    "maintainability": "low",
+    "watering": "medium",
+    "time_to_results": "standard",
+    "season_intent": "start_now",
+    "pollen_sensitive": false,
+    "pets_or_toddlers": false
+  },
+  "practical": {
+    "budget": "medium",
+    "has_basic_tools": true,
+    "organic_only": false
+  }
+}
+```
+
+## Conditional UI Logic (keep it simple)
+
+- If `location_type = indoors` → keep `containers = true` by default; emphasize `bright_shade / low_light`.
+- If `location_type ∈ {balcony, indoors}` → show `container_sizes`.
+- If `area_m2 < 3` OR only `small/medium` pots → show helper text "We'll favor compact/dwarf/container-friendly plants."
+- If `goal = edible` → show only edible chips; if `ornamental` → show only ornamental chips; if `mixed` → show both.
+- Show an **Advanced** accordion with read-only "Detected climate: **cool** (Melbourne)" (no need to let users change it in MVP).
+
+## Light Validation
+
+- `area_m2`: min `0.2`, max `50`.
+- Arrays (chips): allow empty (treated as "no strong preference").
+- Strings: lowercase, dash/underscore free on your side is fine—the backend normalizes anyway.
+
 ## Input: User Preferences JSON
 
 The frontend should send user preferences in the following JSON format:
@@ -170,7 +291,8 @@ The frontend should send user preferences in the following JSON format:
     "watering": "medium",
     "time_to_results": "quick",
     "season_intent": "start_now",
-    "pollen_sensitive": false
+    "pollen_sensitive": false,
+    "pets_or_toddlers": false
   },
   "practical": {
     "budget": "medium",

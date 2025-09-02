@@ -1,0 +1,10 @@
+# Commit message template
+# 
+# Write a clear, concise commit message
+# 
+# Format:
+# - Use imperative mood (e.g., "Fix bug" not "Fixed bug")
+# - Keep first line under 50 characters
+# - Leave blank line before detailed description
+# - Wrap detailed description at 72 characters
+#
