@@ -1,68 +1,110 @@
-# Plantopia Recommendation Engine
+# plantopia
 
-The Plantopia Recommendation Engine provides personalized plant recommendations based on user preferences and environmental data.
+This template should help get you started developing with Vue 3 in Vite.
 
-## Features
+## Component Guide
 
-- Personalized plant recommendations based on location and preferences
-- Support for flowers, herbs, and vegetables
-- Seasonal planting advice
-- Detailed care instructions
-- API for frontend integration
+- [Recommendation Guide](./RECOMMENDATION.md)
 
-## Setup
+## Recommended IDE Setup
 
-```bash
-python -m venv .venv
-source .venv/bin/activate  # On Unix or MacOS
-# .venv\Scripts\activate  # On Windows
-pip install -r requirements.txt
+[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+
+## Type Support for `.vue` Imports in TS
+
+TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+
+## Customize configuration
+
+See [Vite Configuration Reference](https://vite.dev/config/).
+
+## Project Setup
+
+```sh
+npm install
 ```
 
-## Usage
+### Compile and Hot-Reload for Development
 
-### Command Line Interface
-
-```bash
-python main.py --suburb "Richmond" --n 5 --climate climate_data.json --prefs user_preferences.json --out recommendations.json --pretty
+```sh
+npm run dev
 ```
 
-### API Server
+### Type-Check, Compile and Minify for Production
 
-To start the API server:
-
-```bash
-uvicorn api:app --reload
+```sh
+npm run build
 ```
 
-Or alternatively:
+### Run Unit Tests with [Vitest](https://vitest.dev/)
 
-```bash
-python api.py
+```sh
+npm run test:unit
 ```
 
-The API will be available at `http://localhost:8000`.
+### Run End-to-End Tests with [Playwright](https://playwright.dev)
 
-API documentation is available at:
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
+```sh
+# Install browsers for the first run
+npx playwright install
 
-## API Endpoints
+# When testing on CI, must build the project first
+npm run build
 
-- `GET /` - Health check endpoint
-- `POST /recommendations` - Generate plant recommendations
+# Runs the end-to-end tests
+npm run test:e2e
+# Runs the tests only on Chromium
+npm run test:e2e -- --project=chromium
+# Runs the tests of a specific file
+npm run test:e2e -- tests/example.spec.ts
+# Runs the tests in debug mode
+npm run test:e2e -- --debug
+```
 
-## Project Structure
+### Lint with [ESLint](https://eslint.org/)
 
-- `main.py` - Command line interface
-- `api.py` - FastAPI web server
-- `recommender/` - Core recommendation engine
-- `flower_plants_data.csv` - Flower data
-- `herbs_plants_data.csv` - Herb data
-- `vegetable_plants_data.csv` - Vegetable data
-- `climate_data.json` - Climate information for Melbourne suburbs
-- `user_preferences.json` - Sample user preferences
+```sh
+npm run lint
+```
 
-## Development
+## Icons with Heroicons
 
-See `IMPLEMENTATION_GUIDE.md` for detailed information about the engine and API.
+This project uses [Heroicons](https://heroicons.com/) for icons throughout the application.
+
+### Usage
+
+Import icons from the outline set:
+
+```vue
+<script setup lang="ts">
+import {
+  HomeIcon,
+  MagnifyingGlassIcon,
+  BookOpenIcon,
+  ChartBarIcon,
+  TrophyIcon,
+} from '@heroicons/vue/24/outline'
+</script>
+
+<template>
+  <HomeIcon class="nav-icon" />
+  <MagnifyingGlassIcon class="nav-icon" />
+  <BookOpenIcon class="nav-icon" />
+  <ChartBarIcon class="nav-icon" />
+  <TrophyIcon class="nav-icon" />
+</template>
+
+<style>
+.nav-icon {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
+}
+</style>
+```
+
+### Available Icon Sets
+
+- `@heroicons/vue/24/outline` - 24px outline icons
+- `@heroicons/vue/24/solid` - 24px solid icons  
+- `@heroicons/vue/20/solid` - 20px solid icons
