@@ -115,15 +115,20 @@ class handler(BaseHTTPRequestHandler):
                 else:
                     all_plants = load_all_plants(csv_paths)
                     
-                    # Add Google Drive URLs to first 5 plants as a test
+                    # Add image information for first 5 plants as a test
                     for i, plant in enumerate(all_plants[:5]):
                         plant_category = plant.get("plant_category", "")
-                        drive_url = get_drive_image_url(plant_category)
+                        original_image_path = plant.get("image_path", "")
+                        
+                        # For now, use placeholder images since we don't have individual Google Drive file IDs
+                        # The frontend already has a placeholder-plant.svg file
                         plant["media"] = {
-                            "image_path": drive_url,
-                            "drive_url": drive_url,
-                            "drive_thumbnail": drive_url,
-                            "has_image": bool(drive_url)
+                            "image_path": original_image_path,
+                            "image_base64": "",  # Would contain base64 data when available
+                            "drive_url": "",  # Would contain actual Google Drive URL when available  
+                            "drive_thumbnail": "",
+                            "has_image": False,  # Set to false to trigger frontend fallback to placeholder
+                            "placeholder": "/placeholder-plant.svg"
                         }
                     
                     response = {
