@@ -2,23 +2,9 @@
   "version": 2,
   "buildCommand": "cd frontend && npm run vercel-build",
   "routes": [
-    { "src": "/test", "dest": "test_simple.py" },
-    { "src": "/api/?$", "dest": "api_working.py" },
-    { "src": "/api/(.*)", "dest": "api_working.py" },
+    { "src": "/test", "dest": "/test_simple.py" },
+    { "src": "/api/?$", "dest": "/api_working.py" },
+    { "src": "/api/(.*)", "dest": "/api_working.py" },
     { "src": "/(.*)", "dest": "frontend/$1" }
-  ],
-  "functions": {
-    "api.py": {
-      "memory": 1024,
-      "maxDuration": 30
-    },
-    "api_working.py": {
-      "memory": 1024,
-      "maxDuration": 30
-    },
-    "test_simple.py": {
-      "memory": 1024,
-      "maxDuration": 30
-    }
-  }
+  ]
 }
