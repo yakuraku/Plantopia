@@ -1,11 +1,6 @@
 {
   "version": 2,
-  "builds": [
-    { "src": "frontend/package.json", "use": "@vercel/static-build" },
-    { "src": "api.py", "use": "@vercel/python" },
-    { "src": "api_working.py", "use": "@vercel/python" },
-    { "src": "test_simple.py", "use": "@vercel/python" }
-  ],
+  "buildCommand": "cd frontend && npm run vercel-build",
   "routes": [
     { "src": "/test", "dest": "test_simple.py" },
     { "src": "/api/?$", "dest": "api_working.py" },
@@ -14,6 +9,14 @@
   ],
   "functions": {
     "api.py": {
+      "memory": 1024,
+      "maxDuration": 30
+    },
+    "api_working.py": {
+      "memory": 1024,
+      "maxDuration": 30
+    },
+    "test_simple.py": {
       "memory": 1024,
       "maxDuration": 30
     }
