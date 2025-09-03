@@ -52,3 +52,38 @@ venv.bak/
 # IDE
 .vite/
 .claude/
+
+# Plant Images (hosted on Google Drive)
+flower_plant_images/
+herb_plant_images/
+vegetable_plant_images/
+
+# Additional build and cache directories
+**/node_modules/
+**/dist/
+**/.next/
+**/.nuxt/
+**/build/
+**/.cache/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Python additional exclusions
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+nosetests.xml
+coverage.xml
+*.cover
+.mypy_cache
+.pytest_cache
+.hypothesis

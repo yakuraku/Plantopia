@@ -335,6 +335,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { plantApiService, type Plant } from '@/services/api'
+import { getPlantImageUrl, handleImageError as handleImageErrorHelper } from '@/utils/imageHelper'
 
 // Reactive state
 const plants = ref<Plant[]>([])
@@ -496,18 +497,27 @@ const closeModal = () => {
 
 // Function to get image source (Base64 or URL) - following RecommendationsView pattern
 const getPlantImageSrc = (plant: Plant): string => {
-  // Priority 1: Use Base64 data if available
+  // Priority 1: Use Google Drive URL from API response
+  if (plant.image_url && plant.image_url.includes('drive.google.com')) {
+    return plant.image_url
+  }
+
+  // Priority 2: Generate Google Drive URL from category (fallback)
+  if (plant.category) {
+    return getPlantImageUrl(plant.category)
+  }
+
+  // Priority 3: Legacy Base64 support (for backwards compatibility)
   if (plant.image_base64) {
     // Check if it's already a data URL
     if (plant.image_base64.startsWith('data:')) {
       return plant.image_base64
     }
-
     // If it's just the base64 string, add the data URL prefix
     return `data:image/jpeg;base64,${plant.image_base64}`
   }
 
-  // Priority 2: Fall back to image URL if no Base64 data
+  // Priority 4: Legacy image URL support
   if (plant.image_url) {
     return plant.image_url
   }
@@ -516,13 +526,20 @@ const getPlantImageSrc = (plant: Plant): string => {
   return '/placeholder-plant.svg'
 }
 
-// Handle image loading errors - following RecommendationsView pattern
+// Handle image loading errors - using Google Drive helper
 const handleImageError = (event: Event, plantId: string) => {
   const img = event.target as HTMLImageElement
   console.warn('[PLANTS VIEW] Failed to load plant image:', img.src)
 
   // Track this plant as having image error
   imageErrors.value.add(plantId)
+  
+  // Try to find the plant and get its category for fallback
+  const plant = plants.value.find(p => p.id === plantId)
+  const category = plant?.category
+
+  // Use the helper function to handle the error with category context
+  handleImageErrorHelper(event, category)
 
   // Hide the broken image
   img.style.display = 'none'

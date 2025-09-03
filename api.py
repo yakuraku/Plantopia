@@ -10,8 +10,84 @@ import base64
 from recommender.engine import load_all_plants, select_environment, get_user_preferences, hard_filter, relax_if_needed, score_and_rank, assemble_output, category_diversity
 from recommender.scoring import weights, calculate_scores
 
+# Google Drive configuration
+DRIVE_BASE_URL = "https://drive.google.com/uc?export=view&id="
+DRIVE_FOLDERS = {
+    "flower": "1ZcE9R3FMvZa5TRp8HfAHo-K7dAD5IfmL",
+    "herb": "1aVMw8n51wCndrlUb8xG5cRjsMvBnON7n", 
+    "vegetable": "1rmv-7k70qL_fR1efsKa_t28I22pLKzf_"
+}
+
+# Category mapping for backwards compatibility
+CATEGORY_MAPPING = {
+    "flowers": "flower",
+    "flower": "flower",
+    "flower_plant_images": "flower",
+    "herbs": "herb",
+    "herb": "herb", 
+    "herb_plant_images": "herb",
+    "vegetables": "vegetable",
+    "vegetable": "vegetable",
+    "vegetable_plant_images": "vegetable"
+}
+
+def get_drive_image_url(category: str, image_name: Optional[str] = None) -> str:
+    """
+    Generate Google Drive image URL for a plant category
+    
+    Args:
+        category: Plant category (flower, herb, vegetable)
+        image_name: Specific image filename (optional)
+    
+    Returns:
+        Google Drive URL for the image/folder
+    """
+    if not category:
+        return ""
+        
+    # Normalize category
+    normalized_category = CATEGORY_MAPPING.get(category.lower(), category.lower())
+    folder_id = DRIVE_FOLDERS.get(normalized_category)
+    
+    if not folder_id:
+        print(f"No Google Drive folder found for category: {category}")
+        return ""
+        
+    # For now, return folder URL
+    # TODO: Implement specific file mapping when needed
+    if image_name:
+        print(f"Requested specific image: {image_name} from category: {category}")
+    
+    return f"{DRIVE_BASE_URL}{folder_id}"
+
+def get_drive_thumbnail_url(category: str, size: str = "s220") -> str:
+    """
+    Generate Google Drive thumbnail URL for a plant category
+    
+    Args:
+        category: Plant category (flower, herb, vegetable)
+        size: Thumbnail size (s150, s220, s320, etc.)
+    
+    Returns:
+        Google Drive thumbnail URL
+    """
+    if not category:
+        return ""
+        
+    normalized_category = CATEGORY_MAPPING.get(category.lower(), category.lower())
+    folder_id = DRIVE_FOLDERS.get(normalized_category)
+    
+    if not folder_id:
+        return ""
+    
+    return f"https://drive.google.com/thumbnail?id={folder_id}&sz={size}"
+
+def get_plant_categories() -> List[str]:
+    """Get all available plant categories"""
+    return list(DRIVE_FOLDERS.keys())
+
 def image_to_base64(image_path: str) -> str:
-    """Convert image file to base64 string."""
+    """Convert image file to base64 string (DEPRECATED - now using Google Drive)."""
     try:
         if not image_path or not os.path.exists(image_path):
             return ""
@@ -154,18 +230,22 @@ async def get_recommendations(request: RecommendationRequest):
         # Assemble output
         output = assemble_output(top_plants, user_prefs, env, [])
         
-        # Convert image paths to base64
+        # Convert image paths to Google Drive URLs
         for recommendation in output.get("recommendations", []):
-            if "media" in recommendation and "image_path" in recommendation["media"]:
-                image_path = recommendation["media"]["image_path"]
-                base64_image = image_to_base64(image_path)
-                
-                # Update media object with both path and base64
-                recommendation["media"] = {
-                    "image_path": image_path,  # Keep original path for reference
-                    "image_base64": base64_image,  # Add base64 data
-                    "has_image": bool(base64_image)
-                }
+            plant_category = recommendation.get("plant_category", "")
+            
+            # Generate Google Drive URLs
+            drive_url = get_drive_image_url(plant_category)
+            drive_thumbnail = get_drive_thumbnail_url(plant_category)
+            
+            # Update media object with Google Drive URLs
+            recommendation["media"] = {
+                "image_path": drive_url,  # Google Drive URL
+                "image_base64": "",  # No longer using base64
+                "drive_url": drive_url,  # Full resolution Google Drive URL
+                "drive_thumbnail": drive_thumbnail,  # Thumbnail URL
+                "has_image": bool(drive_url)
+            }
         
         # Add suburb and climate info
         output["suburb"] = request.suburb
@@ -202,16 +282,21 @@ async def get_all_plants():
         
         all_plants = load_all_plants(csv_paths)
         
-        # Convert image paths to base64 for each plant
+        # Convert image paths to Google Drive URLs for each plant
         for plant in all_plants:
-            image_path = plant.get("image_path", "")
-            base64_image = image_to_base64(image_path)
+            plant_category = plant.get("plant_category", "")
             
-            # Update plant object with base64 image data
+            # Generate Google Drive URLs
+            drive_url = get_drive_image_url(plant_category)
+            drive_thumbnail = get_drive_thumbnail_url(plant_category)
+            
+            # Update plant object with Google Drive URLs
             plant["media"] = {
-                "image_path": image_path,
-                "image_base64": base64_image,
-                "has_image": bool(base64_image)
+                "image_path": drive_url,  # Google Drive URL
+                "image_base64": "",  # No longer using base64
+                "drive_url": drive_url,  # Full resolution Google Drive URL
+                "drive_thumbnail": drive_thumbnail,  # Thumbnail URL
+                "has_image": bool(drive_url)
             }
         
         return {
@@ -274,11 +359,10 @@ async def get_plant_score(request: PlantScoreRequest):
         sowing_months = target_plant.get("sowing_months_by_climate", {}).get(env["climate_zone"], [])
         season_label = "Start now" if env["month_now"] in sowing_months else "Plan ahead"
         
-        # Convert image path to base64 if available
-        image_base64 = ""
-        image_path = target_plant.get("image_path", "")
-        if image_path:
-            image_base64 = image_to_base64(image_path)
+        # Generate Google Drive URLs for the plant
+        plant_category = target_plant.get("plant_category", "")
+        drive_url = get_drive_image_url(plant_category)
+        drive_thumbnail = get_drive_thumbnail_url(plant_category)
         
         # Assemble response
         result = {
@@ -304,9 +388,11 @@ async def get_plant_score(request: PlantScoreRequest):
                 "season_label": season_label
             },
             "media": {
-                "image_path": image_path,
-                "image_base64": image_base64,
-                "has_image": bool(image_base64)
+                "image_path": drive_url,  # Google Drive URL
+                "image_base64": "",  # No longer using base64
+                "drive_url": drive_url,  # Full resolution Google Drive URL
+                "drive_thumbnail": drive_thumbnail,  # Thumbnail URL
+                "has_image": bool(drive_url)
             },
             "suburb": request.suburb,
             "climate_zone": env["climate_zone"],
