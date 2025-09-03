@@ -89,31 +89,50 @@ class handler(BaseHTTPRequestHandler):
             
             # Try to load plants
             try:
-                base_path = os.path.dirname(os.path.abspath(__file__))
+                # Get the root directory (one level up from /api/)
+                api_dir = os.path.dirname(os.path.abspath(__file__))
+                root_path = os.path.dirname(api_dir)
                 csv_paths = {
-                    "flower": os.path.join(base_path, "flower_plants_data.csv"),
-                    "herb": os.path.join(base_path, "herbs_plants_data.csv"),
-                    "vegetable": os.path.join(base_path, "vegetable_plants_data.csv")
+                    "flower": os.path.join(root_path, "flower_plants_data.csv"),
+                    "herb": os.path.join(root_path, "herbs_plants_data.csv"),
+                    "vegetable": os.path.join(root_path, "vegetable_plants_data.csv")
                 }
                 
-                all_plants = load_all_plants(csv_paths)
+                # Check if CSV files exist
+                missing_files = []
+                for category, path in csv_paths.items():
+                    if not os.path.exists(path):
+                        missing_files.append(f"{category}: {path}")
                 
-                # Add Google Drive URLs to first 5 plants as a test
-                for i, plant in enumerate(all_plants[:5]):
-                    plant_category = plant.get("plant_category", "")
-                    drive_url = get_drive_image_url(plant_category)
-                    plant["media"] = {
-                        "image_path": drive_url,
-                        "drive_url": drive_url,
-                        "drive_thumbnail": drive_url,
-                        "has_image": bool(drive_url)
+                if missing_files:
+                    response = {
+                        "error": "CSV files not found",
+                        "missing_files": missing_files,
+                        "root_path": root_path,
+                        "plants": [],
+                        "total_count": 0
                     }
-                
-                response = {
-                    "plants": all_plants[:5],  # Return first 5 for testing
-                    "total_count": len(all_plants),
-                    "debug": "BaseHTTPRequestHandler implementation working"
-                }
+                else:
+                    all_plants = load_all_plants(csv_paths)
+                    
+                    # Add Google Drive URLs to first 5 plants as a test
+                    for i, plant in enumerate(all_plants[:5]):
+                        plant_category = plant.get("plant_category", "")
+                        drive_url = get_drive_image_url(plant_category)
+                        plant["media"] = {
+                            "image_path": drive_url,
+                            "drive_url": drive_url,
+                            "drive_thumbnail": drive_url,
+                            "has_image": bool(drive_url)
+                        }
+                    
+                    response = {
+                        "plants": all_plants[:5],  # Return first 5 for testing
+                        "total_count": len(all_plants),
+                        "debug": "BaseHTTPRequestHandler implementation working",
+                        "csv_files_found": len(csv_paths),
+                        "root_path": root_path
+                    }
                 
             except Exception as e:
                 response = {
