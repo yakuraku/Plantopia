@@ -3,7 +3,7 @@
 
 // Base configuration
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? '/api' // Vercel serverless functions
+  ? '/api/' // Vercel serverless functions - note trailing slash
   : 'http://localhost:8000' // Development
 
 // API Response interfaces matching the backend structure
