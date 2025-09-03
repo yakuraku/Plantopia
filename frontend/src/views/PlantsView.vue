@@ -94,15 +94,21 @@
                   @click="selectPlant(plant)"
                 >
                   <div class="plant-image">
+                    <!-- Show placeholder for all plants since has_image is false -->
+                    <div v-if="plant.has_image === false" class="image-placeholder">
+                      <div class="placeholder-icon">🌱</div>
+                      <span class="placeholder-text">{{ plant.category || 'Plant' }}</span>
+                    </div>
+                    <!-- Show actual image only if has_image is true -->
                     <img
-                      v-if="plant.has_image !== false && !hasImageError(plant.id)"
+                      v-else-if="plant.has_image === true && !hasImageError(plant.id)"
                       :src="getPlantImageSrc(plant)"
                       :alt="plant.name"
                       @error="(event) => handleImageError(event, plant.id)"
                     >
-                    <!-- Fallback placeholder if no image or image fails to load -->
-                    <div v-if="plant.has_image === false || (!plant.image_base64 && !plant.image_url) || hasImageError(plant.id)" class="image-placeholder">
-                      <div class="placeholder-icon">Plant</div>
+                    <!-- Fallback placeholder for other cases (undefined has_image, etc.) -->
+                    <div v-else class="image-placeholder">
+                      <div class="placeholder-icon">🌿</div>
                       <span class="placeholder-text">{{ plant.category || 'Plant' }}</span>
                     </div>
                   </div>
@@ -203,15 +209,21 @@
         </div>
         <div class="modal-body">
           <div class="plant-detail-image">
+            <!-- Show placeholder for all plants since has_image is false -->
+            <div v-if="selectedPlant.has_image === false" class="image-placeholder">
+              <div class="placeholder-icon">🌱</div>
+              <span class="placeholder-text">{{ selectedPlant.category || 'Plant' }}</span>
+            </div>
+            <!-- Show actual image only if has_image is true -->
             <img
-              v-if="selectedPlant.has_image !== false && !hasImageError(selectedPlant.id)"
+              v-else-if="selectedPlant.has_image === true && !hasImageError(selectedPlant.id)"
               :src="getPlantImageSrc(selectedPlant)"
               :alt="selectedPlant.name"
               @error="(event) => handleImageError(event, selectedPlant.id)"
             >
-            <!-- Fallback placeholder if no image or image fails to load -->
-            <div v-if="selectedPlant.has_image === false || (!selectedPlant.image_base64 && !selectedPlant.image_url) || hasImageError(selectedPlant.id)" class="image-placeholder">
-              <div class="placeholder-icon">Plant</div>
+            <!-- Fallback placeholder for other cases (undefined has_image, etc.) -->
+            <div v-else class="image-placeholder">
+              <div class="placeholder-icon">🌿</div>
               <span class="placeholder-text">{{ selectedPlant.category || 'Plant' }}</span>
             </div>
           </div>
@@ -437,6 +449,8 @@ const loadPlants = async () => {
     const transformedPlants = plantApiService.transformAllPlantsToPlants(apiResponse)
     console.log('[PLANTS VIEW] Plants transformed:', transformedPlants.length, 'plants')
     console.log('[PLANTS VIEW] First transformed plant:', transformedPlants[0] || null)
+    console.log('[PLANTS VIEW] First plant has_image:', transformedPlants[0]?.has_image)
+    console.log('[PLANTS VIEW] First plant media info:', transformedPlants[0])
 
     plants.value = transformedPlants
     console.log('[PLANTS VIEW] Plants loaded successfully!')
