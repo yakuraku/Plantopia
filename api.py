@@ -117,7 +117,7 @@ app = FastAPI(
     title="Plantopia Recommendation Engine API",
     description="API for the Plantopia plant recommendation engine",
     version="1.0.0",
-    root_path="/api" if os.environ.get("VERCEL") == "1" else ""
+    root_path="/api"
 )
 
 # Add CORS middleware to allow frontend requests
@@ -189,6 +189,10 @@ async def root():
 @app.get("/health")
 async def health():
     return {"status": "healthy", "service": "plantopia-api", "debug": "Health check endpoint hit successfully"}
+
+@app.get("/test")
+async def test():
+    return {"message": "Test endpoint working", "debug": "Test route is accessible"}
 
 @app.post("/recommendations")
 async def get_recommendations(request: RecommendationRequest):
