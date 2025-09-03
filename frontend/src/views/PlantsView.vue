@@ -95,13 +95,13 @@
                 >
                   <div class="plant-image">
                     <img
-                      v-if="!hasImageError(plant.id)"
+                      v-if="plant.has_image !== false && !hasImageError(plant.id)"
                       :src="getPlantImageSrc(plant)"
                       :alt="plant.name"
                       @error="(event) => handleImageError(event, plant.id)"
                     >
                     <!-- Fallback placeholder if no image or image fails to load -->
-                    <div v-if="(!plant.image_base64 && !plant.image_url) || hasImageError(plant.id)" class="image-placeholder">
+                    <div v-if="plant.has_image === false || (!plant.image_base64 && !plant.image_url) || hasImageError(plant.id)" class="image-placeholder">
                       <div class="placeholder-icon">Plant</div>
                       <span class="placeholder-text">{{ plant.category || 'Plant' }}</span>
                     </div>
@@ -204,13 +204,13 @@
         <div class="modal-body">
           <div class="plant-detail-image">
             <img
-              v-if="!hasImageError(selectedPlant.id)"
+              v-if="selectedPlant.has_image !== false && !hasImageError(selectedPlant.id)"
               :src="getPlantImageSrc(selectedPlant)"
               :alt="selectedPlant.name"
               @error="(event) => handleImageError(event, selectedPlant.id)"
             >
             <!-- Fallback placeholder if no image or image fails to load -->
-            <div v-if="(!selectedPlant.image_base64 && !selectedPlant.image_url) || hasImageError(selectedPlant.id)" class="image-placeholder">
+            <div v-if="selectedPlant.has_image === false || (!selectedPlant.image_base64 && !selectedPlant.image_url) || hasImageError(selectedPlant.id)" class="image-placeholder">
               <div class="placeholder-icon">Plant</div>
               <span class="placeholder-text">{{ selectedPlant.category || 'Plant' }}</span>
             </div>
@@ -497,17 +497,17 @@ const closeModal = () => {
 
 // Function to get image source (Base64 or URL) - following RecommendationsView pattern
 const getPlantImageSrc = (plant: Plant): string => {
+  // Priority 0: Check if API says image is available
+  if (plant.has_image === false) {
+    return '/placeholder-plant.svg'
+  }
+
   // Priority 1: Use Google Drive URL from API response
   if (plant.image_url && plant.image_url.includes('drive.google.com')) {
     return plant.image_url
   }
 
-  // Priority 2: Generate Google Drive URL from category (fallback)
-  if (plant.category) {
-    return getPlantImageUrl(plant.category)
-  }
-
-  // Priority 3: Legacy Base64 support (for backwards compatibility)
+  // Priority 2: Legacy Base64 support (for backwards compatibility)
   if (plant.image_base64) {
     // Check if it's already a data URL
     if (plant.image_base64.startsWith('data:')) {
@@ -517,9 +517,14 @@ const getPlantImageSrc = (plant: Plant): string => {
     return `data:image/jpeg;base64,${plant.image_base64}`
   }
 
-  // Priority 4: Legacy image URL support
+  // Priority 3: Legacy image URL support
   if (plant.image_url) {
     return plant.image_url
+  }
+
+  // Priority 4: Generate Google Drive URL from category (only if has_image is not explicitly false)
+  if (plant.category && plant.has_image !== false) {
+    return getPlantImageUrl(plant.category)
   }
 
   // Final fallback to placeholder
