@@ -14,30 +14,36 @@ except ImportError as e:
     print(f"Import error: {e}")
     IMPORTS_OK = False
 
-# Google Drive configuration
-DRIVE_BASE_URL = "https://drive.google.com/uc?export=view&id="
-DRIVE_FOLDERS = {
-    "flower": "1ZcE9R3FMvZa5TRp8HfAHo-K7dAD5IfmL",
-    "herb": "1aVMw8n51wCndrlUb8xG5cRjsMvBnON7n", 
-    "vegetable": "1rmv-7k70qL_fR1efsKa_t28I22pLKzf_"
-}
+# Google Drive configuration - Root "Plantopia" folder ID
+PLANTOPIA_DRIVE_FOLDER_ID = "your-plantopia-folder-id"  # This should be set to the actual Plantopia folder ID
 
-def get_drive_image_url(category: str, image_name: Optional[str] = None) -> str:
-    """Generate Google Drive image URL for a plant category"""
-    if not category:
-        return ""
-        
-    # Normalize category
-    normalized_category = category.lower()
-    if normalized_category in ["flowers"]: normalized_category = "flower"
-    if normalized_category in ["herbs"]: normalized_category = "herb"
-    if normalized_category in ["vegetables"]: normalized_category = "vegetable"
+def get_drive_image_url(image_path: str) -> str:
+    """Generate Google Drive image URL for a specific plant image
     
-    folder_id = DRIVE_FOLDERS.get(normalized_category)
-    if not folder_id:
-        return ""
+    Args:
+        image_path: Path like "flower_plant_images/Agastache- Lavender Martini_Agastache aurantiaca/Agastache- Lavender Martini_Agastache aurantiaca_1.jpg"
     
-    return f"{DRIVE_BASE_URL}{folder_id}"
+    Returns:
+        Google Drive URL for the specific image file (currently returns empty for placeholder use)
+    """
+    # TODO: Implement Google Drive API integration to get actual file IDs
+    # 
+    # The user has uploaded all plant images to Google Drive in this structure:
+    # Plantopia/
+    #   ├── flower_plant_images/
+    #   │   └── Agastache- Lavender Martini_Agastache aurantiaca/
+    #   │       └── Agastache- Lavender Martini_Agastache aurantiaca_1.jpg
+    #   ├── herb_plant_images/
+    #   └── vegetable_plant_images/
+    #
+    # To implement this properly, we need to:
+    # 1. Set up Google Drive API credentials
+    # 2. Search for files by path within the Plantopia folder
+    # 3. Get individual file IDs for each plant image
+    # 4. Return proper Google Drive URLs like: https://drive.google.com/uc?export=view&id=ACTUAL_FILE_ID
+    
+    # For now, return empty string to use placeholder images
+    return ""
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -117,18 +123,19 @@ class handler(BaseHTTPRequestHandler):
                     
                     # Add image information for first 5 plants as a test
                     for i, plant in enumerate(all_plants[:5]):
-                        plant_category = plant.get("plant_category", "")
                         original_image_path = plant.get("image_path", "")
                         
-                        # For now, use placeholder images since we don't have individual Google Drive file IDs
-                        # The frontend already has a placeholder-plant.svg file
+                        # Generate Google Drive URL for this specific plant image
+                        drive_url = get_drive_image_url(original_image_path)
+                        
                         plant["media"] = {
                             "image_path": original_image_path,
-                            "image_base64": "",  # Would contain base64 data when available
-                            "drive_url": "",  # Would contain actual Google Drive URL when available  
-                            "drive_thumbnail": "",
-                            "has_image": False,  # Set to false to trigger frontend fallback to placeholder
-                            "placeholder": "/placeholder-plant.svg"
+                            "image_base64": "",  # Could contain base64 data in the future
+                            "drive_url": drive_url,  # Currently empty - needs Google Drive API integration
+                            "drive_thumbnail": drive_url,
+                            "has_image": bool(drive_url),  # False when drive_url is empty
+                            "placeholder": "/placeholder-plant.svg",
+                            "note": "Using placeholder images - Google Drive API integration needed for actual plant photos"
                         }
                     
                     response = {

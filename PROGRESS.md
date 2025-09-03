@@ -162,6 +162,33 @@ After recent deployments, GitHub deployments to Vercel were failing with the err
 - `herbs_plants_data.csv` - Located in root directory
 - `vegetable_plants_data.csv` - Located in root directory
 
+### Sixth Fix - Google Drive Image Integration Issue
+**Problem:** Plants loading successfully but images failing to load due to incorrect Google Drive URL generation. API was using folder IDs instead of individual file IDs.
+
+**Root Cause:** User has uploaded all plant images to Google Drive maintaining the same folder structure:
+```
+Plantopia/
+├── flower_plant_images/
+│   └── Agastache- Lavender Martini_Agastache aurantiaca/
+│       └── Agastache- Lavender Martini_Agastache aurantiaca_1.jpg
+├── herb_plant_images/
+└── vegetable_plant_images/
+```
+
+**Current Solution:** Implemented placeholder image fallback system
+1. **Updated image URL generation** - Now accepts full image paths instead of just categories
+2. **Added comprehensive documentation** - Detailed TODO for Google Drive API integration
+3. **Implemented placeholder fallback** - Uses `/placeholder-plant.svg` when Google Drive URLs unavailable
+4. **Set has_image to false** - Triggers frontend to use placeholder images
+
+**Future Implementation Needed:**
+- Google Drive API credentials setup
+- File search by path within Plantopia folder
+- Individual file ID retrieval for each plant image  
+- Proper Google Drive URLs: `https://drive.google.com/uc?export=view&id=ACTUAL_FILE_ID`
+
+**Current Status:** Plants display with placeholder images - functional but not using actual plant photos
+
 ### Files Modified
 - `vercel.json`: Complete rewrite to eliminate deprecated `builds` property and enhance `functions` configuration
 
