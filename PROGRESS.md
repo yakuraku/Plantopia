@@ -2,11 +2,11 @@
 
 This file contains all essential information about the Plantopia Recommendation Engine project to provide complete context for future development work.
 
-## LATEST UPDATE - September 2025: Critical Vercel API Routing Fix
+## LATEST UPDATE - September 3, 2025: Vercel Build Configuration Fix
 
-### Current Status: ✅ DEPLOYED TO VERCEL WITH WORKING API ENDPOINTS
+### Current Status: ✅ VERCEL BUILD CONFIGURATION FIXED - DEPLOYMENT READY
 
-**Critical Issue Resolved:** Frontend functionality was completely broken due to API 404/500 errors. All plant loading and recommendation features were non-functional after deployment.
+**Critical Issue Resolved:** Vercel deployment was failing with "conflicting functions and builds configuration" error. All deployments were failing due to incorrect vercel.json configuration that used both deprecated `builds` property and modern `functions` property simultaneously.
 
 **Live URLs:**
 - Latest Working: `plantopia-39w96imc7-yashwanth415-1832s-projects.vercel.app` (with API fix)
@@ -14,6 +14,123 @@ This file contains all essential information about the Plantopia Recommendation 
 - Git Branch: `plantopia-git-main-yashwanth415-1832s-projects.vercel.app`
 - Project ID: `prj_ZJQpCbF2M7B5suUac3I3CTKqInVy`
 - Team: `yashwanth415-1832's projects` (team_fwx1cBjzldtysDslDrZ4yno7)
+
+## Vercel Build Configuration Fix - September 3, 2025
+
+### Problem Encountered
+After recent deployments, GitHub deployments to Vercel were failing with the error "conflicting functions and builds configuration". The error referenced: https://vercel.com/docs/errors/error-list#conflicting-functions-and-builds-configuration
+
+### Root Cause Analysis
+1. **Conflicting Configuration**: The `vercel.json` file was using both the deprecated `builds` property and the modern `functions` property
+2. **Vercel Documentation**: According to Vercel's current best practices, using both properties simultaneously causes deployment failures
+3. **Build Process Issue**: The conflicting configuration prevented proper function deployment and build completion
+
+### Technical Investigation Process
+1. **PROGRESS.md Analysis**: Reviewed complete project context and previous deployment history
+2. **Vercel MCP Documentation**: Searched Vercel documentation for conflicting functions error details
+3. **Configuration Examination**: Analyzed current `vercel.json` structure and identified the conflict
+4. **Best Practices Research**: Found that `builds` property is deprecated in favor of `functions` property
+
+### Solution Implemented
+
+#### 1. Fixed vercel.json Configuration
+**File:** `vercel.json` (Complete rewrite)
+
+**Before (Conflicting Configuration):**
+```json
+{
+  "version": 2,
+  "builds": [
+    { "src": "frontend/package.json", "use": "@vercel/static-build" },
+    { "src": "api.py", "use": "@vercel/python" },
+    { "src": "api_working.py", "use": "@vercel/python" },
+    { "src": "test_simple.py", "use": "@vercel/python" }
+  ],
+  "routes": [
+    { "src": "/test", "dest": "test_simple.py" },
+    { "src": "/api/?$", "dest": "api_working.py" },
+    { "src": "/api/(.*)", "dest": "api_working.py" },
+    { "src": "/(.*)", "dest": "frontend/$1" }
+  ],
+  "functions": {
+    "api.py": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  }
+}
+```
+
+**After (Fixed Configuration):**
+```json
+{
+  "version": 2,
+  "buildCommand": "cd frontend && npm run vercel-build",
+  "routes": [
+    { "src": "/test", "dest": "test_simple.py" },
+    { "src": "/api/?$", "dest": "api_working.py" },
+    { "src": "/api/(.*)", "dest": "api_working.py" },
+    { "src": "/(.*)", "dest": "frontend/$1" }
+  ],
+  "functions": {
+    "api.py": {
+      "memory": 1024,
+      "maxDuration": 30
+    },
+    "api_working.py": {
+      "memory": 1024,
+      "maxDuration": 30
+    },
+    "test_simple.py": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  }
+}
+```
+
+**Key Changes:**
+1. **Removed Deprecated `builds` Property**: Eliminated the conflicting `builds` array entirely
+2. **Added Explicit `buildCommand`**: Specified frontend build process with `cd frontend && npm run vercel-build`
+3. **Enhanced `functions` Configuration**: Added all Python files with proper memory and duration settings
+4. **Preserved Routing**: Maintained existing route configuration that was working correctly
+5. **Modern Approach**: Now follows current Vercel best practices using only `functions` property
+
+#### 2. Configuration Benefits
+**Deployment Improvements:**
+- **No More Conflicts**: Eliminates the builds/functions configuration conflict
+- **Explicit Configuration**: All Python functions now properly configured with memory/duration settings
+- **Consistent Build Process**: Frontend build process explicitly defined
+- **Future-Proof**: Uses current Vercel configuration standards
+
+**Function Configuration Details:**
+- **Memory Allocation**: 1024MB for all Python functions
+- **Execution Timeout**: 30 seconds maximum duration for all functions
+- **Coverage**: All Python API files (api.py, api_working.py, test_simple.py) properly configured
+
+### Deployment Status Summary
+- ✅ **Configuration Fixed**: vercel.json now uses modern functions-only approach
+- ✅ **Conflict Resolved**: No more builds/functions property conflicts
+- ✅ **All Functions Configured**: api.py, api_working.py, and test_simple.py all have proper settings
+- ✅ **Build Command Explicit**: Frontend build process clearly defined
+- 🔄 **Ready for Deployment**: Configuration changes ready to be committed and pushed
+
+### Files Modified
+- `vercel.json`: Complete rewrite to eliminate deprecated `builds` property and enhance `functions` configuration
+
+### Next Steps (Post-Fix)
+1. **Commit and Push Changes**: Deploy the fixed configuration to trigger new Vercel deployment
+2. **Monitor Deployment**: Verify that GitHub integration successfully deploys without errors
+3. **Test Functionality**: Confirm all API endpoints and frontend features work correctly
+4. **Performance Verification**: Monitor function execution and memory usage with new configuration
+
+---
+
+## Previous Vercel API Routing Context (September 2025)
+
+### Previous Status: ✅ DEPLOYED TO VERCEL WITH WORKING API ENDPOINTS
+
+**Previous Critical Issue (Now Resolved):** Frontend functionality was completely broken due to API 404/500 errors. All plant loading and recommendation features were non-functional after deployment.
 
 ## Critical API Routing Issue Resolution - September 2025
 
