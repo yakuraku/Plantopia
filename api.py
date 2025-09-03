@@ -116,8 +116,7 @@ def image_to_base64(image_path: str) -> str:
 app = FastAPI(
     title="Plantopia Recommendation Engine API",
     description="API for the Plantopia plant recommendation engine",
-    version="1.0.0",
-    root_path="/api"
+    version="1.0.0"
 )
 
 # Add CORS middleware to allow frontend requests
@@ -182,19 +181,19 @@ class PlantScoreRequest(BaseModel):
     climate_zone: Optional[str] = None
     user_preferences: UserRequest
 
-@app.get("/")
+@app.get("/api/")
 async def root():
     return {"message": "Plantopia Recommendation Engine API", "status": "working", "version": "1.0.0", "debug": "API root endpoint hit successfully"}
 
-@app.get("/health")
+@app.get("/api/health")
 async def health():
     return {"status": "healthy", "service": "plantopia-api", "debug": "Health check endpoint hit successfully"}
 
-@app.get("/test")
+@app.get("/api/test")
 async def test():
     return {"message": "Test endpoint working", "debug": "Test route is accessible"}
 
-@app.post("/recommendations")
+@app.post("/api/recommendations")
 async def get_recommendations(request: RecommendationRequest):
     try:
         # Create temporary files for user preferences and climate data
@@ -278,7 +277,7 @@ async def get_recommendations(request: RecommendationRequest):
                 pass
         raise HTTPException(status_code=500, detail=f"Error processing request: {str(e)}")
 
-@app.get("/plants")
+@app.get("/api/plants")
 async def get_all_plants():
     """
     Get all plants from the database (vegetables, herbs, and flowers).
@@ -320,7 +319,7 @@ async def get_all_plants():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error loading plants: {str(e)}")
 
-@app.post("/plant-score")
+@app.post("/api/plant-score")
 async def get_plant_score(request: PlantScoreRequest):
     try:
         # Create temporary files for user preferences
