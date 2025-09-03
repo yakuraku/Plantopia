@@ -94,21 +94,16 @@
                   @click="selectPlant(plant)"
                 >
                   <div class="plant-image">
-                    <!-- Show placeholder for all plants since has_image is false -->
-                    <div v-if="plant.has_image === false" class="image-placeholder">
-                      <div class="placeholder-icon">🌱</div>
-                      <span class="placeholder-text">{{ plant.category || 'Plant' }}</span>
-                    </div>
-                    <!-- Show actual image only if has_image is true -->
+                    <!-- Show Google Drive image if available -->
                     <img
-                      v-else-if="plant.has_image === true && !hasImageError(plant.id)"
+                      v-if="plant.has_image && !hasImageError(plant.id)"
                       :src="getPlantImageSrc(plant)"
                       :alt="plant.name"
                       @error="(event) => handleImageError(event, plant.id)"
                     >
-                    <!-- Fallback placeholder for other cases (undefined has_image, etc.) -->
+                    <!-- Show placeholder if no image available or image failed to load -->
                     <div v-else class="image-placeholder">
-                      <div class="placeholder-icon">🌿</div>
+                      <div class="placeholder-icon">🌱</div>
                       <span class="placeholder-text">{{ plant.category || 'Plant' }}</span>
                     </div>
                   </div>
@@ -209,21 +204,16 @@
         </div>
         <div class="modal-body">
           <div class="plant-detail-image">
-            <!-- Show placeholder for all plants since has_image is false -->
-            <div v-if="selectedPlant.has_image === false" class="image-placeholder">
-              <div class="placeholder-icon">🌱</div>
-              <span class="placeholder-text">{{ selectedPlant.category || 'Plant' }}</span>
-            </div>
-            <!-- Show actual image only if has_image is true -->
+            <!-- Show Google Drive image if available -->
             <img
-              v-else-if="selectedPlant.has_image === true && !hasImageError(selectedPlant.id)"
+              v-if="selectedPlant.has_image && !hasImageError(selectedPlant.id)"
               :src="getPlantImageSrc(selectedPlant)"
               :alt="selectedPlant.name"
               @error="(event) => handleImageError(event, selectedPlant.id)"
             >
-            <!-- Fallback placeholder for other cases (undefined has_image, etc.) -->
+            <!-- Show placeholder if no image available or image failed to load -->
             <div v-else class="image-placeholder">
-              <div class="placeholder-icon">🌿</div>
+              <div class="placeholder-icon">🌱</div>
               <span class="placeholder-text">{{ selectedPlant.category || 'Plant' }}</span>
             </div>
           </div>
@@ -450,7 +440,8 @@ const loadPlants = async () => {
     console.log('[PLANTS VIEW] Plants transformed:', transformedPlants.length, 'plants')
     console.log('[PLANTS VIEW] First transformed plant:', transformedPlants[0] || null)
     console.log('[PLANTS VIEW] First plant has_image:', transformedPlants[0]?.has_image)
-    console.log('[PLANTS VIEW] First plant media info:', transformedPlants[0])
+    console.log('[PLANTS VIEW] First plant image_url:', transformedPlants[0]?.image_url)
+    console.log('[PLANTS VIEW] First plant category:', transformedPlants[0]?.category)
 
     plants.value = transformedPlants
     console.log('[PLANTS VIEW] Plants loaded successfully!')
@@ -511,12 +502,7 @@ const closeModal = () => {
 
 // Function to get image source (Base64 or URL) - following RecommendationsView pattern
 const getPlantImageSrc = (plant: Plant): string => {
-  // Priority 0: Check if API says image is available
-  if (plant.has_image === false) {
-    return '/placeholder-plant.svg'
-  }
-
-  // Priority 1: Use Google Drive URL from API response
+  // Priority 1: Use Google Drive URL from API if available
   if (plant.image_url && plant.image_url.includes('drive.google.com')) {
     return plant.image_url
   }
@@ -536,7 +522,7 @@ const getPlantImageSrc = (plant: Plant): string => {
     return plant.image_url
   }
 
-  // Priority 4: Generate Google Drive URL from category (only if has_image is not explicitly false)
+  // Priority 4: Generate Google Drive URL from category (fallback)
   if (plant.category && plant.has_image !== false) {
     return getPlantImageUrl(plant.category)
   }
