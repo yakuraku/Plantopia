@@ -137,6 +137,16 @@ After recent deployments, GitHub deployments to Vercel were failing with the err
 3. **Moved `test_simple.py` to `api/test.py`** - Test endpoint at correct Vercel path  
 4. **Updated `vercel.json` routes** - Point to new function locations in `/api/` directory
 5. **Followed Vercel Python function convention** - Files in `/api/` with `handler` class extending `BaseHTTPRequestHandler`
+6. **Fixed path parsing logic** - Handle `/api`, `/api/`, and subpaths correctly in Python function
+
+### Fourth Fix - Path Parsing Issue
+**Problem:** Python function was receiving paths like `/api` and `/api/` but logic only handled `/` and `/health` etc.
+
+**Solution:** Updated path parsing in `api/index.py` to handle both formats:
+- `/api` and `/api/` → root API endpoint
+- `/api/health` and `/health` → health endpoint  
+- `/api/plants` and `/plants` → plants endpoint
+- `/api/recommendations` and `/recommendations` → recommendations endpoint
 
 ### Files Modified
 - `vercel.json`: Complete rewrite to eliminate deprecated `builds` property and enhance `functions` configuration
