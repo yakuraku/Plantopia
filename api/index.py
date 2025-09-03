@@ -44,7 +44,8 @@ class handler(BaseHTTPRequestHandler):
         parsed_path = urlparse(self.path)
         path = parsed_path.path
         
-        if path == "/" or path == "":
+        # Handle both /api and /api/ as root API endpoint
+        if path == "/" or path == "" or path == "/api" or path == "/api/":
             # Root endpoint
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
@@ -59,7 +60,7 @@ class handler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(response).encode('utf-8'))
             return
             
-        elif path == "/health":
+        elif path == "/health" or path == "/api/health":
             # Health check endpoint
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
@@ -72,7 +73,7 @@ class handler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(response).encode('utf-8'))
             return
             
-        elif path == "/plants":
+        elif path == "/plants" or path == "/api/plants":
             # Simple plants endpoint - return a basic response for now
             if not IMPORTS_OK:
                 self.send_response(500)
@@ -145,7 +146,7 @@ class handler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(response).encode('utf-8'))
             return
         
-        if path == "/recommendations":
+        if path == "/recommendations" or path == "/api/recommendations":
             # Simple recommendations response for testing
             try:
                 content_length = int(self.headers.get('Content-Length', 0))
