@@ -14,39 +14,50 @@ except ImportError as e:
     print(f"Import error: {e}")
     IMPORTS_OK = False
 
-# Google Drive configuration - Root "Plantopia" folder ID
-PLANTOPIA_DRIVE_FOLDER_ID = "your-plantopia-folder-id"  # This should be set to the actual Plantopia folder ID
+# Google Drive configuration - Public folder IDs from frontend imageHelper.js
+DRIVE_FOLDERS = {
+    "flower": "1ZcE9R3FMvZa5TRp8HfAHo-K7dAD5IfmL",
+    "herb": "1aVMw8n51wCndrlUb8xG5cRjsMvBnON7n", 
+    "vegetable": "1rmv-7k70qL_fR1efsKa_t28I22pLKzf_"
+}
 
-def get_drive_image_url(image_path: str) -> str:
-    """Generate Google Drive image URL for a specific plant image
+def get_drive_image_url(image_path: str, plant_category: str) -> str:
+    """Generate Google Drive image URL based on plant category
     
     Args:
         image_path: Path like "flower_plant_images/Agastache- Lavender Martini_Agastache aurantiaca/Agastache- Lavender Martini_Agastache aurantiaca_1.jpg"
+        plant_category: Category like "flower", "herb", "vegetable"
     
     Returns:
-        Google Drive URL for the specific image file (currently returns empty for placeholder use)
+        Google Drive folder URL for the category (temporary solution until individual file IDs are available)
     """
-    # TODO: Implement Google Drive API integration to get actual file IDs
-    # 
-    # The user has uploaded all plant images to Google Drive in this structure:
-    # Plantopia/
-    #   ├── flower_plant_images/
-    #   │   └── Agastache- Lavender Martini_Agastache aurantiaca/
-    #   │       ├── Agastache- Lavender Martini_Agastache aurantiaca_1.jpg
-    #   │       ├── Agastache- Lavender Martini_Agastache aurantiaca_2.jpg
-    #   │       └── Agastache- Lavender Martini_Agastache aurantiaca_3.jpg
-    #   ├── herb_plant_images/
-    #   └── vegetable_plant_images/
-    #
-    # To implement this properly, we need to:
-    # 1. Set up Google Drive API credentials
-    # 2. Search for files by path within the Plantopia folder
-    # 3. Get individual file IDs for ALL images per plant (not just _1.jpg)
-    # 4. Return proper Google Drive URLs like: https://drive.google.com/uc?export=view&id=ACTUAL_FILE_ID
-    # 5. Handle multiple images per plant in the API response (image gallery)
+    # Map categories to normalized names
+    category_mapping = {
+        'flowers': 'flower',
+        'flower': 'flower',
+        'flower_plant_images': 'flower',
+        'herbs': 'herb', 
+        'herb': 'herb',
+        'herb_plant_images': 'herb',
+        'vegetables': 'vegetable',
+        'vegetable': 'vegetable', 
+        'vegetable_plant_images': 'vegetable'
+    }
     
-    # For now, return empty string to use placeholder images
-    return ""
+    if not plant_category:
+        return ""
+        
+    # Normalize category name
+    normalized_category = category_mapping.get(plant_category.lower(), plant_category.lower())
+    folder_id = DRIVE_FOLDERS.get(normalized_category)
+    
+    if not folder_id:
+        return ""
+    
+    # Return Google Drive folder URL 
+    # Note: This will show the folder contents, not individual images
+    # Future enhancement: Use Google Drive API to get individual file IDs
+    return f"https://drive.google.com/uc?export=view&id={folder_id}"
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -124,21 +135,22 @@ class handler(BaseHTTPRequestHandler):
                 else:
                     all_plants = load_all_plants(csv_paths)
                     
-                    # Add image information for all plants with placeholder system
+                    # Add image information for all plants with Google Drive URLs
                     for i, plant in enumerate(all_plants):
                         original_image_path = plant.get("image_path", "")
+                        plant_category = plant.get("plant_category", "")
                         
-                        # Generate Google Drive URL for this specific plant image
-                        drive_url = get_drive_image_url(original_image_path)
+                        # Generate Google Drive URL based on plant category
+                        drive_url = get_drive_image_url(original_image_path, plant_category)
                         
                         plant["media"] = {
                             "image_path": original_image_path,
                             "image_base64": "",  # Could contain base64 data in the future
-                            "drive_url": drive_url,  # Currently empty - needs Google Drive API integration
+                            "drive_url": drive_url,  # Google Drive folder URL
                             "drive_thumbnail": drive_url,
-                            "has_image": False,  # Use placeholder images for now
+                            "has_image": bool(drive_url),  # True if we have a Google Drive URL
                             "placeholder": "/placeholder-plant.svg",
-                            "note": "Using placeholder images - Google Drive API integration needed for actual plant photos"
+                            "note": "Using Google Drive folder URLs - individual file ID integration pending"
                         }
                     
                     response = {
