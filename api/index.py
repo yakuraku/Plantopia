@@ -124,8 +124,8 @@ class handler(BaseHTTPRequestHandler):
                 else:
                     all_plants = load_all_plants(csv_paths)
                     
-                    # Add image information for first 5 plants as a test
-                    for i, plant in enumerate(all_plants[:5]):
+                    # Add image information for all plants with placeholder system
+                    for i, plant in enumerate(all_plants):
                         original_image_path = plant.get("image_path", "")
                         
                         # Generate Google Drive URL for this specific plant image
@@ -136,13 +136,13 @@ class handler(BaseHTTPRequestHandler):
                             "image_base64": "",  # Could contain base64 data in the future
                             "drive_url": drive_url,  # Currently empty - needs Google Drive API integration
                             "drive_thumbnail": drive_url,
-                            "has_image": bool(drive_url),  # False when drive_url is empty
+                            "has_image": False,  # Use placeholder images for now
                             "placeholder": "/placeholder-plant.svg",
                             "note": "Using placeholder images - Google Drive API integration needed for actual plant photos"
                         }
                     
                     response = {
-                        "plants": all_plants[:5],  # Return first 5 for testing
+                        "plants": all_plants,  # Return all plants
                         "total_count": len(all_plants),
                         "debug": "BaseHTTPRequestHandler implementation working",
                         "csv_files_found": len(csv_paths),
