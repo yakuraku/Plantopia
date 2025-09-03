@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, List
@@ -116,7 +116,8 @@ def image_to_base64(image_path: str) -> str:
 app = FastAPI(
     title="Plantopia Recommendation Engine API",
     description="API for the Plantopia plant recommendation engine",
-    version="1.0.0"
+    version="1.0.0",
+    root_path="/api" if os.environ.get("VERCEL") == "1" else ""
 )
 
 # Add CORS middleware to allow frontend requests
@@ -183,11 +184,11 @@ class PlantScoreRequest(BaseModel):
 
 @app.get("/")
 async def root():
-    return {"message": "Plantopia Recommendation Engine API", "status": "working", "version": "1.0.0"}
+    return {"message": "Plantopia Recommendation Engine API", "status": "working", "version": "1.0.0", "debug": "API root endpoint hit successfully"}
 
 @app.get("/health")
 async def health():
-    return {"status": "healthy", "service": "plantopia-api"}
+    return {"status": "healthy", "service": "plantopia-api", "debug": "Health check endpoint hit successfully"}
 
 @app.post("/recommendations")
 async def get_recommendations(request: RecommendationRequest):
@@ -280,11 +281,12 @@ async def get_all_plants():
     Returns all plant data with images converted to base64.
     """
     try:
-        # Load plant data from all CSV files
+        # Load plant data from all CSV files (use absolute paths for serverless environment)
+        base_path = os.path.dirname(os.path.abspath(__file__))
         csv_paths = {
-            "flower": "flower_plants_data.csv",
-            "herb": "herbs_plants_data.csv",
-            "vegetable": "vegetable_plants_data.csv"
+            "flower": os.path.join(base_path, "flower_plants_data.csv"),
+            "herb": os.path.join(base_path, "herbs_plants_data.csv"),
+            "vegetable": os.path.join(base_path, "vegetable_plants_data.csv")
         }
         
         all_plants = load_all_plants(csv_paths)
