@@ -183,7 +183,11 @@ class PlantScoreRequest(BaseModel):
 
 @app.get("/")
 async def root():
-    return {"message": "Plantopia Recommendation Engine API"}
+    return {"message": "Plantopia Recommendation Engine API", "status": "working", "version": "1.0.0"}
+
+@app.get("/health")
+async def health():
+    return {"status": "healthy", "service": "plantopia-api"}
 
 @app.post("/recommendations")
 async def get_recommendations(request: RecommendationRequest):
@@ -421,6 +425,10 @@ async def get_plant_score(request: PlantScoreRequest):
             except:
                 pass
         raise HTTPException(status_code=500, detail=f"Error processing request: {str(e)}")
+
+# For Vercel serverless deployment
+# Export the FastAPI app as the handler
+handler = app
 
 if __name__ == "__main__":
     import uvicorn
