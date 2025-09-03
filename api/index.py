@@ -32,15 +32,18 @@ def get_drive_image_url(image_path: str) -> str:
     # Plantopia/
     #   ├── flower_plant_images/
     #   │   └── Agastache- Lavender Martini_Agastache aurantiaca/
-    #   │       └── Agastache- Lavender Martini_Agastache aurantiaca_1.jpg
+    #   │       ├── Agastache- Lavender Martini_Agastache aurantiaca_1.jpg
+    #   │       ├── Agastache- Lavender Martini_Agastache aurantiaca_2.jpg
+    #   │       └── Agastache- Lavender Martini_Agastache aurantiaca_3.jpg
     #   ├── herb_plant_images/
     #   └── vegetable_plant_images/
     #
     # To implement this properly, we need to:
     # 1. Set up Google Drive API credentials
     # 2. Search for files by path within the Plantopia folder
-    # 3. Get individual file IDs for each plant image
+    # 3. Get individual file IDs for ALL images per plant (not just _1.jpg)
     # 4. Return proper Google Drive URLs like: https://drive.google.com/uc?export=view&id=ACTUAL_FILE_ID
+    # 5. Handle multiple images per plant in the API response (image gallery)
     
     # For now, return empty string to use placeholder images
     return ""
