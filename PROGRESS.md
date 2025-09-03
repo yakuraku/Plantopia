@@ -148,6 +148,20 @@ After recent deployments, GitHub deployments to Vercel were failing with the err
 - `/api/plants` and `/plants` → plants endpoint
 - `/api/recommendations` and `/recommendations` → recommendations endpoint
 
+### Fifth Fix - CSV File Path Issue
+**Problem:** Plants endpoint was returning empty array because CSV file paths were incorrect. API function in `/api/` directory was looking for CSV files in same directory, but CSV files are in root directory.
+
+**Solution:** Fixed path calculation in `api/index.py`:
+1. **Updated path logic** - Use `os.path.dirname(api_dir)` to go up one level from `/api/` to root
+2. **Added file existence checking** - Check if CSV files exist before attempting to load
+3. **Enhanced error reporting** - Return detailed error messages showing missing files and paths
+4. **Added debug information** - Include root path and file count in successful responses
+
+**Files affected:**
+- `flower_plants_data.csv` - Located in root directory  
+- `herbs_plants_data.csv` - Located in root directory
+- `vegetable_plants_data.csv` - Located in root directory
+
 ### Files Modified
 - `vercel.json`: Complete rewrite to eliminate deprecated `builds` property and enhance `functions` configuration
 
