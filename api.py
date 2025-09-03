@@ -193,17 +193,20 @@ async def get_recommendations(request: RecommendationRequest):
             json.dump(request.user_preferences.dict(), user_prefs_file)
             user_prefs_path = user_prefs_file.name
         
-        # Load plant data
+        # Load plant data (use absolute paths for serverless environment)
+        base_path = os.path.dirname(os.path.abspath(__file__))
         csv_paths = {
-            "flower": "flower_plants_data.csv",
-            "herb": "herbs_plants_data.csv",
-            "vegetable": "vegetable_plants_data.csv"
+            "flower": os.path.join(base_path, "flower_plants_data.csv"),
+            "herb": os.path.join(base_path, "herbs_plants_data.csv"),
+            "vegetable": os.path.join(base_path, "vegetable_plants_data.csv")
         }
         
         all_plants = load_all_plants(csv_paths)
         
-        # Load climate data
-        with open("climate_data.json", 'r', encoding='utf-8') as f:
+        # Load climate data (use absolute path for serverless environment)
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        climate_file_path = os.path.join(base_path, "climate_data.json")
+        with open(climate_file_path, 'r', encoding='utf-8') as f:
             climate_data = json.load(f)
         
         # Select environment
@@ -315,11 +318,12 @@ async def get_plant_score(request: PlantScoreRequest):
             json.dump(request.user_preferences.dict(), user_prefs_file)
             user_prefs_path = user_prefs_file.name
         
-        # Load plant data
+        # Load plant data (use absolute paths for serverless environment)
+        base_path = os.path.dirname(os.path.abspath(__file__))
         csv_paths = {
-            "flower": "flower_plants_data.csv",
-            "herb": "herbs_plants_data.csv",
-            "vegetable": "vegetable_plants_data.csv"
+            "flower": os.path.join(base_path, "flower_plants_data.csv"),
+            "herb": os.path.join(base_path, "herbs_plants_data.csv"),
+            "vegetable": os.path.join(base_path, "vegetable_plants_data.csv")
         }
         
         all_plants = load_all_plants(csv_paths)
@@ -342,8 +346,10 @@ async def get_plant_score(request: PlantScoreRequest):
         if not target_plant:
             raise HTTPException(status_code=404, detail=f"Plant '{request.plant_name}' not found")
         
-        # Load climate data
-        with open("climate_data.json", 'r', encoding='utf-8') as f:
+        # Load climate data (use absolute path for serverless environment)
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        climate_file_path = os.path.join(base_path, "climate_data.json")
+        with open(climate_file_path, 'r', encoding='utf-8') as f:
             climate_data = json.load(f)
         
         # Select environment
