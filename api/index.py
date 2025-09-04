@@ -329,7 +329,7 @@ class handler(BaseHTTPRequestHandler):
                             "score": 95.0,
                             "why": ["This is a test recommendation from BaseHTTPRequestHandler"],
                             "fit": {"sun_need": "full_sun", "container_ok": True},
-                            "media": {"drive_url": get_drive_image_url("herb")},
+                            "media": {"drive_url": get_drive_image_url("herb_plant_images/test.jpg", "herb")},
                         }
                     ],
                     "suburb": request_data.get("suburb", "Richmond"),
