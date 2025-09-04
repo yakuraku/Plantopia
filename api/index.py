@@ -4,6 +4,10 @@ import tempfile
 import os
 from typing import Optional, Dict, Any, List
 from urllib.parse import parse_qs, urlparse
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Import the existing modules - but wrapped in try/except to handle import issues
 try:
@@ -13,6 +17,15 @@ try:
 except ImportError as e:
     print(f"Import error: {e}")
     IMPORTS_OK = False
+
+# Import Google Drive service
+try:
+    from services.google_drive_service import drive_service
+    DRIVE_SERVICE_OK = True
+except ImportError as e:
+    print(f"Google Drive service import error: {e}")
+    DRIVE_SERVICE_OK = False
+    drive_service = None
 
 # Google Drive configuration - Public folder IDs from frontend imageHelper.js
 DRIVE_FOLDERS = {
@@ -55,6 +68,31 @@ def get_drive_image_url(image_path: str, plant_category: str) -> str:
     
     return ""
 
+def check_environment():
+    """Verify all required environment variables are present"""
+    required_vars = [
+        'GOOGLE_DRIVE_API_KEY',
+        'GOOGLE_DRIVE_FOLDER_FLOWER',
+        'GOOGLE_DRIVE_FOLDER_HERB', 
+        'GOOGLE_DRIVE_FOLDER_VEGETABLE'
+    ]
+    
+    missing_vars = []
+    for var in required_vars:
+        if not os.getenv(var):
+            missing_vars.append(var)
+    
+    if missing_vars:
+        print(f"❌ Missing environment variables: {missing_vars}")
+        print("Please check your .env file")
+        return False
+    
+    print("✅ All environment variables loaded successfully")
+    return True
+
+# Check environment on startup
+env_ok = check_environment()
+
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed_path = urlparse(self.path)
@@ -71,7 +109,9 @@ class handler(BaseHTTPRequestHandler):
                 "status": "working", 
                 "version": "1.0.0",
                 "debug": "API root endpoint working with BaseHTTPRequestHandler",
-                "imports_status": "OK" if IMPORTS_OK else "FAILED"
+                "imports_status": "OK" if IMPORTS_OK else "FAILED",
+                "google_drive": "connected" if DRIVE_SERVICE_OK and drive_service and drive_service.api_key else "not configured",
+                "environment_ok": env_ok
             }
             self.wfile.write(json.dumps(response).encode('utf-8'))
             return
@@ -86,6 +126,64 @@ class handler(BaseHTTPRequestHandler):
                 "service": "plantopia-api",
                 "debug": "Health check working with BaseHTTPRequestHandler"
             }
+            self.wfile.write(json.dumps(response).encode('utf-8'))
+            return
+            
+        elif path == "/test-drive" or path == "/api/test-drive":
+            # Test Google Drive API connection
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            
+            if DRIVE_SERVICE_OK and drive_service:
+                is_connected = drive_service.test_connection()
+                response = {
+                    "google_drive_connected": is_connected,
+                    "api_key_present": bool(drive_service.api_key),
+                    "folder_ids_configured": len([f for f in drive_service.folder_ids.values() if f])
+                }
+            else:
+                response = {
+                    "google_drive_connected": False,
+                    "api_key_present": False,
+                    "folder_ids_configured": 0,
+                    "error": "Google Drive service not available"
+                }
+            
+            self.wfile.write(json.dumps(response).encode('utf-8'))
+            return
+            
+        elif path.startswith("/images/") or path.startswith("/api/images/"):
+            # Get all images for a specific plant category
+            category = path.split("/")[-1]
+            
+            if category not in ['flower', 'herb', 'vegetable']:
+                self.send_response(400)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                response = {"error": "Invalid category. Must be flower, herb, or vegetable"}
+                self.wfile.write(json.dumps(response).encode('utf-8'))
+                return
+            
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            
+            if DRIVE_SERVICE_OK and drive_service:
+                images = drive_service.get_folder_files(category)
+                response = {
+                    "category": category,
+                    "count": len(images),
+                    "images": images
+                }
+            else:
+                response = {
+                    "category": category,
+                    "count": 0,
+                    "images": [],
+                    "error": "Google Drive service not available"
+                }
+            
             self.wfile.write(json.dumps(response).encode('utf-8'))
             return
             
@@ -131,22 +229,41 @@ class handler(BaseHTTPRequestHandler):
                 else:
                     all_plants = load_all_plants(csv_paths)
                     
-                    # Add image information for all plants with placeholder system
+                    # Add image information for all plants with Google Drive API integration
+                    if DRIVE_SERVICE_OK and drive_service:
+                        all_images = drive_service.get_all_images()
+                    else:
+                        all_images = {}
+                    
                     for i, plant in enumerate(all_plants):
                         original_image_path = plant.get("image_path", "")
                         plant_category = plant.get("plant_category", "")
+                        plant_name = plant.get("plant_name", "")
                         
-                        # Try to generate Google Drive URL (currently returns empty string)
-                        drive_url = get_drive_image_url(original_image_path, plant_category)
+                        # Try to find matching Google Drive image
+                        drive_url = ""
+                        plant_images = all_images.get(plant_category, [])
+                        
+                        if plant_images:
+                            # Try to find matching image by plant name
+                            for img in plant_images:
+                                if plant_name.lower().replace(" ", "_") in img["name"].lower() or \
+                                   plant_name.lower() in img["name"].lower():
+                                    drive_url = img["url"]
+                                    break
+                            
+                            # If no exact match, use first available image in category
+                            if not drive_url and plant_images:
+                                drive_url = plant_images[0]["url"]
                         
                         plant["media"] = {
                             "image_path": original_image_path,
-                            "image_base64": "",  # Could contain base64 data in the future
-                            "drive_url": drive_url,  # Empty for now - will be populated when Google Drive API is integrated
+                            "image_base64": "",
+                            "drive_url": drive_url,
                             "drive_thumbnail": drive_url,
-                            "has_image": False,  # Set to False to trigger placeholder usage in frontend
+                            "has_image": bool(drive_url),
                             "placeholder": "/placeholder-plant.svg",
-                            "note": "Using placeholder images - Google Drive API integration required for actual plant photos"
+                            "note": "Google Drive API integration active" if drive_url else "No matching image found in Google Drive"
                         }
                     
                     response = {

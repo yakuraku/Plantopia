@@ -1,16 +1,12 @@
 /**
- * Google Drive Image Helper for Plantopia
- * Handles image URLs from public Google Drive folders
+ * Enhanced Image Helper with Google Drive API integration
+ * Handles secure image URLs via backend API calls
  */
 
-const DRIVE_BASE_URL = 'https://drive.google.com/uc?export=view&id=';
-
-// Public Google Drive folder IDs
-const DRIVE_FOLDERS = {
-  flower: '1ZcE9R3FMvZa5TRp8HfAHo-K7dAD5IfmL',
-  herb: '1aVMw8n51wCndrlUb8xG5cRjsMvBnON7n',
-  vegetable: '1rmv-7k70qL_fR1efsKa_t28I22pLKzf_'
-};
+// API base URL configuration  
+const API_BASE_URL = import.meta.env.MODE === 'production' 
+  ? '/api'  // Vercel serverless functions
+  : 'http://localhost:8000';  // Local development
 
 // Alternative category mappings (handle different naming conventions)
 const CATEGORY_MAPPING = {
@@ -26,54 +22,94 @@ const CATEGORY_MAPPING = {
 };
 
 /**
- * Get Google Drive image URL for a plant image
+ * Get plant image URL from backend API
+ * Backend handles Google Drive API calls securely
  * @param {string} category - Plant category (flower, herb, vegetable)
- * @param {string} imageName - Image filename (optional, for future file-specific URLs)
- * @returns {string} Google Drive image URL
+ * @param {string} imageName - Image filename (optional, for matching specific images)
+ * @returns {Promise<string>} Google Drive image URL or null
  */
-export const getPlantImageUrl = (category, imageName = null) => {
+export const getPlantImageUrl = async (category, imageName = null) => {
   // Handle undefined/null category
   if (!category) {
     console.warn('No category provided for plant image');
-    return '/placeholder-plant.svg'; // Fallback to existing placeholder
+    return null;
   }
   
   // Normalize category name
   const normalizedCategory = CATEGORY_MAPPING[category.toLowerCase()] || category.toLowerCase();
-  const folderId = DRIVE_FOLDERS[normalizedCategory];
   
-  if (!folderId) {
-    console.warn(`No Google Drive folder found for category: ${category}`);
-    return '/placeholder-plant.svg'; // Fallback to existing placeholder
+  if (!['flower', 'herb', 'vegetable'].includes(normalizedCategory)) {
+    console.warn(`Invalid category: ${category}`);
+    return null;
   }
   
-  // For now, return folder URL (will show folder contents)
-  // Later can be enhanced to return specific file URLs when we have file ID mappings
-  if (imageName) {
-    console.log(`Requested specific image: ${imageName} from category: ${category}`);
-    // TODO: Implement specific file ID mapping when needed
-    // For now, still return folder URL
+  try {
+    // Fetch images for category from backend
+    const response = await fetch(`${API_BASE_URL}/images/${normalizedCategory}`);
+    const data = await response.json();
+    
+    if (data.images && data.images.length > 0) {
+      // Find matching image by name if provided
+      if (imageName) {
+        const matchingImage = data.images.find(img => 
+          img.name.toLowerCase().includes(imageName?.toLowerCase() || '') ||
+          imageName?.toLowerCase().includes(img.name.toLowerCase().split('.')[0] || '')
+        );
+        
+        if (matchingImage) {
+          return matchingImage.url;
+        }
+      }
+      
+      // Return first image if no specific match or no imageName provided
+      return data.images[0].url;
+    }
+    
+    return null;
+  } catch (error) {
+    console.warn(`Failed to fetch image for ${category}/${imageName}:`, error);
+    return null;
   }
-  
-  return `${DRIVE_BASE_URL}${folderId}`;
 };
 
 /**
- * Get thumbnail URL for Google Drive folder/file
+ * Get all images for a category from backend API
  * @param {string} category - Plant category
- * @param {string} size - Thumbnail size (s150, s220, s320, etc.)
- * @returns {string} Google Drive thumbnail URL
+ * @returns {Promise<Array>} Array of image objects
  */
-export const getPlantImageThumbnail = (category, size = 's220') => {
-  const normalizedCategory = CATEGORY_MAPPING[category?.toLowerCase()] || category?.toLowerCase();
-  const folderId = DRIVE_FOLDERS[normalizedCategory];
+export const getCategoryImages = async (category) => {
+  if (!category) return [];
   
-  if (!folderId) {
-    return '/placeholder-plant.svg';
+  const normalizedCategory = CATEGORY_MAPPING[category.toLowerCase()] || category.toLowerCase();
+  
+  if (!['flower', 'herb', 'vegetable'].includes(normalizedCategory)) {
+    console.warn(`Invalid category: ${category}`);
+    return [];
   }
   
-  // Google Drive thumbnail URL format
-  return `https://drive.google.com/thumbnail?id=${folderId}&sz=${size}`;
+  try {
+    const response = await fetch(`${API_BASE_URL}/images/${normalizedCategory}`);
+    const data = await response.json();
+    return data.images || [];
+  } catch (error) {
+    console.warn(`Failed to fetch images for category ${category}:`, error);
+    return [];
+  }
+};
+
+/**
+ * Fallback/placeholder image component
+ * @param {string} category - Plant category
+ * @returns {string} Emoji placeholder or SVG path
+ */
+export const getPlaceholderImage = (category) => {
+  const placeholders = {
+    flower: '🌸',
+    herb: '🌿', 
+    vegetable: '🥕'
+  };
+  
+  return placeholders[category] || '🌱';
 };
 
 /**
@@ -81,7 +117,7 @@ export const getPlantImageThumbnail = (category, size = 's220') => {
  * @returns {string[]} Array of category names
  */
 export const getPlantCategories = () => {
-  return Object.keys(DRIVE_FOLDERS);
+  return ['flower', 'herb', 'vegetable'];
 };
 
 /**
@@ -92,13 +128,13 @@ export const getPlantCategories = () => {
 export const isValidCategory = (category) => {
   if (!category) return false;
   const normalizedCategory = CATEGORY_MAPPING[category.toLowerCase()] || category.toLowerCase();
-  return DRIVE_FOLDERS.hasOwnProperty(normalizedCategory);
+  return ['flower', 'herb', 'vegetable'].includes(normalizedCategory);
 };
 
 /**
  * Handle image loading errors with fallback
  * @param {Event} event - Image error event
- * @param {string} category - Plant category for alternative URL
+ * @param {string} category - Plant category for placeholder
  */
 export const handleImageError = (event, category = null) => {
   const img = event.target;
@@ -110,19 +146,9 @@ export const handleImageError = (event, category = null) => {
   
   console.warn('Failed to load image:', img.src);
   
-  // Try alternative Google Drive URL format first
-  if (category && !img.dataset.retried) {
-    img.dataset.retried = 'true';
-    const thumbnailUrl = getPlantImageThumbnail(category);
-    if (thumbnailUrl !== img.src) {
-      img.src = thumbnailUrl;
-      return;
-    }
-  }
-  
   // Final fallback to placeholder
   img.src = '/placeholder-plant.svg';
-  img.alt = 'Plant image unavailable';
+  img.alt = `Plant image unavailable ${getPlaceholderImage(category)}`;
 };
 
 /**
@@ -131,20 +157,29 @@ export const handleImageError = (event, category = null) => {
  * @returns {Promise[]} Array of image load promises
  */
 export const preloadPlantImages = (categories = []) => {
-  return categories.map(category => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => resolve({ category, status: 'loaded' });
-      img.onerror = () => resolve({ category, status: 'error' });
-      img.src = getPlantImageUrl(category);
-    });
+  return categories.map(async category => {
+    try {
+      const imageUrl = await getPlantImageUrl(category);
+      if (imageUrl) {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve({ category, status: 'loaded' });
+          img.onerror = () => resolve({ category, status: 'error' });
+          img.src = imageUrl;
+        });
+      }
+      return { category, status: 'no-image' };
+    } catch (error) {
+      return { category, status: 'error', error };
+    }
   });
 };
 
 // Default export for convenience
 export default {
   getPlantImageUrl,
-  getPlantImageThumbnail,
+  getCategoryImages,
+  getPlaceholderImage,
   getPlantCategories,
   isValidCategory,
   handleImageError,
