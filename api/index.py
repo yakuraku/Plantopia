@@ -210,14 +210,26 @@ class handler(BaseHTTPRequestHandler):
             
             # Try to load plants
             try:
-                # Get the root directory (one level up from /api/)
-                api_dir = os.path.dirname(os.path.abspath(__file__))
-                root_path = os.path.dirname(api_dir)
-                csv_paths = {
-                    "flower": os.path.join(root_path, "flower_plants_data.csv"),
-                    "herb": os.path.join(root_path, "herbs_plants_data.csv"),
-                    "vegetable": os.path.join(root_path, "vegetable_plants_data.csv")
+                # In Vercel, the working directory is the project root, not /api/
+                root_path = os.getcwd()  # Vercel working directory is project root
+                
+                # Load plant data with fallback paths
+                csv_paths = {}
+                csv_files = {
+                    "flower": ["flower_plants_data.csv", "./flower_plants_data.csv"],
+                    "herb": ["herbs_plants_data.csv", "./herbs_plants_data.csv"], 
+                    "vegetable": ["vegetable_plants_data.csv", "./vegetable_plants_data.csv"]
                 }
+                
+                for category, possible_paths in csv_files.items():
+                    for path in possible_paths:
+                        if os.path.exists(path):
+                            csv_paths[category] = path
+                            break
+                    
+                    # If not found, use first path as fallback (will cause error if missing)
+                    if category not in csv_paths:
+                        csv_paths[category] = possible_paths[0]
                 
                 # Check if CSV files exist
                 missing_files = []
@@ -329,24 +341,40 @@ class handler(BaseHTTPRequestHandler):
                 # Try to get real recommendations, fallback to test response if imports fail
                 if IMPORTS_OK:
                     try:
-                        # Get the root directory (one level up from /api/)
-                        api_dir = os.path.dirname(os.path.abspath(__file__))
-                        root_path = os.path.dirname(api_dir)
+                        # In Vercel, the working directory is the project root, not /api/
+                        # Try multiple path strategies to find the data files
+                        root_path = os.getcwd()  # Vercel working directory is project root
                         
-                        # Load climate data
-                        climate_file = os.path.join(root_path, "climate_data.json")
-                        if os.path.exists(climate_file):
+                        # Load climate data with fallback paths
+                        climate_file = None
+                        for possible_path in ["climate_data.json", "./climate_data.json"]:
+                            if os.path.exists(possible_path):
+                                climate_file = possible_path
+                                break
+                        
+                        if climate_file:
                             with open(climate_file, 'r') as f:
                                 climate_data = json.load(f)
                         else:
                             climate_data = {}
                         
-                        # Load plant data
-                        csv_paths = {
-                            "flower": os.path.join(root_path, "flower_plants_data.csv"),
-                            "herb": os.path.join(root_path, "herbs_plants_data.csv"),
-                            "vegetable": os.path.join(root_path, "vegetable_plants_data.csv")
+                        # Load plant data with fallback paths
+                        csv_paths = {}
+                        csv_files = {
+                            "flower": ["flower_plants_data.csv", "./flower_plants_data.csv"],
+                            "herb": ["herbs_plants_data.csv", "./herbs_plants_data.csv"], 
+                            "vegetable": ["vegetable_plants_data.csv", "./vegetable_plants_data.csv"]
                         }
+                        
+                        for category, possible_paths in csv_files.items():
+                            for path in possible_paths:
+                                if os.path.exists(path):
+                                    csv_paths[category] = path
+                                    break
+                            
+                            # If not found, use first path as fallback (will cause error if missing)
+                            if category not in csv_paths:
+                                csv_paths[category] = possible_paths[0]
                         
                         all_plants = load_all_plants(csv_paths)
                         
@@ -404,18 +432,35 @@ class handler(BaseHTTPRequestHandler):
                             "climate_zone": environment.get("climate_zone", "temperate"),
                             "month_now": environment.get("month_now", "August"),
                             "notes": [],
-                            "debug": f"Real recommendations engine - {len(top_plants)} plants processed"
+                            "debug": f"Real recommendations engine - {len(top_plants)} plants processed",
+                            "success_debug": {
+                                "working_directory": os.getcwd(),
+                                "csv_files_loaded": len(csv_paths),
+                                "total_plants_loaded": len(all_plants),
+                                "filtered_plants_count": len(filtered_plants),
+                                "final_recommendations_count": len(recommendations)
+                            }
                         }
                         
                     except Exception as e:
-                        # Return error instead of fallback data
+                        # Return detailed error for debugging
+                        import traceback
                         self.send_response(500)
                         self.send_header('Content-type', 'application/json')
                         self.end_headers()
                         error_response = {
                             "error": f"Recommendation engine error: {str(e)}",
                             "debug": "Real recommendation engine failed to process request",
-                            "suburb": request_data.get("suburb", "Richmond")
+                            "suburb": request_data.get("suburb", "Richmond"),
+                            "traceback": traceback.format_exc(),
+                            "working_directory": os.getcwd(),
+                            "files_exist": {
+                                "climate_data.json": os.path.exists("climate_data.json"),
+                                "flower_plants_data.csv": os.path.exists("flower_plants_data.csv"),
+                                "herbs_plants_data.csv": os.path.exists("herbs_plants_data.csv"), 
+                                "vegetable_plants_data.csv": os.path.exists("vegetable_plants_data.csv")
+                            },
+                            "imports_ok": IMPORTS_OK
                         }
                         self.wfile.write(json.dumps(error_response).encode('utf-8'))
                         return
