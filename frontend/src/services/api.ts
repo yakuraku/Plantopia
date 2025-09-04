@@ -332,10 +332,10 @@ export class PlantRecommendationService {
         id: `${apiPlant.plant_name.replace(/\s+/g, '_').toLowerCase()}_${index}`,
         name: apiPlant.plant_name,
         scientific_name: apiPlant.scientific_name,
-        description: apiPlant.description?.replace(/\\1/g, `${apiPlant.plant_name} (${apiPlant.scientific_name})`) || '',
+        description: this.processPlantDescription(apiPlant.description, apiPlant.plant_name, apiPlant.scientific_name),
         category: apiPlant.plant_category,
         plant_type: apiPlant.plant_type,
-        additional_information: apiPlant.additional_information?.replace(/\\1/g, `${apiPlant.plant_name} (${apiPlant.scientific_name})`),
+        additional_information: this.processPlantDescription(apiPlant.additional_information, apiPlant.plant_name, apiPlant.scientific_name),
         days_to_maturity: apiPlant.days_to_maturity,
         plant_spacing: apiPlant.plant_spacing,
         sowing_depth: apiPlant.sowing_depth,
@@ -387,7 +387,7 @@ export class PlantRecommendationService {
         id: `${apiPlant.plant_name.replace(/\s+/g, '_').toLowerCase()}_${index}`,
         name: apiPlant.plant_name,
         scientific_name: apiPlant.scientific_name,
-        description: apiPlant.description || 'No description available.',
+        description: this.processPlantDescription(apiPlant.description, apiPlant.plant_name, apiPlant.scientific_name),
         category: apiPlant.plant_category as 'vegetable' | 'herb' | 'flower',
         days_to_maturity: apiPlant.fit.time_to_maturity_days,
         image_url: apiPlant.media.drive_url || (apiPlant.media.has_image ? apiPlant.media.image_path : '/placeholder-plant.svg'),
@@ -618,6 +618,25 @@ export class PlantRecommendationService {
     }
 
     return requirements
+  }
+
+  // Helper method to process plant description and fix mismatched plant names
+  private processPlantDescription(description: string | undefined, actualPlantName: string, actualScientificName: string): string {
+    if (!description) {
+      return 'No description available.'
+    }
+
+    let processedDescription = description
+
+    // Handle \1 placeholders first
+    processedDescription = processedDescription.replace(/\\1/g, `${actualPlantName} (${actualScientificName})`)
+
+    // Handle markdown format with potentially wrong plant names: **Wrong Name** (*Wrong Scientific*)
+    // Replace with correct plant name and scientific name
+    const markdownPattern = /\*\*([^*]+)\*\*\s*\(([^)]*)\)/g
+    processedDescription = processedDescription.replace(markdownPattern, `**${actualPlantName}** (*${actualScientificName}*)`)
+
+    return processedDescription
   }
 }
 
