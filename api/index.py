@@ -325,14 +325,56 @@ class handler(BaseHTTPRequestHandler):
                         {
                             "plant_name": "Test Plant",
                             "scientific_name": "Testus Plantus",
-                            "plant_category": "test",
+                            "plant_category": "herb",
+                            "plant_type": "Annual herb to 50cm; Test plant; Aromatic leaves",
                             "score": 95.0,
                             "why": ["This is a test recommendation from BaseHTTPRequestHandler"],
-                            "fit": {"sun_need": "full_sun", "container_ok": True},
-                            "media": {"drive_url": get_drive_image_url("herb_plant_images/test.jpg", "herb")},
+                            "fit": {
+                                "sun_need": "full_sun", 
+                                "container_ok": True,
+                                "time_to_maturity_days": 60,
+                                "maintainability": "hardy",
+                                "indoor_ok": True,
+                                "habit": "compact"
+                            },
+                            "sowing": {
+                                "climate_zone": "cool",
+                                "months": ["August", "September", "October"],
+                                "method": "sow_direct",
+                                "depth_mm": 5,
+                                "spacing_cm": 20,
+                                "season_label": "Start now"
+                            },
+                            "media": {
+                                "image_path": "herb_plant_images/test.jpg",
+                                "drive_url": get_drive_image_url("herb_plant_images/test.jpg", "herb"),
+                                "has_image": False,
+                                "placeholder": "/placeholder-plant.svg"
+                            },
+                            "days_to_maturity": 60,
+                            "plant_spacing": 20,
+                            "sowing_depth": 5,
+                            "position": "Full sun to part sun, well drained soil",
+                            "season": "Spring and summer",
+                            "germination": "7-14 days @ 18-25°C",
+                            "sowing_method": "Sow direct or raise seedlings",
+                            "hardiness_life_cycle": "Frost tender Annual",
+                            "characteristics": "Test plant, hardy herb",
+                            "description": "Test plant for API endpoint validation",
+                            "additional_information": "Test use only",
+                            "seed_type": "Test seed variety",
+                            "image_filename": "herb_plant_images/test.jpg",
+                            "cool_climate_sowing_period": "September, October, November",
+                            "temperate_climate_sowing_period": "August, September, October, November, December",
+                            "subtropical_climate_sowing_period": "March, April, May, June, July, August, September",
+                            "tropical_climate_sowing_period": "April, May, June, July, August",
+                            "arid_climate_sowing_period": "March, April, May, August, September, October"
                         }
                     ],
                     "suburb": request_data.get("suburb", "Richmond"),
+                    "climate_zone": "cool",
+                    "month_now": "August",
+                    "notes": [],
                     "debug": "POST recommendations working with BaseHTTPRequestHandler"
                 }
                 
