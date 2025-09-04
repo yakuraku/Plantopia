@@ -292,7 +292,7 @@ export class PlantRecommendationService {
       
       if (!response.ok) {
         console.error('[ERROR] API Request Failed:', response.status, response.statusText)
-        console.error('[ERROR] Response Body:', responseData)
+        console.error('[ERROR] Response Body:', JSON.stringify(responseData, null, 2))
         console.groupEnd()
         throw new Error(`API request failed: ${response.status} ${response.statusText}`)
       }
