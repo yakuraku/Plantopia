@@ -18,6 +18,8 @@ def _norm(s: str) -> str:
     s = re.sub(r"[^a-z0-9]+", "", s)      # keep alnum only
     return s
 
+
+
 def canonical_id(plant: dict) -> str:
     # Prefer scientific_name if present; else plant_name
     sci = _norm(plant.get("scientific_name", ""))

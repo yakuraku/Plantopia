@@ -346,7 +346,7 @@ export class PlantRecommendationService {
         hardiness_life_cycle: apiPlant.hardiness_life_cycle,
         characteristics: apiPlant.characteristics,
         climate_specific_sowing: apiPlant.climate_specific_sowing,
-        image_url: apiPlant.media?.drive_url || (apiPlant.media?.has_image ? apiPlant.media.image_path : '/placeholder-plant.svg'),
+        image_url: this.getImageUrlForAllPlants(apiPlant),
         image_base64: apiPlant.media?.image_base64,
         has_image: apiPlant.media?.has_image || false,
         // Additional plant properties
@@ -390,7 +390,7 @@ export class PlantRecommendationService {
         description: this.processPlantDescription(apiPlant.description, apiPlant.plant_name, apiPlant.scientific_name),
         category: apiPlant.plant_category as 'vegetable' | 'herb' | 'flower',
         days_to_maturity: apiPlant.fit.time_to_maturity_days,
-        image_url: apiPlant.media.drive_url || (apiPlant.media.has_image ? apiPlant.media.image_path : '/placeholder-plant.svg'),
+        image_url: this.getImageUrl(apiPlant),
         image_base64: apiPlant.media.image_base64,
         has_image: apiPlant.media.has_image,
         // Legacy fields for backwards compatibility
@@ -621,6 +621,135 @@ export class PlantRecommendationService {
   }
 
   // Helper method to process plant description and fix mismatched plant names
+  private findVictoriaPlantImage(plantName: string, scientificName: string, category: string): string | null {
+    /**
+     * Search for plant images in Victoria Plants Data structure in public folder
+     * Returns the first image found or null if no image found
+     */
+    if (!plantName || !category) {
+      return null
+    }
+
+    // Map category to folder name
+    const categoryFolders: Record<string, string> = {
+      'flower': 'flower_plant_images',
+      'herb': 'herb_plant_images',
+      'vegetable': 'vegetable_plant_images'  // Prepared for when vegetable images are added
+    }
+
+    const folderName = categoryFolders[category.toLowerCase()]
+    if (!folderName) {
+      return null
+    }
+
+    // Search patterns to try
+    const searchPatterns: string[] = []
+    
+    // Primary pattern: PlantName_ScientificName
+    if (scientificName) {
+      searchPatterns.push(`${plantName}_${scientificName}`)
+    }
+    
+    // Secondary pattern: just PlantName
+    searchPatterns.push(plantName)
+    
+    // Alternative patterns with normalized names (remove special chars)
+    const normalizedPlant = plantName.replace(/[^\w\s-]/g, '').trim()
+    if (normalizedPlant !== plantName) {
+      searchPatterns.push(normalizedPlant)
+      if (scientificName) {
+        const normalizedSci = scientificName.replace(/[^\w\s-]/g, '').trim()
+        searchPatterns.push(`${normalizedPlant}_${normalizedSci}`)
+      }
+    }
+
+    // Try each pattern to construct the image URL
+    for (const pattern of searchPatterns) {
+      if (!pattern) continue
+      
+      // Construct the expected image path
+      const imagePath = `/VICTORIA_PLANTS_DATA/${folderName}/${pattern}/${pattern}_1.jpg`
+      
+      // We can't check if the file exists in the browser, so we return the first viable path
+      // The browser will handle 404s gracefully with our fallback logic
+      return imagePath
+    }
+
+    return null
+  }
+
+  private getImageUrl(apiPlant: ApiPlantRecommendation): string {
+    /**
+     * Get the best available image URL with fallback priority:
+     * 1. Base64 data (if available)
+     * 2. Victoria Plants Data image
+     * 3. Google Drive URL
+     * 4. Category-specific fallback image
+     */
+    // First priority: Base64 data
+    if (apiPlant.media.image_base64) {
+      return `data:image/jpeg;base64,${apiPlant.media.image_base64}`
+    }
+
+    // Second priority: Victoria Plants Data image
+    const victoriaImage = this.findVictoriaPlantImage(
+      apiPlant.plant_name,
+      apiPlant.scientific_name,
+      apiPlant.plant_category
+    )
+    if (victoriaImage) {
+      return victoriaImage
+    }
+
+    // Third priority: Google Drive URL
+    if (apiPlant.media.drive_url) {
+      return apiPlant.media.drive_url
+    }
+
+    // Fourth priority: Category-specific fallback
+    return this.getCategoryFallbackImage(apiPlant.plant_category)
+  }
+
+  private getImageUrlForAllPlants(apiPlant: ApiPlantData): string {
+    /**
+     * Get the best available image URL for /plants endpoint
+     */
+    // First priority: Base64 data
+    if (apiPlant.media?.image_base64) {
+      return `data:image/jpeg;base64,${apiPlant.media.image_base64}`
+    }
+
+    // Second priority: Victoria Plants Data image
+    const victoriaImage = this.findVictoriaPlantImage(
+      apiPlant.plant_name,
+      apiPlant.scientific_name,
+      apiPlant.plant_category
+    )
+    if (victoriaImage) {
+      return victoriaImage
+    }
+
+    // Third priority: Google Drive URL
+    if (apiPlant.media?.drive_url) {
+      return apiPlant.media.drive_url
+    }
+
+    // Fourth priority: Category-specific fallback
+    return this.getCategoryFallbackImage(apiPlant.plant_category)
+  }
+
+  private getCategoryFallbackImage(category: string): string {
+    /**
+     * Return category-specific fallback images
+     */
+    const fallbackImages: Record<string, string> = {
+      'flower': '/Flower.jpg',
+      'herb': '/Herb.jpg',
+      'vegetable': '/Vegetable.jpg'
+    }
+    return fallbackImages[category.toLowerCase()] || '/placeholder-plant.svg'
+  }
+
   private processPlantDescription(description: string | undefined, actualPlantName: string, actualScientificName: string): string {
     if (!description) {
       return 'No description available.'

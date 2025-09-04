@@ -35,15 +35,15 @@
       <div class="plant-card-requirements">
         <div class="requirement-item">
           <span class="requirement-label">Sun:</span>
-          <span class="requirement-value">{{ getSunIcon(plant.sunlight) }}</span>
+          <span class="requirement-value">{{ getSunIcon(plant.sunlight || '') }}</span>
         </div>
         <div class="requirement-item">
           <span class="requirement-label">Water:</span>
-          <span class="requirement-value">{{ getWaterIcon(plant.water) }}</span>
+          <span class="requirement-value">{{ getWaterIcon(plant.water || '') }}</span>
         </div>
         <div class="requirement-item">
           <span class="requirement-label">Care:</span>
-          <span class="requirement-value">{{ getEffortIcon(plant.effort) }}</span>
+          <span class="requirement-value">{{ getEffortIcon(plant.effort || '') }}</span>
         </div>
       </div>
 
@@ -86,7 +86,7 @@ const currentImageUrl = ref('')
 const urlIndex = ref(0)
 const allPossibleUrls = ref<string[]>([])
 
-// Function to get image source (Base64, URL, or category placeholder)
+// Function to get image source with Victoria Plants Data priority
 const getImageSource = (): string => {
   // Priority 1: Use Base64 data if available
   if (props.plant.imageData) {
@@ -99,13 +99,72 @@ const getImageSource = (): string => {
     return `data:image/jpeg;base64,${props.plant.imageData}`
   }
   
-  // Priority 2: Fall back to URL construction if no Base64 data
+  // Priority 2: Try Victoria Plants Data image
+  const victoriaImage = findVictoriaPlantImage()
+  if (victoriaImage) {
+    return victoriaImage
+  }
+  
+  // Priority 3: Fall back to existing URL construction
   if (props.plant.imagePath) {
     return getImageUrl(props.plant.imagePath)
   }
   
-  // Priority 3: Use category-specific placeholder image
+  // Priority 4: Use category-specific placeholder image
   return getCategoryPlaceholder()
+}
+
+// Function to find Victoria Plants Data image
+const findVictoriaPlantImage = (): string | null => {
+  if (!props.plant.name || !props.plant.category) {
+    return null
+  }
+
+  // Map category to folder name
+  const categoryFolders: Record<string, string> = {
+    'flower': 'flower_plant_images',
+    'herb': 'herb_plant_images',
+    'vegetable': 'vegetable_plant_images'  // Prepared for when vegetable images are added
+  }
+
+  const folderName = categoryFolders[props.plant.category.toLowerCase()]
+  if (!folderName) {
+    return null
+  }
+
+  // Search patterns to try
+  const searchPatterns: string[] = []
+  
+  // Primary pattern: PlantName_ScientificName
+  if (props.plant.scientificName) {
+    searchPatterns.push(`${props.plant.name}_${props.plant.scientificName}`)
+  }
+  
+  // Secondary pattern: just PlantName
+  searchPatterns.push(props.plant.name)
+  
+  // Alternative patterns with normalized names (remove special chars)
+  const normalizedPlant = props.plant.name.replace(/[^\w\s-]/g, '').trim()
+  if (normalizedPlant !== props.plant.name) {
+    searchPatterns.push(normalizedPlant)
+    if (props.plant.scientificName) {
+      const normalizedSci = props.plant.scientificName.replace(/[^\w\s-]/g, '').trim()
+      searchPatterns.push(`${normalizedPlant}_${normalizedSci}`)
+    }
+  }
+
+  // Try each pattern to construct the image URL
+  for (const pattern of searchPatterns) {
+    if (!pattern) continue
+    
+    // Construct the expected image path
+    const imagePath = `/VICTORIA_PLANTS_DATA/${folderName}/${pattern}/${pattern}_1.jpg`
+    
+    // Return the first viable path - browser will handle 404s with our error handler
+    return imagePath
+  }
+
+  return null
 }
 
 // Function to get category-specific placeholder image
@@ -156,19 +215,7 @@ const getImageUrl = (imagePath: string): string => {
 const handleImageError = (event: Event) => {
   const img = event.target as HTMLImageElement
   
-  // If we have alternative URLs to try
-  if (allPossibleUrls.value.length > 0) {
-    // Try the next URL if available
-    urlIndex.value++
-    if (urlIndex.value < allPossibleUrls.value.length) {
-      const nextUrl = allPossibleUrls.value[urlIndex.value]
-      currentImageUrl.value = nextUrl
-      img.src = nextUrl
-      return
-    }
-  }
-  
-  // All URLs failed or no URLs to try, fall back to category placeholder
+  // Simple fallback: if Victoria image fails, use category placeholder
   const placeholderUrl = getCategoryPlaceholder()
   
   // Avoid infinite loop if placeholder image also fails

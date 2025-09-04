@@ -129,6 +129,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Pydantic models for request/response
 class SitePreferences(BaseModel):
     location_type: str = "balcony"
