@@ -338,7 +338,7 @@ export class PlantRecommendationService {
         hardiness_life_cycle: apiPlant.hardiness_life_cycle,
         characteristics: apiPlant.characteristics,
         climate_specific_sowing: apiPlant.climate_specific_sowing,
-        image_url: apiPlant.media.drive_url || apiPlant.media.image_path,
+        image_url: apiPlant.media.drive_url || (apiPlant.media.has_image ? apiPlant.media.image_path : '/placeholder-plant.svg'),
         image_base64: apiPlant.media.image_base64,
         has_image: apiPlant.media.has_image,
         // Additional plant properties
@@ -382,7 +382,7 @@ export class PlantRecommendationService {
         description: apiPlant.why.join(' '),
         category: apiPlant.plant_category as 'vegetable' | 'herb' | 'flower',
         days_to_maturity: apiPlant.fit.time_to_maturity_days,
-        image_url: apiPlant.media.drive_url || apiPlant.media.image_path,
+        image_url: apiPlant.media.drive_url || (apiPlant.media.has_image ? apiPlant.media.image_path : '/placeholder-plant.svg'),
         image_base64: apiPlant.media.image_base64,
         has_image: apiPlant.media.has_image,
         // Legacy fields for backwards compatibility
