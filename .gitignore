@@ -41,7 +41,16 @@ __pycache__/
 env/
 venv/
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 .venv
+
+# API keys and secrets (NEVER commit these)
+*.key
+*.pem
+config/credentials.json
 ENV/
 env.bak/
 venv.bak/
