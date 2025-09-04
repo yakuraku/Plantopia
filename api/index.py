@@ -414,8 +414,9 @@ class handler(BaseHTTPRequestHandler):
                                 "note": "Using placeholder - Google Drive integration disabled"
                             }
                             
-                            recommendation = assemble_output([score], [plant], [scores_breakdown], 
-                                                           environment, user_prefs)[0]
+                            assembled_output = assemble_output([(score, plant, scores_breakdown)], 
+                                                             user_prefs, environment, [])
+                            recommendation = assembled_output["recommendations"][0]
                             recommendation["media"] = media_obj
                             recommendations.append(recommendation)
                         
