@@ -334,10 +334,6 @@ class handler(BaseHTTPRequestHandler):
                 else:
                     request_data = {}
                 
-                self.send_response(200)
-                self.send_header('Content-type', 'application/json')
-                self.end_headers()
-                
                 # Try to get real recommendations, fallback to test response if imports fail
                 if IMPORTS_OK:
                     try:
@@ -442,6 +438,13 @@ class handler(BaseHTTPRequestHandler):
                             }
                         }
                         
+                        # Send success response
+                        self.send_response(200)
+                        self.send_header('Content-type', 'application/json')
+                        self.end_headers()
+                        self.wfile.write(json.dumps(response).encode('utf-8'))
+                        return
+                        
                     except Exception as e:
                         # Return detailed error for debugging
                         import traceback
@@ -476,9 +479,6 @@ class handler(BaseHTTPRequestHandler):
                     }
                     self.wfile.write(json.dumps(error_response).encode('utf-8'))
                     return
-                
-                self.wfile.write(json.dumps(response).encode('utf-8'))
-                return
                 
             except Exception as e:
                 self.send_response(500)
