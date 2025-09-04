@@ -10,19 +10,12 @@
 
       
       <img 
-        v-if="(plant.imageData || plant.imagePath) && !imageError" 
         :src="getImageSource()"
         :alt="plant.name"
         class="plant-image"
         @error="handleImageError"
         @load="() => {}"
       />
-      <!-- Fallback placeholder if no image or image fails to load -->
-      <div v-if="(!plant.imageData && !plant.imagePath) || imageError" class="image-placeholder">
-        <div class="placeholder-icon">Plant</div>
-        <span class="placeholder-text">{{ plant.category || 'Plant' }}</span>
-
-      </div>
     </div>
 
     <!-- Plant Information Section -->
@@ -93,7 +86,7 @@ const currentImageUrl = ref('')
 const urlIndex = ref(0)
 const allPossibleUrls = ref<string[]>([])
 
-// Function to get image source (Base64 or URL)
+// Function to get image source (Base64, URL, or category placeholder)
 const getImageSource = (): string => {
   // Priority 1: Use Base64 data if available
   if (props.plant.imageData) {
@@ -111,7 +104,24 @@ const getImageSource = (): string => {
     return getImageUrl(props.plant.imagePath)
   }
   
-  return ''
+  // Priority 3: Use category-specific placeholder image
+  return getCategoryPlaceholder()
+}
+
+// Function to get category-specific placeholder image
+const getCategoryPlaceholder = (): string => {
+  const category = props.plant.category?.toLowerCase()
+  
+  switch (category) {
+    case 'flower':
+      return '/Flower.jpg'
+    case 'herb':
+      return '/Herb.jpg'
+    case 'vegetable':
+      return '/Vegetable.jpg'
+    default:
+      return '/placeholder-plant.svg'
+  }
 }
 
 // Function to construct full image URL (fallback method)
@@ -146,18 +156,29 @@ const getImageUrl = (imagePath: string): string => {
 const handleImageError = (event: Event) => {
   const img = event.target as HTMLImageElement
   
-  // Try the next URL if available
-  urlIndex.value++
-  if (urlIndex.value < allPossibleUrls.value.length) {
-    const nextUrl = allPossibleUrls.value[urlIndex.value]
-    currentImageUrl.value = nextUrl
-    img.src = nextUrl
-    return
+  // If we have alternative URLs to try
+  if (allPossibleUrls.value.length > 0) {
+    // Try the next URL if available
+    urlIndex.value++
+    if (urlIndex.value < allPossibleUrls.value.length) {
+      const nextUrl = allPossibleUrls.value[urlIndex.value]
+      currentImageUrl.value = nextUrl
+      img.src = nextUrl
+      return
+    }
   }
   
-  // All URLs failed, show placeholder
-  imageError.value = true
-  img.style.display = 'none'
+  // All URLs failed or no URLs to try, fall back to category placeholder
+  const placeholderUrl = getCategoryPlaceholder()
+  
+  // Avoid infinite loop if placeholder image also fails
+  if (img.src !== placeholderUrl) {
+    img.src = placeholderUrl
+  } else {
+    // If even the placeholder fails, hide the image
+    imageError.value = true
+    img.style.display = 'none'
+  }
 }
 
 // Helper function to get appropriate sun icon based on sunlight requirement
@@ -234,31 +255,9 @@ const getEffortIcon = (effort: string): string => {
   transform: scale(1.05);                             /* Slight zoom on hover */
 }
 
-/* Image placeholder container */
-.image-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  color: #059669;
-  text-align: center;
-}
-
-/* Placeholder icon styling */
-.placeholder-icon {
-  font-size: 3rem;
-  margin-bottom: 0.5rem;
-  opacity: 0.7;
-}
-
-/* Placeholder text styling */
-.placeholder-text {
-  font-size: 0.875rem;
-  font-weight: 600;
-  text-transform: capitalize;
-  opacity: 0.8;
+/* Image error handling - hide broken images */
+.plant-image[style*="display: none"] {
+  display: none !important;
 }
 
 
