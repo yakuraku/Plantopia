@@ -287,14 +287,16 @@ export class PlantRecommendationService {
       console.log('[RESPONSE] Status Text:', response.statusText)
       console.log('[RESPONSE] Headers:', Object.fromEntries(response.headers.entries()))
 
+      const responseData = await response.json()
+      console.log('[RESPONSE] Data:', responseData)
+      
       if (!response.ok) {
         console.error('[ERROR] API Request Failed:', response.status, response.statusText)
+        console.error('[ERROR] Response Body:', responseData)
         console.groupEnd()
         throw new Error(`API request failed: ${response.status} ${response.statusText}`)
       }
 
-      const responseData = await response.json()
-      console.log('[RESPONSE] Data:', responseData)
       console.log('[RESPONSE] Number of recommendations:', responseData.recommendations?.length || 0)
       console.log('[RESPONSE] Suburb detected:', responseData.suburb)
       console.log('[RESPONSE] Climate zone:', responseData.climate_zone)
