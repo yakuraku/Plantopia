@@ -631,10 +631,22 @@ export class PlantRecommendationService {
     // Handle \1 placeholders first
     processedDescription = processedDescription.replace(/\\1/g, `${actualPlantName} (${actualScientificName})`)
 
-    // Handle markdown format with potentially wrong plant names: **Wrong Name** (*Wrong Scientific*)
-    // Replace with correct plant name and scientific name
-    const markdownPattern = /\*\*([^*]+)\*\*\s*\(([^)]*)\)/g
-    processedDescription = processedDescription.replace(markdownPattern, `**${actualPlantName}** (*${actualScientificName}*)`)
+    // Clean up any leading periods or spaces first
+    processedDescription = processedDescription.replace(/^\s*\.\s*/, '').trim()
+
+    // Handle markdown format with potentially wrong plant names
+    // Pattern 1: **Wrong Name** (*Scientific*) or **Wrong Name** (description)
+    const markdownPatternWithParens = /\*\*([^*]+)\*\*\s*\([^)]*\)/g
+    processedDescription = processedDescription.replace(markdownPatternWithParens, `**${actualPlantName}** (*${actualScientificName}*)`)
+    
+    // Pattern 2: **Wrong Name**: (description)
+    const markdownPatternWithColon = /\*\*([^*]+)\*\*\s*:/g
+    processedDescription = processedDescription.replace(markdownPatternWithColon, `**${actualPlantName}**:`)
+
+    // Clean up any duplicate names that might occur from replacements
+    // Pattern to match: Name (Scientific) (Name (Scientific))
+    const duplicateNamePattern = new RegExp(`${actualPlantName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\([^)]*\\)\\s*\\(${actualPlantName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\([^)]*\\)\\)`, 'g')
+    processedDescription = processedDescription.replace(duplicateNamePattern, `${actualPlantName} (${actualScientificName})`)
 
     return processedDescription
   }

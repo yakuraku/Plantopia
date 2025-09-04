@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { RouterLink, RouterView, useRoute } from 'vue-router'
+import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { computed } from 'vue'
+import { useAuthStore } from './stores/auth'
 import {
   HomeIcon,
   MagnifyingGlassIcon,
@@ -8,14 +9,25 @@ import {
   ChartBarIcon,
   TrophyIcon,
   BeakerIcon,
+  ArrowRightOnRectangleIcon,
 } from '@heroicons/vue/24/outline'
 
+const route = useRoute()
+const router = useRouter()
+const authStore = useAuthStore()
+
 const isDarkNavbar = computed(() => false)
+const showNavbar = computed(() => route.name !== 'login')
+
+const handleLogout = () => {
+  authStore.logout()
+  router.push('/login')
+}
 </script>
 
 <template>
   <div id="app">
-    <nav class="navbar" :class="{ 'navbar-dark': isDarkNavbar }">
+    <nav v-if="showNavbar" class="navbar" :class="{ 'navbar-dark': isDarkNavbar }">
       <div class="nav-container">
         <div class="nav-logo">
           <RouterLink to="/" class="nav-brand"> Plantopia </RouterLink>
@@ -57,11 +69,17 @@ const isDarkNavbar = computed(() => false)
               My Impact
             </RouterLink>
           </li>
+          <li class="nav-item">
+            <button @click="handleLogout" class="nav-link logout-button">
+              <ArrowRightOnRectangleIcon class="nav-icon" />
+              Logout
+            </button>
+          </li>
         </ul>
       </div>
     </nav>
 
-    <main class="main-content">
+    <main class="main-content" :class="{ 'no-navbar': !showNavbar }">
       <RouterView />
     </main>
   </div>
@@ -206,6 +224,19 @@ body {
 
 .main-content {
   min-height: calc(100vh - 80px);
+}
+
+.main-content.no-navbar {
+  min-height: 100vh;
+}
+
+.logout-button {
+  background: none !important;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
 }
 
 /* Responsive adjustments for smaller screens */
