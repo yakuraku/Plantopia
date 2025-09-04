@@ -409,6 +409,7 @@ def assemble_output(top: List[Tuple[float, Dict[str, Any], Dict[str, float]]],
             "plant_name": plant.get("plant_name", ""),
             "scientific_name": plant.get("scientific_name", ""),
             "plant_category": plant.get("plant_category", ""),
+            "description": plant.get("description", ""),
             "score": round(score, 1),
             "why": why_bullets,
             "fit": {

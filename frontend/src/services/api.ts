@@ -11,6 +11,7 @@ export interface ApiPlantRecommendation {
   plant_name: string
   scientific_name: string
   plant_category: string
+  description: string
   score: number
   why: string[]
   fit: {
@@ -29,6 +30,9 @@ export interface ApiPlantRecommendation {
   media: {
     image_path: string
     image_base64?: string  // Base64 encoded image data
+    drive_url?: string     // Google Drive URL
+    drive_thumbnail?: string // Google Drive thumbnail URL
+    has_image?: boolean    // Whether image is available
   }
 }
 
@@ -82,6 +86,8 @@ export interface ApiPlantData {
   media: {
     image_path: string
     image_base64?: string
+    drive_url?: string
+    drive_thumbnail?: string
     has_image: boolean
   }
 }
@@ -340,9 +346,9 @@ export class PlantRecommendationService {
         hardiness_life_cycle: apiPlant.hardiness_life_cycle,
         characteristics: apiPlant.characteristics,
         climate_specific_sowing: apiPlant.climate_specific_sowing,
-        image_url: apiPlant.media.drive_url || (apiPlant.media.has_image ? apiPlant.media.image_path : '/placeholder-plant.svg'),
-        image_base64: apiPlant.media.image_base64,
-        has_image: apiPlant.media.has_image,
+        image_url: apiPlant.media?.drive_url || (apiPlant.media?.has_image ? apiPlant.media.image_path : '/placeholder-plant.svg'),
+        image_base64: apiPlant.media?.image_base64,
+        has_image: apiPlant.media?.has_image || false,
         // Additional plant properties
         container_ok: apiPlant.container_ok,
         indoor_ok: apiPlant.indoor_ok,
@@ -381,7 +387,7 @@ export class PlantRecommendationService {
         id: `${apiPlant.plant_name.replace(/\s+/g, '_').toLowerCase()}_${index}`,
         name: apiPlant.plant_name,
         scientific_name: apiPlant.scientific_name,
-        description: apiPlant.why.join(' '),
+        description: apiPlant.description || 'No description available.',
         category: apiPlant.plant_category as 'vegetable' | 'herb' | 'flower',
         days_to_maturity: apiPlant.fit.time_to_maturity_days,
         image_url: apiPlant.media.drive_url || (apiPlant.media.has_image ? apiPlant.media.image_path : '/placeholder-plant.svg'),
