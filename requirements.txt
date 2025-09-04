@@ -3,3 +3,5 @@ python-dateutil
 fastapi
 uvicorn
 python-multipart
+python-dotenv
+requests
