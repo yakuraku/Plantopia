@@ -392,7 +392,7 @@ class handler(BaseHTTPRequestHandler):
                                                             filtered_plants, n_recommendations)
                         
                         # Score and rank
-                        scored_plants = score_and_rank(filtered_plants, user_prefs, environment)
+                        scored_plants = score_and_rank(filtered_plants, user_prefs, environment, weights)
                         
                         # Apply diversity cap but ensure we reach target count
                         diverse_plants = category_diversity(scored_plants, max_per_cat=2, target_count=n_recommendations)
