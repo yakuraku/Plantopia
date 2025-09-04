@@ -11,6 +11,13 @@ load_dotenv()
 
 # Import the existing modules - but wrapped in try/except to handle import issues
 try:
+    # Add parent directory to Python path to find recommender modules
+    import sys
+    import os
+    parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if parent_dir not in sys.path:
+        sys.path.insert(0, parent_dir)
+    
     from recommender.engine import load_all_plants, select_environment, get_user_preferences, hard_filter, relax_if_needed, score_and_rank, assemble_output, category_diversity
     from recommender.scoring import weights, calculate_scores
     IMPORTS_OK = True
@@ -83,11 +90,11 @@ def check_environment():
             missing_vars.append(var)
     
     if missing_vars:
-        print(f"❌ Missing environment variables: {missing_vars}")
+        print(f"Missing environment variables: {missing_vars}")
         print("Please check your .env file")
         return False
     
-    print("✅ All environment variables loaded successfully")
+    print("All environment variables loaded successfully")
     return True
 
 # Check environment on startup
@@ -401,129 +408,29 @@ class handler(BaseHTTPRequestHandler):
                         }
                         
                     except Exception as e:
-                        # Fallback to test response if real recommendations fail
-                        response = {
-                            "recommendations": [
-                                {
-                                    "plant_name": "Basil",
-                                    "scientific_name": "Ocimum basilicum",
-                                    "plant_category": "herb",
-                                    "plant_type": "Annual herb to 50cm; Culinary use; Aromatic leaves",
-                                    "score": 95.0,
-                                    "why": ["Fallback recommendation - real engine failed", f"Error: {str(e)}"],
-                                    "fit": {
-                                        "sun_need": "full_sun", 
-                                        "container_ok": True,
-                                        "time_to_maturity_days": 60,
-                                        "maintainability": "hardy",
-                                        "indoor_ok": True,
-                                        "habit": "compact"
-                                    },
-                                    "sowing": {
-                                        "climate_zone": "cool",
-                                        "months": ["August", "September", "October"],
-                                        "method": "sow_direct",
-                                        "depth_mm": 5,
-                                        "spacing_cm": 20,
-                                        "season_label": "Start now"
-                                    },
-                                    "media": {
-                                        "image_path": "herb_plant_images/basil.jpg",
-                                        "image_base64": "",
-                                        "drive_url": "",
-                                        "drive_thumbnail": "",
-                                        "has_image": False,
-                                        "placeholder": "/placeholder-plant.svg",
-                                        "note": "Using placeholder - Google Drive integration disabled for testing"
-                                    },
-                                    "days_to_maturity": 60,
-                                    "plant_spacing": 20,
-                                    "sowing_depth": 5,
-                                    "position": "Full sun to part sun, well drained soil",
-                                    "season": "Spring and summer",
-                                    "germination": "7-14 days @ 18-25°C",
-                                    "sowing_method": "Sow direct or raise seedlings",
-                                    "hardiness_life_cycle": "Frost tender Annual",
-                                    "characteristics": "Aromatic, culinary herb",
-                                    "description": "Sweet basil is a popular culinary herb with aromatic leaves",
-                                    "additional_information": "Culinary use; Container growing",
-                                    "seed_type": "Open pollinated, untreated, non-GMO variety of seed",
-                                    "image_filename": "herb_plant_images/basil.jpg",
-                                    "cool_climate_sowing_period": "September, October, November",
-                                    "temperate_climate_sowing_period": "August, September, October, November, December",
-                                    "subtropical_climate_sowing_period": "March, April, May, June, July, August, September",
-                                    "tropical_climate_sowing_period": "April, May, June, July, August",
-                                    "arid_climate_sowing_period": "March, April, May, August, September, October"
-                                }
-                            ],
-                            "suburb": request_data.get("suburb", "Richmond"),
-                            "climate_zone": "cool",
-                            "month_now": "August",
-                            "notes": [],
-                            "debug": f"Fallback recommendation due to error: {str(e)}"
+                        # Return error instead of fallback data
+                        self.send_response(500)
+                        self.send_header('Content-type', 'application/json')
+                        self.end_headers()
+                        error_response = {
+                            "error": f"Recommendation engine error: {str(e)}",
+                            "debug": "Real recommendation engine failed to process request",
+                            "suburb": request_data.get("suburb", "Richmond")
                         }
+                        self.wfile.write(json.dumps(error_response).encode('utf-8'))
+                        return
                 else:
-                    # Basic test response when imports are not available
-                    response = {
-                        "recommendations": [
-                            {
-                                "plant_name": "Test Plant - Imports Failed",
-                                "scientific_name": "Importus Failedus",
-                                "plant_category": "herb",
-                                "plant_type": "Test plant when imports are not available",
-                                "score": 90.0,
-                                "why": ["Test recommendation - imports not available"],
-                                "fit": {
-                                    "sun_need": "full_sun", 
-                                    "container_ok": True,
-                                    "time_to_maturity_days": 60,
-                                    "maintainability": "hardy",
-                                    "indoor_ok": True,
-                                    "habit": "compact"
-                                },
-                                "sowing": {
-                                    "climate_zone": "cool",
-                                    "months": ["August", "September", "October"],
-                                    "method": "sow_direct",
-                                    "depth_mm": 5,
-                                    "spacing_cm": 20,
-                                    "season_label": "Start now"
-                                },
-                                "media": {
-                                    "image_path": "herb_plant_images/test.jpg",
-                                    "image_base64": "",
-                                    "drive_url": "",
-                                    "drive_thumbnail": "",
-                                    "has_image": False,
-                                    "placeholder": "/placeholder-plant.svg",
-                                    "note": "Using placeholder - imports not available"
-                                },
-                                "days_to_maturity": 60,
-                                "plant_spacing": 20,
-                                "sowing_depth": 5,
-                                "position": "Full sun to part sun, well drained soil",
-                                "season": "Spring and summer",
-                                "germination": "7-14 days @ 18-25°C",
-                                "sowing_method": "Sow direct or raise seedlings",
-                                "hardiness_life_cycle": "Frost tender Annual",
-                                "characteristics": "Test plant, hardy herb",
-                                "description": "Test plant for API endpoint when imports fail",
-                                "additional_information": "Test use only",
-                                "seed_type": "Test seed variety",
-                                "image_filename": "herb_plant_images/test.jpg",
-                                "cool_climate_sowing_period": "September, October, November",
-                                "temperate_climate_sowing_period": "August, September, October, November, December",
-                                "subtropical_climate_sowing_period": "March, April, May, June, July, August, September",
-                                "tropical_climate_sowing_period": "April, May, June, July, August",
-                                "arid_climate_sowing_period": "March, April, May, August, September, October"
-                            }
-                        ],
-                        "suburb": request_data.get("suburb", "Richmond"),
-                        "climate_zone": "cool",
-                        "month_now": "August",
-                        "notes": [],
-                        "debug": "Test recommendations - imports not available"
+                    # Return error when imports are not available
+                    self.send_response(500)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    error_response = {
+                        "error": "Recommendation engine not available - import dependencies failed",
+                        "debug": "Please check server configuration and dependencies",
+                        "imports_ok": IMPORTS_OK
                     }
+                    self.wfile.write(json.dumps(error_response).encode('utf-8'))
+                    return
                 
                 self.wfile.write(json.dumps(response).encode('utf-8'))
                 return
