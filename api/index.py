@@ -383,19 +383,16 @@ class handler(BaseHTTPRequestHandler):
                         environment = select_environment(suburb, climate_data, 
                                                        cli_override_climate_zone=request_data.get("climate_zone"))
                         
-                        # Get processed user preferences
-                        processed_prefs = get_user_preferences(user_prefs, environment)
-                        
-                        # Apply filters
-                        filtered_plants = hard_filter(all_plants, processed_prefs, environment)
+                        # Apply filters using user preferences directly
+                        filtered_plants = hard_filter(all_plants, user_prefs, environment)
                         
                         # Relax filters if needed
                         if len(filtered_plants) < n_recommendations:
-                            filtered_plants = relax_if_needed(all_plants, processed_prefs, environment, 
+                            filtered_plants = relax_if_needed(all_plants, user_prefs, environment, 
                                                             filtered_plants, n_recommendations)
                         
                         # Score and rank
-                        scored_plants = score_and_rank(filtered_plants, processed_prefs, environment)
+                        scored_plants = score_and_rank(filtered_plants, user_prefs, environment)
                         
                         # Apply diversity cap but ensure we reach target count
                         diverse_plants = category_diversity(scored_plants, max_per_cat=2, target_count=n_recommendations)
@@ -418,7 +415,7 @@ class handler(BaseHTTPRequestHandler):
                             }
                             
                             recommendation = assemble_output([score], [plant], [scores_breakdown], 
-                                                           environment, processed_prefs)[0]
+                                                           environment, user_prefs)[0]
                             recommendation["media"] = media_obj
                             recommendations.append(recommendation)
                         
