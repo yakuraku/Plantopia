@@ -381,7 +381,7 @@ class handler(BaseHTTPRequestHandler):
                         
                         # Select environment
                         environment = select_environment(suburb, climate_data, 
-                                                       climate_zone=request_data.get("climate_zone"))
+                                                       cli_override_climate_zone=request_data.get("climate_zone"))
                         
                         # Get processed user preferences
                         processed_prefs = get_user_preferences(user_prefs, environment)
