@@ -103,7 +103,7 @@
                     >
                     <!-- Show placeholder if no image available or image failed to load -->
                     <div v-else class="image-placeholder">
-                      <div class="placeholder-icon">🌱</div>
+                      <div class="placeholder-icon">Plant</div>
                       <span class="placeholder-text">{{ plant.category || 'Plant' }}</span>
                     </div>
                   </div>
@@ -213,7 +213,7 @@
             >
             <!-- Show placeholder if no image available or image failed to load -->
             <div v-else class="image-placeholder">
-              <div class="placeholder-icon">🌱</div>
+              <div class="placeholder-icon">Plant</div>
               <span class="placeholder-text">{{ selectedPlant.category || 'Plant' }}</span>
             </div>
           </div>

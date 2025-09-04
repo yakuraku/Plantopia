@@ -100,16 +100,16 @@ export const getCategoryImages = async (category) => {
 /**
  * Fallback/placeholder image component
  * @param {string} category - Plant category
- * @returns {string} Emoji placeholder or SVG path
+ * @returns {string} Text placeholder or SVG path
  */
 export const getPlaceholderImage = (category) => {
   const placeholders = {
-    flower: '🌸',
-    herb: '🌿', 
-    vegetable: '🥕'
+    flower: 'Flower',
+    herb: 'Herb', 
+    vegetable: 'Vegetable'
   };
   
-  return placeholders[category] || '🌱';
+  return placeholders[category] || 'Plant';
 };
 
 /**
@@ -148,7 +148,7 @@ export const handleImageError = (event, category = null) => {
   
   // Final fallback to placeholder
   img.src = '/placeholder-plant.svg';
-  img.alt = `Plant image unavailable ${getPlaceholderImage(category)}`;
+  img.alt = `Plant image unavailable for ${getPlaceholderImage(category)}`;
 };
 
 /**

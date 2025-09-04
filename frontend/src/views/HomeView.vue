@@ -43,12 +43,6 @@
             @navigate-to-dashboard="goToDashboard"
             @navigate-to-journey="goToJourney"
           />
-
-          <!-- Impact Stats Section -->
-          <ImpactStats />
-
-          <!-- CTA Section -->
-          <CTASection @navigate-to-recommendations="goToRecommendations" />
         </div>
       </div>
     </Transition>
@@ -62,8 +56,6 @@ import { onMounted, onUnmounted, ref, computed } from 'vue'
 // Import components
 import HeroSection from './home/HeroSection.vue'
 import FeaturesSection from './home/FeaturesSection.vue'
-import ImpactStats from './home/ImpactStats.vue'
-import CTASection from './home/CTASection.vue'
 
 const router = useRouter()
 
@@ -189,7 +181,7 @@ onMounted(() => {
   }, observerOptions)
 
   // Observe all elements that need animation
-  const elements = document.querySelectorAll('.features-section, .impact-stats, .cta-section')
+  const elements = document.querySelectorAll('.features-section')
   elements.forEach((el) => observer.observe(el))
 })
 
@@ -261,7 +253,6 @@ onUnmounted(() => {
 
 /* Content Section */
 .content-section {
-  min-height: 100vh;
   position: relative;
   z-index: 2;
 }
@@ -269,24 +260,20 @@ onUnmounted(() => {
 .home-container {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 4rem 2rem 2rem;
+  padding: 4rem 2rem 4rem;
   text-align: center;
   position: relative;
   z-index: 2;
 }
 
 /* Scroll Animations */
-.features-section,
-.impact-stats,
-.cta-section {
+.features-section {
   opacity: 0;
   transform: translateY(50px);
   transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.features-section.animate,
-.impact-stats.animate,
-.cta-section.animate {
+.features-section.animate {
   opacity: 1;
   transform: translateY(0);
 }

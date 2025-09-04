@@ -1,59 +1,78 @@
 <template>
   <div class="features-section">
-    <h2 class="features-title">Transform Your Space, Transform the Climate</h2>
-    <p class="features-subtitle">
-      Join Melbourne's growing community of climate gardeners making a real environmental
-      impact
-    </p>
+    <!-- Explore Plants Section -->
+    <div class="explore-section">
+      <h2 class="section-title">Explore Plants</h2>
+      <p class="section-subtitle">Discover your most interest plants</p>
+      
+      <div class="explore-grid">
+        <!-- Flowers Card -->
+        <div class="category-card flowers-card" @click="$emit('navigate-to-recommendations')">
+          <div class="category-content">
+            <h3 class="category-title">Flowers</h3>
+            <button class="category-btn">Explore Plants</button>
+          </div>
+          <div class="category-background"></div>
+        </div>
 
-    <div class="features-grid">
-      <div class="feature-card">
-        <div class="feature-icon">
+        <!-- Vegetables Card -->
+        <div class="category-card vegetables-card" @click="$emit('navigate-to-recommendations')">
+          <div class="category-content">
+            <h3 class="category-title">Vegetables</h3>
+            <button class="category-btn">Explore Plants</button>
+          </div>
+          <div class="category-background"></div>
+        </div>
+
+        <!-- Herbs Card -->
+        <div class="category-card herbs-card" @click="$emit('navigate-to-recommendations')">
+          <div class="category-content">
+            <h3 class="category-title">Herbs</h3>
+            <button class="category-btn">Explore Plants</button>
+          </div>
+          <div class="category-background"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Smart Recommendations Section -->
+    <div class="recommendations-section">
+      <div class="recommendations-content">
+        <div class="recommendations-icon">
           <SparklesIcon class="icon" />
         </div>
-        <h3 class="feature-title">Smart Recommendations</h3>
-        <p class="feature-description">
-          Get personalized plant suggestions based on your location, space, and climate goals
-        </p>
-        <button class="feature-btn" @click="$emit('navigate-to-recommendations')">
-          Explore Plants
-          <ArrowRightIcon class="btn-arrow" />
-        </button>
+        <div class="recommendations-text">
+          <h3 class="recommendations-title">Smart Recommendations</h3>
+          <p class="recommendations-description">Get personalized plant suggestions based on your location, space, and climate goals</p>
+        </div>
       </div>
+      <button class="recommendations-btn" @click="$emit('navigate-to-recommendations')">
+        Explore Plants
+        <ArrowRightIcon class="btn-arrow" />
+      </button>
+    </div>
 
-      <div class="feature-card">
-        <div class="feature-icon feature-icon-blue">
+    <!-- Track Your Impact Section -->
+    <div class="impact-section">
+      <div class="impact-content">
+        <div class="impact-icon">
           <ChartBarIcon class="icon" />
         </div>
-        <h3 class="feature-title">Track Your Impact</h3>
-        <p class="feature-description">
-          Visualize your CO2 absorption, cooling effects, and contribution to air quality
-        </p>
-        <button class="feature-btn" @click="$emit('navigate-to-dashboard')">
-          View Dashboard
-          <ArrowRightIcon class="btn-arrow" />
-        </button>
-      </div>
-
-      <div class="feature-card">
-        <div class="feature-icon">
-          <BookOpenIcon class="icon" />
+        <div class="impact-text">
+          <h3 class="impact-title">Track Your Impact</h3>
+          <p class="impact-description">Visualize your CO2 absorption, cooling effects, and contribution to air quality</p>
         </div>
-        <h3 class="feature-title">Earn & Achieve</h3>
-        <p class="feature-description">
-          Complete challenges, earn badges, and compete with your community
-        </p>
-        <button class="feature-btn" @click="$emit('navigate-to-journey')">
-          Start Journey
-          <ArrowRightIcon class="btn-arrow" />
-        </button>
       </div>
+      <button class="impact-btn" @click="$emit('navigate-to-dashboard')">
+        View Dashboard
+        <ArrowRightIcon class="btn-arrow" />
+      </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { SparklesIcon, ChartBarIcon, BookOpenIcon, ArrowRightIcon } from '@heroicons/vue/24/outline'
+import { SparklesIcon, ChartBarIcon, ArrowRightIcon } from '@heroicons/vue/24/outline'
 
 defineEmits<{
   'navigate-to-recommendations': []
@@ -64,54 +83,147 @@ defineEmits<{
 
 <style scoped>
 .features-section {
-  margin-bottom: 4rem;
-  background: rgba(255, 255, 255, 0.05);
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+/* Explore Plants Section */
+.explore-section {
+  background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(15px);
-  border-radius: 20px;
+  border-radius: 24px;
   padding: 3rem 2rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.features-title {
+.section-title {
   font-size: 2.5rem;
   font-weight: 700;
   color: white;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+  text-align: center;
 }
 
-.features-subtitle {
+.section-subtitle {
   font-size: 1.1rem;
   color: rgba(255, 255, 255, 0.9);
   margin-bottom: 2.5rem;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  margin-top: 2rem;
-}
-
-.feature-card {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
-  padding: 2rem;
   text-align: center;
-  backdrop-filter: blur(10px);
+}
+
+.explore-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.category-card {
+  position: relative;
+  height: 200px;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.category-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.category-content {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 2rem;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6));
+}
+
+.category-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.category-btn {
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.feature-card:hover {
-  transform: translateY(-5px);
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(52, 211, 153, 0.3);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+.category-btn:hover {
+  background: white;
+  color: #111827;
+  transform: translateY(-2px);
 }
 
-.feature-icon {
+.category-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.3s ease;
+}
+
+.flowers-card .category-background {
+  background-image: url('/Flower.jpg');
+}
+
+.vegetables-card .category-background {
+  background-image: url('/Vegetable.jpg');
+}
+
+.herbs-card .category-background {
+  background-image: url('/Herb.jpg');
+}
+
+.category-card:hover .category-background {
+  transform: scale(1.1);
+}
+
+/* Smart Recommendations Section */
+.recommendations-section {
+  background: rgba(52, 211, 153, 0.1);
+  backdrop-filter: blur(15px);
+  border-radius: 24px;
+  padding: 2.5rem;
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.recommendations-content {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex: 1;
+}
+
+.recommendations-icon {
   width: 80px;
   height: 80px;
   border-radius: 50%;
@@ -119,11 +231,120 @@ defineEmits<{
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 1.5rem;
+  flex-shrink: 0;
 }
 
-.feature-icon-blue {
+.recommendations-text {
+  flex: 1;
+}
+
+.recommendations-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 0.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.recommendations-description {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.recommendations-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 2px solid white;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.recommendations-btn:hover {
+  background: white;
+  color: #111827;
+  transform: translateY(-2px);
+}
+
+/* Track Your Impact Section */
+.impact-section {
+  background: rgba(59, 130, 246, 0.1);
+  backdrop-filter: blur(15px);
+  border-radius: 24px;
+  padding: 2.5rem;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.impact-content {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex: 1;
+}
+
+.impact-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
   background: linear-gradient(135deg, #60a5fa, #3b82f6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.impact-text {
+  flex: 1;
+}
+
+.impact-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 0.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.impact-description {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.impact-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 2px solid white;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.impact-btn:hover {
+  background: white;
+  color: #111827;
+  transform: translateY(-2px);
 }
 
 .icon {
@@ -133,64 +354,60 @@ defineEmits<{
   stroke-width: 1.5;
 }
 
-.feature-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: white;
-  margin-bottom: 1rem;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
-}
-
-.feature-description {
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.8);
-  line-height: 1.6;
-  margin-bottom: 1.5rem;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
-}
-
-.feature-btn {
-  background: transparent;
-  color: white;
-  border: 1px solid white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.feature-btn:hover {
-  background: white;
-  color: #111827;
-  transform: translateY(-2px);
-}
-
 .btn-arrow {
   width: 16px;
   height: 16px;
   stroke-width: 2;
 }
 
+@media (max-width: 1024px) {
+  .recommendations-section,
+  .impact-section {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .recommendations-content,
+  .impact-content {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
 @media (max-width: 768px) {
-  .features-grid {
+  .explore-grid {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 1rem;
   }
 
-  .features-title {
+  .section-title {
     font-size: 2rem;
   }
 
-  .feature-card {
+  .category-card {
+    height: 160px;
+  }
+
+  .category-content {
     padding: 1.5rem;
   }
 
-  .feature-icon {
+  .category-title {
+    font-size: 1.5rem;
+  }
+
+  .recommendations-section,
+  .impact-section {
+    padding: 2rem;
+  }
+
+  .recommendations-title,
+  .impact-title {
+    font-size: 1.5rem;
+  }
+
+  .recommendations-icon,
+  .impact-icon {
     width: 60px;
     height: 60px;
   }
