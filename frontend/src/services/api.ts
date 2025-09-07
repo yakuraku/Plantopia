@@ -1,10 +1,14 @@
 // API service for Plantopia Recommendation Engine
 // Handles all communication with the backend recommendation API
 
-// Base configuration
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
+// Base configuration with fallback URLs
+const PRIMARY_API_URL = process.env.NODE_ENV === 'production' 
   ? '/api' // Vercel serverless functions - no trailing slash to avoid double slash
   : 'http://localhost:8000' // Development
+
+const FALLBACK_API_URL = process.env.NODE_ENV === 'production'
+  ? '/api' // Same in production
+  : 'http://127.0.0.1:8000' // Fallback for development
 
 // API Response interfaces matching the backend structure
 export interface ApiPlantRecommendation {
@@ -213,19 +217,57 @@ export interface Plant {
 
 // API Service class
 export class PlantRecommendationService {
-  private baseUrl: string
+  private primaryUrl: string
+  private fallbackUrl: string
+  private currentBaseUrl: string
 
-  constructor(baseUrl: string = API_BASE_URL) {
-    this.baseUrl = baseUrl
+  constructor(primaryUrl: string = PRIMARY_API_URL, fallbackUrl: string = FALLBACK_API_URL) {
+    this.primaryUrl = primaryUrl
+    this.fallbackUrl = fallbackUrl
+    this.currentBaseUrl = primaryUrl
+  }
+
+  // Helper method to try API call with fallback
+  private async fetchWithFallback(endpoint: string, options?: RequestInit): Promise<Response> {
+    console.log(`[API] Attempting to connect to ${this.currentBaseUrl}${endpoint}`)
+    
+    try {
+      const response = await fetch(`${this.currentBaseUrl}${endpoint}`, options)
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      }
+      console.log(`[API] Successfully connected to ${this.currentBaseUrl}`)
+      return response
+    } catch (error) {
+      console.warn(`[API] Failed to connect to ${this.currentBaseUrl}:`, error)
+      
+      // If we're not already using fallback, try fallback URL
+      if (this.currentBaseUrl !== this.fallbackUrl && process.env.NODE_ENV !== 'production') {
+        console.log(`[API] Switching to fallback URL: ${this.fallbackUrl}`)
+        this.currentBaseUrl = this.fallbackUrl
+        
+        try {
+          const fallbackResponse = await fetch(`${this.currentBaseUrl}${endpoint}`, options)
+          if (!fallbackResponse.ok) {
+            throw new Error(`HTTP ${fallbackResponse.status}: ${fallbackResponse.statusText}`)
+          }
+          console.log(`[API] Successfully connected to fallback URL ${this.currentBaseUrl}`)
+          return fallbackResponse
+        } catch (fallbackError) {
+          console.error(`[API] Fallback URL also failed:`, fallbackError)
+          this.currentBaseUrl = this.primaryUrl // Reset to primary for next attempt
+          throw new Error(`Both primary (${this.primaryUrl}) and fallback (${this.fallbackUrl}) URLs failed`)
+        }
+      } else {
+        throw error
+      }
+    }
   }
 
   // Health check endpoint
   async healthCheck(): Promise<{ message: string }> {
     try {
-      const response = await fetch(`${this.baseUrl}/`)
-      if (!response.ok) {
-        throw new Error(`Health check failed: ${response.status}`)
-      }
+      const response = await this.fetchWithFallback('/')
       return await response.json()
     } catch (error) {
       console.error('Health check failed:', error)
@@ -237,19 +279,14 @@ export class PlantRecommendationService {
   async getAllPlants(): Promise<ApiAllPlantsResponse> {
     try {
       console.group('[PLANTS API] Get All Plants Request')
-      console.log('[REQUEST] URL:', `${this.baseUrl}/plants`)
+      console.log('[REQUEST] URL:', `${this.currentBaseUrl}/plants`)
       console.log('[REQUEST] Method:', 'GET')
 
-      const response = await fetch(`${this.baseUrl}/plants`)
+      const response = await this.fetchWithFallback('/plants')
 
       console.log('[RESPONSE] Status:', response.status)
       console.log('[RESPONSE] Status Text:', response.statusText)
 
-      if (!response.ok) {
-        console.error('[ERROR] API Request Failed:', response.status, response.statusText)
-        console.groupEnd()
-        throw new Error(`API request failed: ${response.status} ${response.statusText}`)
-      }
 
       const responseData = await response.json()
       console.log('[RESPONSE] Data:', responseData)
@@ -271,7 +308,7 @@ export class PlantRecommendationService {
   async getRecommendations(request: ApiRecommendationRequest): Promise<ApiRecommendationResponse> {
     try {
       console.group('[PLANT API] Request Debug')
-      console.log('[REQUEST] URL:', `${this.baseUrl}/recommendations`)
+      console.log('[REQUEST] URL:', `${this.currentBaseUrl}/recommendations`)
       console.log('[REQUEST] Method:', 'POST')
       console.log('[REQUEST] Headers:', {
         'Content-Type': 'application/json',
@@ -280,7 +317,7 @@ export class PlantRecommendationService {
       console.log('[REQUEST] Raw Object:', request)
       console.groupEnd()
 
-      const response = await fetch(`${this.baseUrl}/recommendations`, {
+      const response = await this.fetchWithFallback('/recommendations', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -295,13 +332,6 @@ export class PlantRecommendationService {
 
       const responseData = await response.json()
       console.log('[RESPONSE] Data:', responseData)
-      
-      if (!response.ok) {
-        console.error('[ERROR] API Request Failed:', response.status, response.statusText)
-        console.error('[ERROR] Response Body:', JSON.stringify(responseData, null, 2))
-        console.groupEnd()
-        throw new Error(`API request failed: ${response.status} ${response.statusText}`)
-      }
 
       console.log('[RESPONSE] Number of recommendations:', responseData.recommendations?.length || 0)
       console.log('[RESPONSE] Suburb detected:', responseData.suburb)
@@ -332,10 +362,10 @@ export class PlantRecommendationService {
         id: `${apiPlant.plant_name.replace(/\s+/g, '_').toLowerCase()}_${index}`,
         name: apiPlant.plant_name,
         scientific_name: apiPlant.scientific_name,
-        description: this.processPlantDescription(apiPlant.description, apiPlant.plant_name, apiPlant.scientific_name),
+        description: apiPlant.description || 'No description available.',
         category: apiPlant.plant_category,
         plant_type: apiPlant.plant_type,
-        additional_information: this.processPlantDescription(apiPlant.additional_information, apiPlant.plant_name, apiPlant.scientific_name),
+        additional_information: apiPlant.additional_information || '',
         days_to_maturity: apiPlant.days_to_maturity,
         plant_spacing: apiPlant.plant_spacing,
         sowing_depth: apiPlant.sowing_depth,
@@ -387,7 +417,7 @@ export class PlantRecommendationService {
         id: `${apiPlant.plant_name.replace(/\s+/g, '_').toLowerCase()}_${index}`,
         name: apiPlant.plant_name,
         scientific_name: apiPlant.scientific_name,
-        description: this.processPlantDescription(apiPlant.description, apiPlant.plant_name, apiPlant.scientific_name),
+        description: apiPlant.description || 'No description available.',
         category: apiPlant.plant_category as 'vegetable' | 'herb' | 'flower',
         days_to_maturity: apiPlant.fit.time_to_maturity_days,
         image_url: this.getImageUrl(apiPlant),
@@ -750,35 +780,6 @@ export class PlantRecommendationService {
     return fallbackImages[category.toLowerCase()] || '/placeholder-plant.svg'
   }
 
-  private processPlantDescription(description: string | undefined, actualPlantName: string, actualScientificName: string): string {
-    if (!description) {
-      return 'No description available.'
-    }
-
-    let processedDescription = description
-
-    // Handle \1 placeholders first
-    processedDescription = processedDescription.replace(/\\1/g, `${actualPlantName} (${actualScientificName})`)
-
-    // Clean up any leading periods or spaces first
-    processedDescription = processedDescription.replace(/^\s*\.\s*/, '').trim()
-
-    // Handle markdown format with potentially wrong plant names
-    // Pattern 1: **Wrong Name** (*Scientific*) or **Wrong Name** (description)
-    const markdownPatternWithParens = /\*\*([^*]+)\*\*\s*\([^)]*\)/g
-    processedDescription = processedDescription.replace(markdownPatternWithParens, `**${actualPlantName}** (*${actualScientificName}*)`)
-    
-    // Pattern 2: **Wrong Name**: (description)
-    const markdownPatternWithColon = /\*\*([^*]+)\*\*\s*:/g
-    processedDescription = processedDescription.replace(markdownPatternWithColon, `**${actualPlantName}**:`)
-
-    // Clean up any duplicate names that might occur from replacements
-    // Pattern to match: Name (Scientific) (Name (Scientific))
-    const duplicateNamePattern = new RegExp(`${actualPlantName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\([^)]*\\)\\s*\\(${actualPlantName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\([^)]*\\)\\)`, 'g')
-    processedDescription = processedDescription.replace(duplicateNamePattern, `${actualPlantName} (${actualScientificName})`)
-
-    return processedDescription
-  }
 }
 
 // Create and export a singleton instance

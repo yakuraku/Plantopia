@@ -48,7 +48,7 @@
             <!-- Description Section -->
             <div class="info-card">
               <h3 class="card-title">Description:</h3>
-              <p class="card-content">{{ plant.description }}</p>
+              <div class="card-content plant-description" v-html="renderedDescription"></div>
               <div class="recommendation-reasons" v-if="plant.whyRecommended?.length">
                 <p v-for="reason in plant.whyRecommended" :key="reason" class="reason-item">
                   - {{ reason }}
@@ -216,11 +216,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { ArrowLeftIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
 import type { Plant } from '@/services/api'
 import { addToViewHistory } from '@/services/viewHistory'
 import ViewHistory from './ViewHistory.vue'
+import { renderMarkdown } from '@/services/markdownService'
 
 // Component props - receives plant data or null when modal is closed
 const props = defineProps<{
@@ -235,6 +236,14 @@ const emit = defineEmits<{
 
 // State for handling image loading errors
 const imageError = ref(false)
+
+// Markdown rendering computed property
+const renderedDescription = computed(() => {
+  if (!props.plant || !props.plant.description) {
+    return 'No description available.'
+  }
+  return renderMarkdown(props.plant.description)
+})
 
 // Reference to ViewHistory component
 const viewHistoryRef = ref<InstanceType<typeof ViewHistory> | null>(null)
@@ -286,10 +295,11 @@ const getImageUrl = (imagePath: string): string => {
   }
   
   // If it's a relative path, construct URL with backend base
-  const baseUrl = process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:8000'
+  const primaryUrl = process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:8000'
+  const fallbackUrl = process.env.NODE_ENV === 'production' ? '/api' : 'http://127.0.0.1:8000'
   
-  // Use the same logic as PlantCard - try /static/ first
-  const fullUrl = `${baseUrl}/static/${imagePath}`
+  // Try primary URL first, fallback URL if needed
+  const fullUrl = `${primaryUrl}/static/${imagePath}`
   return fullUrl
 }
 
