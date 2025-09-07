@@ -1,0 +1,82 @@
+/* Markdown rendering styles for plant descriptions */
+
+/* General markdown content styling */
+.plant-card-description strong,
+.card-content strong {
+  color: #2d5a3a;
+  font-weight: 700;
+}
+
+.plant-card-description em,
+.card-content em {
+  color: #4a5a4a;
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* Ensure markdown content flows well */
+.plant-card-description p,
+.card-content p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Description in detail modal */
+.description strong {
+  color: #2d5a3a;
+  font-weight: 700;
+}
+
+.description em {
+  color: #4a5a4a;
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* Specific styling for plant cards */
+.plant-card-description {
+  color: #1c3d21 !important;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.plant-card-description strong {
+  color: #2d5a3a !important;
+}
+
+.plant-card-description em {
+  color: #4a5a4a !important;
+}
+
+/* Plant detail info styling */
+.plant-detail-info .description div {
+  color: #1c3d21;
+  line-height: 1.6;
+}
+
+.plant-detail-info .description strong {
+  color: #2d5a3a;
+  font-weight: 700;
+}
+
+.plant-detail-info .description em {
+  color: #4a5a4a;
+  font-style: italic;
+}
+
+/* Modal content styling */
+.info-card .card-content {
+  color: #1c3d21;
+  line-height: 1.6;
+}
+
+.info-card .card-content strong {
+  color: #2d5a3a;
+  font-weight: 700;
+}
+
+.info-card .card-content em {
+  color: #4a5a4a;
+  font-style: italic;
+}

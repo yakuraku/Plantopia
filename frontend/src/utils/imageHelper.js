@@ -3,10 +3,17 @@
  * Handles secure image URLs via backend API calls
  */
 
-// API base URL configuration  
-const API_BASE_URL = import.meta.env.MODE === 'production' 
+// API base URL configuration with fallback
+const PRIMARY_API_URL = import.meta.env.MODE === 'production' 
   ? '/api'  // Vercel serverless functions
   : 'http://localhost:8000';  // Local development
+
+const FALLBACK_API_URL = import.meta.env.MODE === 'production'
+  ? '/api'  // Same in production
+  : 'http://127.0.0.1:8000';  // Fallback for local development
+
+// Current API URL (will switch to fallback if needed)
+let currentApiUrl = PRIMARY_API_URL;
 
 // Alternative category mappings (handle different naming conventions)
 const CATEGORY_MAPPING = {
@@ -44,8 +51,17 @@ export const getPlantImageUrl = async (category, imageName = null) => {
   }
   
   try {
-    // Fetch images for category from backend
-    const response = await fetch(`${API_BASE_URL}/images/${normalizedCategory}`);
+    // Fetch images for category from backend with fallback
+    let response;
+    try {
+      response = await fetch(`${currentApiUrl}/images/${normalizedCategory}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    } catch (error) {
+      console.warn(`[IMAGE HELPER] Primary URL failed, trying fallback...`);
+      currentApiUrl = FALLBACK_API_URL;
+      response = await fetch(`${currentApiUrl}/images/${normalizedCategory}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    }
     const data = await response.json();
     
     if (data.images && data.images.length > 0) {
@@ -88,7 +104,16 @@ export const getCategoryImages = async (category) => {
   }
   
   try {
-    const response = await fetch(`${API_BASE_URL}/images/${normalizedCategory}`);
+    let response;
+    try {
+      response = await fetch(`${currentApiUrl}/images/${normalizedCategory}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    } catch (error) {
+      console.warn(`[IMAGE HELPER] Primary URL failed, trying fallback...`);
+      currentApiUrl = FALLBACK_API_URL;
+      response = await fetch(`${currentApiUrl}/images/${normalizedCategory}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    }
     const data = await response.json();
     return data.images || [];
   } catch (error) {

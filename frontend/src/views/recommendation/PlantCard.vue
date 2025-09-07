@@ -29,7 +29,7 @@
       </div>
       
       <!-- Plant Description -->
-      <p class="plant-card-description">{{ plant.description }}</p>
+      <div class="plant-card-description" v-html="renderedDescription"></div>
 
       <!-- Plant Care Requirements -->
       <div class="plant-card-requirements">
@@ -67,8 +67,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import type { Plant } from '@/services/api'
+import { renderMarkdownInline } from '@/services/markdownService'
 
 // Component props - receives plant data
 const props = defineProps<{
@@ -85,6 +86,14 @@ const imageError = ref(false)
 const currentImageUrl = ref('')
 const urlIndex = ref(0)
 const allPossibleUrls = ref<string[]>([])
+
+// Markdown rendering computed property
+const renderedDescription = computed(() => {
+  if (!props.plant.description) {
+    return 'No description available.'
+  }
+  return renderMarkdownInline(props.plant.description)
+})
 
 // Function to get image source with Victoria Plants Data priority
 const getImageSource = (): string => {
@@ -190,17 +199,25 @@ const getImageUrl = (imagePath: string): string => {
     return imagePath
   }
   
-  // Base URL for your backend
-  const baseUrl = process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:8000'
+  // Base URL for your backend with fallback
+  const primaryUrl = process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:8000'
+  const fallbackUrl = process.env.NODE_ENV === 'production' ? '/api' : 'http://127.0.0.1:8000'
   
   // For separated frontend/backend projects, we need API endpoints
   const possibleUrls = [
-    `${baseUrl}/api/plant-image/${encodeURIComponent(imagePath)}`,
-    `${baseUrl}/api/plant-image?path=${encodeURIComponent(imagePath)}`,
-    `${baseUrl}/api/images/${encodeURIComponent(imagePath)}`,
-    `${baseUrl}/image/${encodeURIComponent(imagePath)}`,
-    `${baseUrl}/static/${imagePath}`,           
-    `${baseUrl}/media/${imagePath}`,            
+    `${primaryUrl}/api/plant-image/${encodeURIComponent(imagePath)}`,
+    `${primaryUrl}/api/plant-image?path=${encodeURIComponent(imagePath)}`,
+    `${primaryUrl}/api/images/${encodeURIComponent(imagePath)}`,
+    `${primaryUrl}/image/${encodeURIComponent(imagePath)}`,
+    `${primaryUrl}/static/${imagePath}`,           
+    `${primaryUrl}/media/${imagePath}`,
+    // Fallback URLs
+    `${fallbackUrl}/api/plant-image/${encodeURIComponent(imagePath)}`,
+    `${fallbackUrl}/api/plant-image?path=${encodeURIComponent(imagePath)}`,
+    `${fallbackUrl}/api/images/${encodeURIComponent(imagePath)}`,
+    `${fallbackUrl}/image/${encodeURIComponent(imagePath)}`,
+    `${fallbackUrl}/static/${imagePath}`,           
+    `${fallbackUrl}/media/${imagePath}`,            
   ]
   
   // Store all possible URLs for fallback

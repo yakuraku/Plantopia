@@ -1,4 +1,4 @@
-<template>
+画<template>
   <!--
     Plants Page
     Display all available plants in the system
@@ -221,7 +221,7 @@
             <p class="scientific-name">{{ selectedPlant.scientific_name }}</p>
             <div class="description">
               <h4>Description</h4>
-              <p>{{ selectedPlant.description || 'No description available.' }}</p>
+              <div class="plant-description" v-html="renderedDescription"></div>
             </div>
             <div class="plant-type" v-if="selectedPlant.plant_type">
               <h4>Plant Type</h4>
@@ -338,6 +338,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { plantApiService, type Plant } from '@/services/api'
 import { getPlantImageUrl, handleImageError as handleImageErrorHelper } from '@/utils/imageHelper'
+import { renderMarkdown } from '@/services/markdownService'
 
 // Reactive state
 const plants = ref<Plant[]>([])
@@ -379,6 +380,14 @@ const filteredPlants = computed(() => {
 // Pagination computed properties
 const totalPlants = computed(() => filteredPlants.value.length)
 const totalPages = computed(() => Math.ceil(totalPlants.value / plantsPerPage))
+
+// Markdown rendering computed property
+const renderedDescription = computed(() => {
+  if (!selectedPlant.value || !selectedPlant.value.description) {
+    return 'No description available.'
+  }
+  return renderMarkdown(selectedPlant.value.description)
+})
 
 const paginatedPlants = computed(() => {
   const start = (currentPage.value - 1) * plantsPerPage
