@@ -80,8 +80,8 @@ const getImageUrl = (imagePath: string): string => {
   }
   
   // Otherwise, construct URL relative to API base
-  const baseUrl = process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:8000'
-  return `${baseUrl}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`
+  const primaryUrl = process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:8000'
+  return `${primaryUrl}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`
 }
 
 // Handle image loading errors

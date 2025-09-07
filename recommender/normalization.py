@@ -3,14 +3,10 @@ import os
 from typing import List, Dict, Any, Optional
 
 def clean_text(s: str) -> str:
-    """Clean text by removing markdown markers and extra whitespace."""
+    """Clean text by preserving markdown markers and removing only extra whitespace."""
     if not isinstance(s, str):
         return ""
-    # Remove markdown **bold** markers
-    s = re.sub(r'\*\*(.*?)\*\*', r'\\1', s)
-    # Remove other markdown markers if needed
-    s = re.sub(r'\*(.*?)\*', r'\\1', s)
-    # Strip whitespace
+    # Keep markdown markers intact, only strip whitespace
     s = s.strip()
     return s
 
