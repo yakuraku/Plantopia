@@ -336,6 +336,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { plantApiService, type Plant } from '@/services/api'
 import { getPlantImageUrl, handleImageError as handleImageErrorHelper } from '@/utils/imageHelper'
 import { renderMarkdown } from '@/services/markdownService'
@@ -471,6 +472,8 @@ const setCategory = (category: 'all' | 'vegetable' | 'herb' | 'flower') => {
   selectedCategory.value = category
   // Reset to first page when changing category
   currentPage.value = 1
+  // Keep user at top when switching via navigation
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 // Pagination methods
@@ -547,7 +550,7 @@ const handleImageError = (event: Event, plantId: string) => {
 
   // Track this plant as having image error
   imageErrors.value.add(plantId)
-  
+
   // Try to find the plant and get its category for fallback
   const plant = plants.value.find(p => p.id === plantId)
   const category = plant?.category
@@ -591,6 +594,13 @@ const capitalizeFirst = (str: string): string => {
 
 // Lifecycle
 onMounted(() => {
+  // if navigated with ?category=vegetables|herbs|flowers, map to internal keys
+  const route = useRoute()
+  const q = String(route.query.category || '').toLowerCase()
+  if (q === 'vegetables') selectedCategory.value = 'vegetable'
+  else if (q === 'herbs') selectedCategory.value = 'herb'
+  else if (q === 'flowers') selectedCategory.value = 'flower'
+
   loadPlants()
 })
 </script>

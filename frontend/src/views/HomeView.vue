@@ -1,5 +1,5 @@
 <template>
-  <div 
+  <div
     class="home"
     :class="{ 'highlight-left': isLeftActive, 'highlight-right': isRightActive, 'heat-hovered': isHeatHovered }"
     @mousemove="handleMouseMove"
@@ -24,7 +24,7 @@
 
     <!-- Hero Section -->
     <Transition name="fade-in" appear>
-      <HeroSection 
+      <HeroSection
         v-show="showContent"
         @navigate-to-recommendations="goToRecommendations"
         @navigate-to-guides="goToGuides"
@@ -38,10 +38,11 @@
       <div v-show="showContent" class="content-section">
         <div class="home-container">
           <!-- Features Section -->
-          <FeaturesSection 
+          <FeaturesSection
             @navigate-to-recommendations="goToRecommendations"
             @navigate-to-dashboard="goToDashboard"
             @navigate-to-journey="goToJourney"
+            @navigate-to-plants="goToPlants"
           />
         </div>
       </div>
@@ -72,11 +73,11 @@ const showContent = ref(false) // Control content display animation state
 const handleMouseMove = (event: MouseEvent) => {
   // Only handle when interaction is enabled
   if (!isInteractionEnabled.value) return
-  
+
   const { clientX, clientY, currentTarget } = event
   const { offsetWidth } = currentTarget as HTMLElement
   const halfWidth = offsetWidth / 2
-  
+
   // Only trigger interaction effects when mouse is in the bottom 70% of the screen
   // This ensures the dividing effect only occurs below the button area
   const windowHeight = window.innerHeight
@@ -102,7 +103,7 @@ const handleMouseMove = (event: MouseEvent) => {
 const handleScroll = () => {
   const scrollTop = window.scrollY
   const windowHeight = window.innerHeight
-  
+
   // When scroll distance exceeds 10% of viewport height, start disabling interaction effects
   // This way interaction effects disappear as soon as user starts scrolling
   if (scrollTop > windowHeight * 0.1) {
@@ -118,6 +119,13 @@ const handleScroll = () => {
 
 const goToRecommendations = () => {
   router.push('/recommendations')
+}
+
+const goToPlants = (category: 'flowers' | 'vegetables' | 'herbs') => {
+  // Pass category as query or path segment depending on your PlantsView routing
+  router.push({ path: '/plants', query: { category } })
+  // Ensure landing at top of the Plants page
+  setTimeout(() => window.scrollTo({ top: 0, behavior: 'auto' }), 0)
 }
 
 const goToGuides = () => {
@@ -155,10 +163,10 @@ onMounted(() => {
   setTimeout(() => {
     showContent.value = true
   }, 1000)
-  
+
   // Add scroll listener
   window.addEventListener('scroll', handleScroll)
-  
+
   const observerOptions = {
     threshold: 0.1,
     rootMargin: '0px 0px -50px 0px',

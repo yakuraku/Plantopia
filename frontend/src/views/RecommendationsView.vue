@@ -9,20 +9,24 @@
     <div class="container-fluid bg-transparent">
       <!-- Top Search Bar - Full Width (unchanged) -->
       <div class="top-search-section">
-        <div class="container-xl">
-          <SearchForm @find-plants="handleFindPlants" />
+        <div class="container-xl top-inline">
+          <div class="scale-root"><div class="scale-inner">
+            <SearchForm @find-plants="handleFindPlants" />
+          </div></div>
+          <div class="filter-col">
+            <FilterSidebar
+              :filters="filterData"
+              @update-filters="handleUpdateFilters"
+            />
+          </div>
         </div>
       </div>
 
       <!-- Content section with left filter and right results -->
       <div class="content-section">
+        <div class="scale-root"><div class="scale-inner results-shift">
         <div class="content-layout">
-          <aside class="filters-column">
-            <FilterSidebar
-              :filters="filterData"
-              @update-filters="handleUpdateFilters"
-            />
-          </aside>
+          <aside class="filters-column"></aside>
           <section class="results-column">
             <div class="container-xl">
               <div class="content-panel">
@@ -64,6 +68,7 @@
             </div>
           </section>
         </div>
+        </div></div>
       </div>
 
       <!-- Plant Detail Modal - shows detailed plant information when plant is selected -->
@@ -222,6 +227,25 @@ const handleUpdateFilters = (filters: typeof filterData.value) => {
 </script>
 
 <style scoped>
+/* Proportional scale wrapper (keeps layout, scales to 90%) */
+.scale-root {
+  width: 100%;
+}
+
+.scale-inner {
+  --rec-scale: 0.9;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%) scale(var(--rec-scale));
+  transform-origin: top left;
+  width: 100%;
+}
+
+/* Slightly shift results area to the right after scaling */
+.results-shift {
+  transform: translateX(calc(-50% + 25px)) scale(var(--rec-scale));
+}
+
 /* Background and Page Setup */
 .recommendations-page {
   min-height: 100vh;
@@ -274,6 +298,8 @@ const handleUpdateFilters = (filters: typeof filterData.value) => {
   pointer-events: none;
 }
 
+/* (Reverted) removed global scale-down rules */
+
 /* Top Search Section - Full Width (unchanged) */
 .top-search-section {
   background: transparent;
@@ -299,6 +325,46 @@ const handleUpdateFilters = (filters: typeof filterData.value) => {
   backdrop-filter: none;
   z-index: -1;
   pointer-events: none; /* ensure clicks pass through to form controls */
+}
+
+/* Inline filter next to search without affecting search width */
+.top-inline {
+  position: relative;
+}
+
+.filter-col {
+  position: absolute;
+  top: 1.2rem;
+  right: -100px; /* move filter slightly left (reduce negative right) */
+  z-index: 3;
+}
+
+/* Prevent clipping around ~1940px: pull filter slightly inward */
+
+
+@media (max-width: 1870px) {
+  .filter-col { right: -100px; top: 1.8rem; }
+}
+
+/* Responsive adjustments for filter button position */
+@media (max-width: 1600px) {
+  .filter-col { right: -100px; top: 1.9rem; }
+}
+@media (max-width: 1440px) {
+  .filter-col { right: -100px; top: 1.9rem; }
+}
+@media (max-width: 1320px) {
+  .filter-col { right: -100px; top: 1.9rem; }
+}
+@media (max-width: 1200px) {
+  .filter-col {
+    position: static;
+    margin-top: 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
 }
 
 /* Filter section placed below the top search area */
@@ -368,6 +434,10 @@ const handleUpdateFilters = (filters: typeof filterData.value) => {
   100% { transform: rotate(360deg); }
 }
 
+.loading-state p {
+  color: #ffffff;
+}
+
 /* Plant Results Grid */
 .plant-results {
   padding: 1rem 0;
@@ -378,12 +448,17 @@ const handleUpdateFilters = (filters: typeof filterData.value) => {
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
   margin-top: 1rem;
-  margin-left: -9em;
+  margin-left: 0;
   justify-content: start;
   justify-items: start;
   /* Match search form width */
   max-width: calc(100vw - 280px - 3rem); /* Account for filter width and gaps */
   width: 100%;
+}
+
+/* Nudge only the second row of cards slightly to the right on wide screens (3 cols) */
+.plant-grid > *:nth-child(n+4) {
+  transform: translateX(225px);
 }
 
 /* Custom Alert Styles */
@@ -402,21 +477,21 @@ const handleUpdateFilters = (filters: typeof filterData.value) => {
 /* Responsive Adjustments - Very conservative to prevent overlap */
 @media (max-width: 2000px) {
   .plant-grid {
-    margin-left: -6em; /* Start reducing much earlier */
+    margin-left: 0; /* Align to container */
     max-width: calc(100vw - 280px - 2rem);
   }
 }
 
 @media (max-width: 1800px) {
   .plant-grid {
-    margin-left: -2em; /* More conservative */
+    margin-left: 0; /* Align to container */
     max-width: calc(100vw - 280px - 2rem);
   }
 }
 
 @media (max-width: 1700px) {
   .plant-grid {
-    margin-left: -1em; /* Very minimal margin */
+    margin-left: 0; /* Align to container */
     max-width: calc(100vw - 280px - 2rem);
   }
 }
@@ -454,6 +529,10 @@ const handleUpdateFilters = (filters: typeof filterData.value) => {
     margin-left: 0; /* Keep safe */
     max-width: 100%;
     grid-template-columns: repeat(2, 1fr); /* 2 columns on medium screens */
+  }
+  /* When 2 columns, the second row starts from the 3rd item */
+  .plant-grid > *:nth-child(n+3) {
+    transform: translateX(12px);
   }
 }
 
@@ -504,6 +583,12 @@ const handleUpdateFilters = (filters: typeof filterData.value) => {
     position: static;
     order: -1; /* Show filters above results */
   }
+
+  /* Keep filter flowing normally on small screens */
+  .filter-col {
+    position: static;
+    margin-top: 0.5rem;
+  }
 }
 
 @media (max-width: 767.98px) {
@@ -522,6 +607,16 @@ const handleUpdateFilters = (filters: typeof filterData.value) => {
   /* Extra small devices */
   .content-panel {
     padding: 0.75rem;
+  }
+}
+
+/* Remove left placeholder column on wide screens so results can align left */
+@media (min-width: 1025px) {
+  .content-layout {
+    grid-template-columns: 1fr;
+  }
+  .filters-column {
+    display: none;
   }
 }
 </style>

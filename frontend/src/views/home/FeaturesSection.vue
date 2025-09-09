@@ -4,10 +4,10 @@
     <div class="explore-section">
       <h2 class="section-title">Explore Plants</h2>
       <p class="section-subtitle">Discover your most interest plants</p>
-      
+
       <div class="explore-grid">
         <!-- Flowers Card -->
-        <div class="category-card flowers-card" @click="$emit('navigate-to-recommendations')">
+        <div class="category-card flowers-card" @click="$emit('navigate-to-plants', 'flowers')">
           <div class="category-content">
             <h3 class="category-title">Flowers</h3>
             <button class="category-btn">Explore Plants</button>
@@ -16,7 +16,7 @@
         </div>
 
         <!-- Vegetables Card -->
-        <div class="category-card vegetables-card" @click="$emit('navigate-to-recommendations')">
+        <div class="category-card vegetables-card" @click="$emit('navigate-to-plants', 'vegetables')">
           <div class="category-content">
             <h3 class="category-title">Vegetables</h3>
             <button class="category-btn">Explore Plants</button>
@@ -25,7 +25,7 @@
         </div>
 
         <!-- Herbs Card -->
-        <div class="category-card herbs-card" @click="$emit('navigate-to-recommendations')">
+        <div class="category-card herbs-card" @click="$emit('navigate-to-plants', 'herbs')">
           <div class="category-content">
             <h3 class="category-title">Herbs</h3>
             <button class="category-btn">Explore Plants</button>
@@ -78,6 +78,7 @@ defineEmits<{
   'navigate-to-recommendations': []
   'navigate-to-dashboard': []
   'navigate-to-journey': []
+  'navigate-to-plants': [category: 'flowers' | 'vegetables' | 'herbs']
 }>()
 </script>
 
@@ -366,7 +367,7 @@ defineEmits<{
     flex-direction: column;
     text-align: center;
   }
-  
+
   .recommendations-content,
   .impact-content {
     flex-direction: column;
