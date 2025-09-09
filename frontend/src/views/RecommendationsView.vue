@@ -9,20 +9,21 @@
     <div class="container-fluid bg-transparent">
       <!-- Top Search Bar - Full Width (unchanged) -->
       <div class="top-search-section">
-        <div class="container-xl">
+        <div class="container-xl top-inline">
           <SearchForm @find-plants="handleFindPlants" />
+          <div class="filter-col">
+            <FilterSidebar
+              :filters="filterData"
+              @update-filters="handleUpdateFilters"
+            />
+          </div>
         </div>
       </div>
 
       <!-- Content section with left filter and right results -->
       <div class="content-section">
         <div class="content-layout">
-          <aside class="filters-column">
-            <FilterSidebar
-              :filters="filterData"
-              @update-filters="handleUpdateFilters"
-            />
-          </aside>
+          <aside class="filters-column"></aside>
           <section class="results-column">
             <div class="container-xl">
               <div class="content-panel">
@@ -274,6 +275,8 @@ const handleUpdateFilters = (filters: typeof filterData.value) => {
   pointer-events: none;
 }
 
+/* (Reverted) removed global scale-down rules */
+
 /* Top Search Section - Full Width (unchanged) */
 .top-search-section {
   background: transparent;
@@ -299,6 +302,46 @@ const handleUpdateFilters = (filters: typeof filterData.value) => {
   backdrop-filter: none;
   z-index: -1;
   pointer-events: none; /* ensure clicks pass through to form controls */
+}
+
+/* Inline filter next to search without affecting search width */
+.top-inline {
+  position: relative;
+}
+
+.filter-col {
+  position: absolute;
+  top: 2.3rem;
+  right: -250px;
+  z-index: 3;
+}
+
+/* Prevent clipping around ~1940px: pull filter slightly inward */
+
+
+@media (max-width: 1870px) {
+  .filter-col { right: -240px; top: 2.9rem; }
+}
+
+/* Responsive adjustments for filter button position */
+@media (max-width: 1600px) {
+  .filter-col { right: -220px; top: 3rem; }
+}
+@media (max-width: 1440px) {
+  .filter-col { right: -160px; top: 3rem; }
+}
+@media (max-width: 1320px) {
+  .filter-col { right: -100px; top: 3rem; }
+}
+@media (max-width: 1200px) {
+  .filter-col {
+    position: static;
+    margin-top: 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
 }
 
 /* Filter section placed below the top search area */
@@ -368,6 +411,10 @@ const handleUpdateFilters = (filters: typeof filterData.value) => {
   100% { transform: rotate(360deg); }
 }
 
+.loading-state p {
+  color: #ffffff;
+}
+
 /* Plant Results Grid */
 .plant-results {
   padding: 1rem 0;
@@ -378,7 +425,7 @@ const handleUpdateFilters = (filters: typeof filterData.value) => {
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
   margin-top: 1rem;
-  margin-left: -9em;
+  margin-left: 0;
   justify-content: start;
   justify-items: start;
   /* Match search form width */
@@ -402,21 +449,21 @@ const handleUpdateFilters = (filters: typeof filterData.value) => {
 /* Responsive Adjustments - Very conservative to prevent overlap */
 @media (max-width: 2000px) {
   .plant-grid {
-    margin-left: -6em; /* Start reducing much earlier */
+    margin-left: 0; /* Align to container */
     max-width: calc(100vw - 280px - 2rem);
   }
 }
 
 @media (max-width: 1800px) {
   .plant-grid {
-    margin-left: -2em; /* More conservative */
+    margin-left: 0; /* Align to container */
     max-width: calc(100vw - 280px - 2rem);
   }
 }
 
 @media (max-width: 1700px) {
   .plant-grid {
-    margin-left: -1em; /* Very minimal margin */
+    margin-left: 0; /* Align to container */
     max-width: calc(100vw - 280px - 2rem);
   }
 }
@@ -504,6 +551,12 @@ const handleUpdateFilters = (filters: typeof filterData.value) => {
     position: static;
     order: -1; /* Show filters above results */
   }
+
+  /* Keep filter flowing normally on small screens */
+  .filter-col {
+    position: static;
+    margin-top: 0.5rem;
+  }
 }
 
 @media (max-width: 767.98px) {
@@ -522,6 +575,16 @@ const handleUpdateFilters = (filters: typeof filterData.value) => {
   /* Extra small devices */
   .content-panel {
     padding: 0.75rem;
+  }
+}
+
+/* Remove left placeholder column on wide screens so results can align left */
+@media (min-width: 1025px) {
+  .content-layout {
+    grid-template-columns: 1fr;
+  }
+  .filters-column {
+    display: none;
   }
 }
 </style>
