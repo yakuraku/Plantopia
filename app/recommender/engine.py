@@ -6,12 +6,13 @@ from typing import Dict, Any, List, Tuple
 from datetime import datetime
 from dateutil import tz
 from dateutil import parser as dtparser
-from recommender.normalization import normalize_dataframe
-from recommender.scoring import calculate_scores, goal_match
+from app.recommender.normalization import normalize_dataframe
+from app.recommender.scoring import calculate_scores, goal_match
 
 
 def _norm(s: str) -> str:
-    if not s:
+    # Handle NaN or non-string values from pandas
+    if not s or not isinstance(s, str):
         return ""
     s = s.lower().strip()
     s = re.sub(r"\*\*", "", s)            # strip markdown bold
@@ -297,7 +298,7 @@ def score_and_rank(candidates: List[Dict[str, Any]], user: Dict[str, Any],
         key=lambda x: (
             -round(x[0], 3),
             (x[1].get("time_to_maturity_days") or 10**9),
-            x[1].get("plant_name","").lower()
+            str(x[1].get("plant_name","")).lower()  # Convert to str to handle NaN
         )
     )
     
@@ -345,7 +346,10 @@ def assemble_output(top: List[Tuple[float, Dict[str, Any], Dict[str, float]]],
         season_label = "Start now" if month_now in sowing_months else "Plan ahead"
         
         # Normalize sowing method
-        sowing_method = plant.get("sowing_method", "").lower()
+        sowing_method = plant.get("sowing_method", "")
+        if not isinstance(sowing_method, str):
+            sowing_method = ""
+        sowing_method = sowing_method.lower()
         if "raise seedlings" in sowing_method:
             method_normalized = "raise_seedlings"
         elif "sow direct" in sowing_method:
@@ -368,16 +372,19 @@ def assemble_output(top: List[Tuple[float, Dict[str, Any], Dict[str, float]]],
                     else:
                         why_bullets.append(f"Ideal sowing time in {climate_zone} climate ({', '.join(sowing_months[:3])}).")
                 elif factor == "sun" and value >= 0.7:
-                    why_bullets.append(f"{plant['sun_need'].replace('_', ' ').title()} tolerant; matches your site conditions.")
+                    sun_need = plant.get('sun_need', 'part_sun')
+                    why_bullets.append(f"{sun_need.replace('_', ' ').title()} tolerant; matches your site conditions.")
                 elif factor == "maintainability" and value >= 0.7:
-                    maint_desc = "Hardy" if plant['maintainability_score'] >= 0.8 else "Moderate-care" if plant['maintainability_score'] >= 0.6 else "Special-care"
+                    maint_score = plant.get('maintainability_score', 0.5)
+                    maint_desc = "Hardy" if maint_score >= 0.8 else "Moderate-care" if maint_score >= 0.6 else "Special-care"
                     why_bullets.append(f"{maint_desc} plant; aligns with your maintenance preference.")
                 elif factor == "site_fit" and value > 0:
                     site_fits = []
                     if user.get("site", {}).get("containers") and plant.get("container_ok"):
                         site_fits.append("container-friendly")
-                    if plant.get("habit") in ["dwarf", "compact", "groundcover"]:
-                        site_fits.append(f"{plant['habit']} habit")
+                    habit = plant.get("habit", "")
+                    if habit in ["dwarf", "compact", "groundcover"]:
+                        site_fits.append(f"{habit} habit")
                     if site_fits:
                         why_bullets.append(f"{' and '.join(site_fits)} suit your space constraints.")
                 elif factor == "preferences" and value > 0:
@@ -386,9 +393,10 @@ def assemble_output(top: List[Tuple[float, Dict[str, Any], Dict[str, float]]],
                         pref_fits.append("edible")
                     if plant.get("fragrant") and user.get("preferences", {}).get("fragrant"):
                         pref_fits.append("fragrant")
-                    if plant.get("flower_colors") and set(plant["flower_colors"]).intersection(
+                    flower_colors = plant.get("flower_colors", [])
+                    if flower_colors and set(flower_colors).intersection(
                             set(user.get("preferences", {}).get("colors", []))):
-                        colors = set(plant["flower_colors"]).intersection(
+                        colors = set(flower_colors).intersection(
                             set(user.get("preferences", {}).get("colors", [])))
                         pref_fits.append(f"{', '.join(colors)} colored")
                     if pref_fits:

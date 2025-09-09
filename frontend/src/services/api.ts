@@ -267,7 +267,7 @@ export class PlantRecommendationService {
   // Health check endpoint
   async healthCheck(): Promise<{ message: string }> {
     try {
-      const response = await this.fetchWithFallback('/')
+      const response = await this.fetchWithFallback('/api/v1/')
       return await response.json()
     } catch (error) {
       console.error('Health check failed:', error)
@@ -279,10 +279,10 @@ export class PlantRecommendationService {
   async getAllPlants(): Promise<ApiAllPlantsResponse> {
     try {
       console.group('[PLANTS API] Get All Plants Request')
-      console.log('[REQUEST] URL:', `${this.currentBaseUrl}/plants`)
+      console.log('[REQUEST] URL:', `${this.currentBaseUrl}/api/v1/plants`)
       console.log('[REQUEST] Method:', 'GET')
 
-      const response = await this.fetchWithFallback('/plants')
+      const response = await this.fetchWithFallback('/api/v1/plants')
 
       console.log('[RESPONSE] Status:', response.status)
       console.log('[RESPONSE] Status Text:', response.statusText)
@@ -308,7 +308,7 @@ export class PlantRecommendationService {
   async getRecommendations(request: ApiRecommendationRequest): Promise<ApiRecommendationResponse> {
     try {
       console.group('[PLANT API] Request Debug')
-      console.log('[REQUEST] URL:', `${this.currentBaseUrl}/recommendations`)
+      console.log('[REQUEST] URL:', `${this.currentBaseUrl}/api/v1/recommendations`)
       console.log('[REQUEST] Method:', 'POST')
       console.log('[REQUEST] Headers:', {
         'Content-Type': 'application/json',
@@ -317,7 +317,7 @@ export class PlantRecommendationService {
       console.log('[REQUEST] Raw Object:', request)
       console.groupEnd()
 
-      const response = await this.fetchWithFallback('/recommendations', {
+      const response = await this.fetchWithFallback('/api/v1/recommendations', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

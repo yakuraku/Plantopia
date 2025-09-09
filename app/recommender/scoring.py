@@ -181,8 +181,16 @@ def eco_bonus_score(plant: Dict[str, Any]) -> float:
     bonus = 0.0
     
     keywords = ["beneficial insects", "pollinator"]
-    characteristics = plant.get("characteristics", "").lower()
-    description = plant.get("description", "").lower()
+    # Handle NaN or float values from pandas
+    characteristics = plant.get("characteristics", "")
+    if not isinstance(characteristics, str):
+        characteristics = ""
+    characteristics = characteristics.lower()
+    
+    description = plant.get("description", "")
+    if not isinstance(description, str):
+        description = ""
+    description = description.lower()
     
     text = characteristics + " " + description
     if any(keyword in text for keyword in keywords):

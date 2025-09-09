@@ -1,16 +1,18 @@
 import os
 import sys
 import json
-from recommender.engine import load_all_plants, select_environment, get_user_preferences, hard_filter, relax_if_needed, score_and_rank, assemble_output, category_diversity
-from recommender.scoring import weights
+import sys
+sys.path.append('../..')
+from app.recommender.engine import load_all_plants, select_environment, get_user_preferences, hard_filter, relax_if_needed, score_and_rank, assemble_output, category_diversity
+from app.recommender.scoring import weights
 
 def test_smoke():
     """Run a smoke test of the recommendation engine."""
     # Load plant data
     csv_paths = {
-        "flower": "flower_plants_data.csv",
-        "herb": "herbs_plants_data.csv",
-        "vegetable": "vegetable_plants_data.csv"
+        "flower": "../../data/csv/flower_plants_data.csv",
+        "herb": "../../data/csv/herbs_plants_data.csv",
+        "vegetable": "../../data/csv/vegetable_plants_data.csv"
     }
     
     try:
@@ -22,8 +24,8 @@ def test_smoke():
     
     # Load environment and user preferences
     try:
-        if os.path.exists("climate_data.json"):
-            with open("climate_data.json", 'r', encoding='utf-8') as f:
+        if os.path.exists("../../data/json/climate_data.json"):
+            with open("../../data/json/climate_data.json", 'r', encoding='utf-8') as f:
                 climate_data = json.load(f)
         else:
             climate_data = {}
