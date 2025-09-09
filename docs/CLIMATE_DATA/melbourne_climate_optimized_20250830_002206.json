@@ -1,0 +1,673 @@
+{
+  "Melbourne CBD": {
+    "suburb": "Melbourne CBD",
+    "timestamp": "2025-08-30T00:21:12.780756",
+    "location": {
+      "latitude": -37.8136,
+      "longitude": 144.9631
+    },
+    "data_sources": {
+      "weather": "Open-Meteo (primary)",
+      "air_quality": "WAQI (primary)",
+      "uv_index": "ARPANSA (primary)"
+    },
+    "uv_index": {
+      "value": 0.0,
+      "category": "Low",
+      "protection_required": false
+    },
+    "weather": {
+      "temperature": 8.2,
+      "apparent_temperature": 4.1,
+      "humidity": 89,
+      "pressure": 999.0,
+      "wind_speed": 21.9,
+      "wind_direction": 247,
+      "cloud_cover": 100,
+      "precipitation": 0.2
+    },
+    "air_quality": {
+      "aqi": 22,
+      "category": "Good",
+      "dominant_pollutant": "pm25",
+      "station": "Melbourne CBD",
+      "pollutants": {
+        "pm25": 22,
+        "pm10": 11,
+        "o3": 8,
+        "no2": 3.8,
+        "so2": 0.8,
+        "co": 1.5
+      }
+    }
+  },
+  "Carlton": {
+    "suburb": "Carlton",
+    "timestamp": "2025-08-30T00:21:15.996829",
+    "location": {
+      "latitude": -37.8001,
+      "longitude": 144.9674
+    },
+    "data_sources": {
+      "weather": "Open-Meteo (primary)",
+      "air_quality": "WAQI (primary)",
+      "uv_index": "ARPANSA (primary)"
+    },
+    "uv_index": {
+      "value": 0.0,
+      "category": "Low",
+      "protection_required": false
+    },
+    "weather": {
+      "temperature": 8.5,
+      "apparent_temperature": 5.1,
+      "humidity": 87,
+      "pressure": 998.5,
+      "wind_speed": 17.1,
+      "wind_direction": 262,
+      "cloud_cover": 100,
+      "precipitation": 0.2
+    },
+    "air_quality": {
+      "aqi": 22,
+      "category": "Good",
+      "dominant_pollutant": "pm25",
+      "station": "Melbourne CBD",
+      "pollutants": {
+        "pm25": 22,
+        "pm10": 11,
+        "o3": 8,
+        "no2": 3.8,
+        "so2": 0.8,
+        "co": 1.5
+      }
+    }
+  },
+  "Brunswick": {
+    "suburb": "Brunswick",
+    "timestamp": "2025-08-30T00:21:19.658832",
+    "location": {
+      "latitude": -37.7666,
+      "longitude": 144.9596
+    },
+    "data_sources": {
+      "weather": "Open-Meteo (primary)",
+      "air_quality": "WAQI (primary)",
+      "uv_index": "ARPANSA (primary)"
+    },
+    "uv_index": {
+      "value": 0.0,
+      "category": "Low",
+      "protection_required": false
+    },
+    "weather": {
+      "temperature": 8.5,
+      "apparent_temperature": 5.1,
+      "humidity": 87,
+      "pressure": 998.5,
+      "wind_speed": 17.1,
+      "wind_direction": 262,
+      "cloud_cover": 100,
+      "precipitation": 0.2
+    },
+    "air_quality": {
+      "aqi": 22,
+      "category": "Good",
+      "dominant_pollutant": "pm25",
+      "station": "Melbourne CBD",
+      "pollutants": {
+        "pm25": 22,
+        "pm10": 11,
+        "o3": 8,
+        "no2": 3.8,
+        "so2": 0.8,
+        "co": 1.5
+      }
+    }
+  },
+  "Preston": {
+    "suburb": "Preston",
+    "timestamp": "2025-08-30T00:21:22.786587",
+    "location": {
+      "latitude": -37.7415,
+      "longitude": 144.9949
+    },
+    "data_sources": {
+      "weather": "Open-Meteo (primary)",
+      "air_quality": "WAQI (primary)",
+      "uv_index": "ARPANSA (primary)"
+    },
+    "uv_index": {
+      "value": 0.0,
+      "category": "Low",
+      "protection_required": false
+    },
+    "weather": {
+      "temperature": 8.4,
+      "apparent_temperature": 4.9,
+      "humidity": 87,
+      "pressure": 998.5,
+      "wind_speed": 17.1,
+      "wind_direction": 262,
+      "cloud_cover": 100,
+      "precipitation": 0.2
+    },
+    "air_quality": {
+      "aqi": 20,
+      "category": "Good",
+      "dominant_pollutant": "o3",
+      "station": "Alphington",
+      "pollutants": {
+        "pm25": 19,
+        "pm10": 7,
+        "o3": 20,
+        "no2": 5.6,
+        "so2": 1.2,
+        "co": 1.4
+      }
+    }
+  },
+  "Craigieburn": {
+    "suburb": "Craigieburn",
+    "timestamp": "2025-08-30T00:21:26.053332",
+    "location": {
+      "latitude": -37.603,
+      "longitude": 144.9391
+    },
+    "data_sources": {
+      "weather": "Open-Meteo (primary)",
+      "air_quality": "WAQI (primary)",
+      "uv_index": "ARPANSA (primary)"
+    },
+    "uv_index": {
+      "value": 0.0,
+      "category": "Low",
+      "protection_required": false
+    },
+    "weather": {
+      "temperature": 6.8,
+      "apparent_temperature": 3.0,
+      "humidity": 89,
+      "pressure": 999.0,
+      "wind_speed": 17.7,
+      "wind_direction": 265,
+      "cloud_cover": 100,
+      "precipitation": 0.3
+    },
+    "air_quality": {
+      "aqi": 18,
+      "category": "Good",
+      "dominant_pollutant": "o3",
+      "station": "Macleod",
+      "pollutants": {
+        "pm25": 13,
+        "pm10": 7,
+        "o3": 18.4,
+        "no2": 7.5,
+        "so2": 1.2,
+        "co": 1.4
+      }
+    }
+  },
+  "Box Hill": {
+    "suburb": "Box Hill",
+    "timestamp": "2025-08-30T00:21:29.195903",
+    "location": {
+      "latitude": -37.8193,
+      "longitude": 145.1218
+    },
+    "data_sources": {
+      "weather": "Open-Meteo (primary)",
+      "air_quality": "WAQI (primary)",
+      "uv_index": "ARPANSA (primary)"
+    },
+    "uv_index": {
+      "value": 0.0,
+      "category": "Low",
+      "protection_required": false
+    },
+    "weather": {
+      "temperature": 8.8,
+      "apparent_temperature": 4.9,
+      "humidity": 84,
+      "pressure": 998.3,
+      "wind_speed": 20.0,
+      "wind_direction": 262,
+      "cloud_cover": 100,
+      "precipitation": 0.2
+    },
+    "air_quality": {
+      "aqi": 20,
+      "category": "Good",
+      "dominant_pollutant": "o3",
+      "station": "Box Hill",
+      "pollutants": {
+        "pm25": 6,
+        "pm10": 7,
+        "o3": 20,
+        "no2": 5.6,
+        "so2": 1.2,
+        "co": 1.4
+      }
+    }
+  },
+  "Ringwood": {
+    "suburb": "Ringwood",
+    "timestamp": "2025-08-30T00:21:32.256528",
+    "location": {
+      "latitude": -37.8142,
+      "longitude": 145.2295
+    },
+    "data_sources": {
+      "weather": "Open-Meteo (primary)",
+      "air_quality": "WAQI (primary)",
+      "uv_index": "ARPANSA (primary)"
+    },
+    "uv_index": {
+      "value": 0.0,
+      "category": "Low",
+      "protection_required": false
+    },
+    "weather": {
+      "temperature": 8.1,
+      "apparent_temperature": 5.4,
+      "humidity": 86,
+      "pressure": 998.0,
+      "wind_speed": 11.7,
+      "wind_direction": 288,
+      "cloud_cover": 100,
+      "precipitation": 0.2
+    },
+    "air_quality": {
+      "aqi": 20,
+      "category": "Good",
+      "dominant_pollutant": "o3",
+      "station": "Box Hill",
+      "pollutants": {
+        "pm25": 6,
+        "pm10": 7,
+        "o3": 20,
+        "no2": 5.6,
+        "so2": 1.2,
+        "co": 1.4
+      }
+    }
+  },
+  "Glen Waverley": {
+    "suburb": "Glen Waverley",
+    "timestamp": "2025-08-30T00:21:35.394482",
+    "location": {
+      "latitude": -37.8783,
+      "longitude": 145.1648
+    },
+    "data_sources": {
+      "weather": "Open-Meteo (primary)",
+      "air_quality": "WAQI (primary)",
+      "uv_index": "ARPANSA (primary)"
+    },
+    "uv_index": {
+      "value": 0.0,
+      "category": "Low",
+      "protection_required": false
+    },
+    "weather": {
+      "temperature": 8.6,
+      "apparent_temperature": 4.8,
+      "humidity": 84,
+      "pressure": 998.3,
+      "wind_speed": 20.0,
+      "wind_direction": 262,
+      "cloud_cover": 100,
+      "precipitation": 0.2
+    },
+    "air_quality": {
+      "aqi": 20,
+      "category": "Good",
+      "dominant_pollutant": "o3",
+      "station": "Box Hill",
+      "pollutants": {
+        "pm25": 6,
+        "pm10": 7,
+        "o3": 20,
+        "no2": 5.6,
+        "so2": 1.2,
+        "co": 1.4
+      }
+    }
+  },
+  "St Kilda": {
+    "suburb": "St Kilda",
+    "timestamp": "2025-08-30T00:21:38.766923",
+    "location": {
+      "latitude": -37.8678,
+      "longitude": 144.974
+    },
+    "data_sources": {
+      "weather": "Open-Meteo (primary)",
+      "air_quality": "WAQI (primary)",
+      "uv_index": "ARPANSA (primary)"
+    },
+    "uv_index": {
+      "value": 0.0,
+      "category": "Low",
+      "protection_required": false
+    },
+    "weather": {
+      "temperature": 8.3,
+      "apparent_temperature": 4.2,
+      "humidity": 89,
+      "pressure": 999.0,
+      "wind_speed": 21.9,
+      "wind_direction": 247,
+      "cloud_cover": 100,
+      "precipitation": 0.2
+    },
+    "air_quality": {
+      "aqi": 34,
+      "category": "Good",
+      "dominant_pollutant": "pm25",
+      "station": "Brighton",
+      "pollutants": {
+        "pm25": 34,
+        "pm10": 11,
+        "o3": 8,
+        "no2": 3.8,
+        "so2": 0.8,
+        "co": 1.5
+      }
+    }
+  },
+  "Brighton": {
+    "suburb": "Brighton",
+    "timestamp": "2025-08-30T00:21:41.753958",
+    "location": {
+      "latitude": -37.9098,
+      "longitude": 145.0
+    },
+    "data_sources": {
+      "weather": "Open-Meteo (primary)",
+      "air_quality": "WAQI (primary)",
+      "uv_index": "ARPANSA (primary)"
+    },
+    "uv_index": {
+      "value": 0.0,
+      "category": "Low",
+      "protection_required": false
+    },
+    "weather": {
+      "temperature": 8.2,
+      "apparent_temperature": 4.1,
+      "humidity": 89,
+      "pressure": 999.0,
+      "wind_speed": 21.9,
+      "wind_direction": 247,
+      "cloud_cover": 100,
+      "precipitation": 0.2
+    },
+    "air_quality": {
+      "aqi": 34,
+      "category": "Good",
+      "dominant_pollutant": "pm25",
+      "station": "Brighton",
+      "pollutants": {
+        "pm25": 34,
+        "pm10": 11,
+        "o3": 8,
+        "no2": 3.8,
+        "so2": 0.8,
+        "co": 1.5
+      }
+    }
+  },
+  "Frankston": {
+    "suburb": "Frankston",
+    "timestamp": "2025-08-30T00:21:44.922905",
+    "location": {
+      "latitude": -38.1413,
+      "longitude": 145.1226
+    },
+    "data_sources": {
+      "weather": "Open-Meteo (primary)",
+      "air_quality": "WAQI (primary)",
+      "uv_index": "ARPANSA (primary)"
+    },
+    "uv_index": {
+      "value": 0.0,
+      "category": "Low",
+      "protection_required": false
+    },
+    "weather": {
+      "temperature": 9.6,
+      "apparent_temperature": 2.7,
+      "humidity": 84,
+      "pressure": 997.8,
+      "wind_speed": 41.3,
+      "wind_direction": 237,
+      "cloud_cover": 100,
+      "precipitation": 0.5
+    },
+    "air_quality": {
+      "aqi": 22,
+      "category": "Good",
+      "dominant_pollutant": "o3",
+      "station": "Dandenong",
+      "pollutants": {
+        "pm25": 12,
+        "pm10": 7,
+        "o3": 21.6,
+        "no2": 4.7,
+        "so2": 0.8,
+        "co": 1.5
+      }
+    }
+  },
+  "Footscray": {
+    "suburb": "Footscray",
+    "timestamp": "2025-08-30T00:21:48.137527",
+    "location": {
+      "latitude": -37.8016,
+      "longitude": 144.8995
+    },
+    "data_sources": {
+      "weather": "Open-Meteo (primary)",
+      "air_quality": "WAQI (primary)",
+      "uv_index": "ARPANSA (primary)"
+    },
+    "uv_index": {
+      "value": 0.0,
+      "category": "Low",
+      "protection_required": false
+    },
+    "weather": {
+      "temperature": 8.1,
+      "apparent_temperature": 4.1,
+      "humidity": 89,
+      "pressure": 999.0,
+      "wind_speed": 21.9,
+      "wind_direction": 247,
+      "cloud_cover": 100,
+      "precipitation": 0.2
+    },
+    "air_quality": {
+      "aqi": 17,
+      "category": "Good",
+      "dominant_pollutant": "o3",
+      "station": "Kingsville",
+      "pollutants": {
+        "pm25": 5,
+        "pm10": 2,
+        "o3": 16.8,
+        "no2": 10.2,
+        "so2": 1,
+        "co": 1.8
+      }
+    }
+  },
+  "Sunshine": {
+    "suburb": "Sunshine",
+    "timestamp": "2025-08-30T00:21:51.302779",
+    "location": {
+      "latitude": -37.7881,
+      "longitude": 144.8324
+    },
+    "data_sources": {
+      "weather": "Open-Meteo (primary)",
+      "air_quality": "WAQI (primary)",
+      "uv_index": "ARPANSA (primary)"
+    },
+    "uv_index": {
+      "value": 0.0,
+      "category": "Low",
+      "protection_required": false
+    },
+    "weather": {
+      "temperature": 8.1,
+      "apparent_temperature": 3.9,
+      "humidity": 89,
+      "pressure": 999.0,
+      "wind_speed": 21.9,
+      "wind_direction": 247,
+      "cloud_cover": 100,
+      "precipitation": 0.2
+    },
+    "air_quality": {
+      "aqi": 17,
+      "category": "Good",
+      "dominant_pollutant": "o3",
+      "station": "Brooklyn",
+      "pollutants": {
+        "pm25": 8,
+        "pm10": 6,
+        "o3": 16.8,
+        "no2": 10.2,
+        "so2": 1,
+        "co": 1.8
+      }
+    }
+  },
+  "Werribee": {
+    "suburb": "Werribee",
+    "timestamp": "2025-08-30T00:21:56.473025",
+    "location": {
+      "latitude": -37.8999,
+      "longitude": 144.6596
+    },
+    "data_sources": {
+      "weather": "Open-Meteo (primary)",
+      "air_quality": "WAQI (primary)",
+      "uv_index": "ARPANSA (primary)"
+    },
+    "uv_index": {
+      "value": 0.0,
+      "category": "Low",
+      "protection_required": false
+    },
+    "weather": {
+      "temperature": 8.0,
+      "apparent_temperature": 2.4,
+      "humidity": 89,
+      "pressure": 999.6,
+      "wind_speed": 31.9,
+      "wind_direction": 236,
+      "cloud_cover": 100,
+      "precipitation": 0.3
+    },
+    "air_quality": {
+      "aqi": 21,
+      "category": "Good",
+      "dominant_pollutant": "o3",
+      "station": "Pt. Cook",
+      "pollutants": {
+        "pm25": 6,
+        "pm10": 8,
+        "o3": 20.8,
+        "no2": 2.8,
+        "so2": 0.1
+      }
+    }
+  },
+  "Dandenong": {
+    "suburb": "Dandenong",
+    "timestamp": "2025-08-30T00:21:59.748395",
+    "location": {
+      "latitude": -37.9874,
+      "longitude": 145.2149
+    },
+    "data_sources": {
+      "weather": "Open-Meteo (primary)",
+      "air_quality": "WAQI (primary)",
+      "uv_index": "ARPANSA (primary)"
+    },
+    "uv_index": {
+      "value": 0.0,
+      "category": "Low",
+      "protection_required": false
+    },
+    "weather": {
+      "temperature": 8.1,
+      "apparent_temperature": 4.9,
+      "humidity": 88,
+      "pressure": 997.3,
+      "wind_speed": 15.5,
+      "wind_direction": 274,
+      "cloud_cover": 100,
+      "precipitation": 0.4
+    },
+    "air_quality": {
+      "aqi": 22,
+      "category": "Good",
+      "dominant_pollutant": "o3",
+      "station": "Dandenong",
+      "pollutants": {
+        "pm25": 12,
+        "pm10": 7,
+        "o3": 21.6,
+        "no2": 4.7,
+        "so2": 0.8,
+        "co": 1.5
+      }
+    }
+  },
+  "Clayton": {
+    "suburb": "Clayton",
+    "timestamp": "2025-08-30T00:22:02.976394",
+    "location": {
+      "latitude": -37.9248,
+      "longitude": 145.1198
+    },
+    "data_sources": {
+      "weather": "Open-Meteo (primary)",
+      "air_quality": "WAQI (primary)",
+      "uv_index": "ARPANSA (primary)"
+    },
+    "uv_index": {
+      "value": 0.0,
+      "category": "Low",
+      "protection_required": false
+    },
+    "weather": {
+      "temperature": 9.1,
+      "apparent_temperature": 5.2,
+      "humidity": 84,
+      "pressure": 998.3,
+      "wind_speed": 20.0,
+      "wind_direction": 262,
+      "cloud_cover": 100,
+      "precipitation": 0.2
+    },
+    "air_quality": {
+      "aqi": 20,
+      "category": "Good",
+      "dominant_pollutant": "o3",
+      "station": "Box Hill",
+      "pollutants": {
+        "pm25": 6,
+        "pm10": 7,
+        "o3": 20,
+        "no2": 5.6,
+        "so2": 1.2,
+        "co": 1.4
+      }
+    }
+  }
+}

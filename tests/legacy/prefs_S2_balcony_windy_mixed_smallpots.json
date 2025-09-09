@@ -1,0 +1,47 @@
+{
+  "user_id": "anon_mvp",
+  "site": {
+    "location_type": "balcony",
+    "area_m2": 2.0,
+    "sun_exposure": "part_sun",
+    "wind_exposure": "windy",
+    "containers": true,
+    "container_sizes": [
+      "small",
+      "medium"
+    ]
+  },
+  "preferences": {
+    "goal": "mixed",
+    "edible_types": [
+      "herbs",
+      "leafy"
+    ],
+    "ornamental_types": [
+      "flowers"
+    ],
+    "colors": [
+      "purple",
+      "white"
+    ],
+    "fragrant": true,
+    "maintainability": "low",
+    "watering": "medium",
+    "time_to_results": "quick",
+    "season_intent": "start_now",
+    "pollen_sensitive": false
+  },
+  "practical": {
+    "budget": "medium",
+    "has_basic_tools": true,
+    "organic_only": false
+  },
+  "environment": {
+    "climate_zone": "cool",
+    "month_now": "August",
+    "uv_index": 0.0,
+    "temperature_c": 8.0,
+    "humidity_pct": 75,
+    "wind_speed_kph": 15
+  }
+}

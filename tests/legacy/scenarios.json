@@ -1,0 +1,98 @@
+{
+  "meta": {
+    "suburb": "Richmond",
+    "climate_path": "climate_data.json",
+    "prefs_path": "user_preferences.json",
+    "n": 5,
+    "notes": "All scenarios assume Melbourne/VIC; default climate is 'cool'."
+  },
+  "scenarios": [
+    {
+      "id": "S1_indoor_quick_herbs",
+      "desc": "Indoor windowsill, low light, quick edible herbs only.",
+      "prefs_override": {
+        "site": { "location_type": "indoors", "area_m2": 0.8, "sun_exposure": "bright_shade", "wind_exposure": "sheltered", "containers": true, "container_sizes": ["small"] },
+        "preferences": { "goal": "edible", "edible_types": ["herbs","leafy"], "ornamental_types": [], "colors": [], "fragrant": true, "maintainability": "low", "watering": "medium", "time_to_results": "quick", "season_intent": "start_now", "pollen_sensitive": false },
+        "environment": { "climate_zone": "cool", "month_now": "August" }
+      },
+      "invariants": {
+        "all_indoor_ok": true,
+        "all_goal_edible": true,
+        "season_now_or_plan_ahead": true,
+        "no_duplicates": true
+      }
+    },
+    {
+      "id": "S2_balcony_windy_mixed_smallpots",
+      "desc": "Windy balcony, small/medium pots, mixed goal. Penalize climbers; prefer compact/dwarf.",
+      "prefs_override": {
+        "site": { "location_type": "balcony", "area_m2": 2.0, "sun_exposure": "part_sun", "wind_exposure": "windy", "containers": true, "container_sizes": ["small","medium"] },
+        "preferences": { "goal": "mixed", "edible_types": ["herbs","leafy"], "ornamental_types": ["flowers"], "colors": ["purple","white"], "fragrant": true, "maintainability": "low", "watering": "medium", "time_to_results": "quick", "season_intent": "start_now", "pollen_sensitive": false },
+        "environment": { "climate_zone": "cool", "month_now": "August" }
+      },
+      "invariants": {
+        "no_majority_climbers_in_windy": true,
+        "prefer_container_ok": true,
+        "season_now_or_plan_ahead": true,
+        "diversity_cap_max2_per_category": true,
+        "no_duplicates": true
+      }
+    },
+    {
+      "id": "S3_backyard_fullsun_edible_patient",
+      "desc": "Backyard, full sun, edible fruiting veg, patient timeline (>120d).",
+      "prefs_override": {
+        "site": { "location_type": "backyard", "area_m2": 20.0, "sun_exposure": "full_sun", "wind_exposure": "moderate", "containers": false, "container_sizes": [] },
+        "preferences": { "goal": "edible", "edible_types": ["fruiting","legumes","root"], "ornamental_types": [], "colors": [], "fragrant": false, "maintainability": "medium", "watering": "medium", "time_to_results": "patient", "season_intent": "start_now", "pollen_sensitive": false },
+        "environment": { "climate_zone": "cool", "month_now": "August" }
+      },
+      "invariants": {
+        "all_goal_edible": true,
+        "favor_full_sun": true,
+        "season_now_or_plan_ahead": true,
+        "no_duplicates": true
+      }
+    },
+    {
+      "id": "S4_ornamental_flower_colors",
+      "desc": "Ornamental only, target purple/white & fragrance.",
+      "prefs_override": {
+        "site": { "location_type": "courtyard", "area_m2": 6.0, "sun_exposure": "part_sun", "wind_exposure": "moderate", "containers": true, "container_sizes": ["medium","large"] },
+        "preferences": { "goal": "ornamental", "edible_types": [], "ornamental_types": ["flowers"], "colors": ["purple","white"], "fragrant": true, "maintainability": "low", "watering": "medium", "time_to_results": "standard", "season_intent": "start_now", "pollen_sensitive": false },
+        "environment": { "climate_zone": "cool", "month_now": "August" }
+      },
+      "invariants": {
+        "all_goal_ornamental": true,
+        "prefer_color_match_or_fragrant": true,
+        "season_now_or_plan_ahead": true
+      }
+    },
+    {
+      "id": "S5_relaxation_ladder",
+      "desc": "Hard case to force relaxation: indoor, full shade, very picky. Expect 'Plan ahead' items to appear.",
+      "prefs_override": {
+        "site": { "location_type": "indoors", "area_m2": 0.5, "sun_exposure": "bright_shade", "wind_exposure": "sheltered", "containers": true, "container_sizes": ["small"] },
+        "preferences": { "goal": "ornamental", "ornamental_types": ["flowers"], "colors": ["blue"], "fragrant": false, "maintainability": "low", "watering": "low", "time_to_results": "quick", "season_intent": "start_now", "pollen_sensitive": false },
+        "environment": { "climate_zone": "cool", "month_now": "August" }
+      },
+      "invariants": {
+        "season_now_or_plan_ahead": true,
+        "at_least_one_plan_ahead": true,
+        "all_indoor_ok": true
+      }
+    },
+    {
+      "id": "S6_override_climate_to_subtropical",
+      "desc": "Same suburb but override to subtropical to confirm climate sensitivity.",
+      "prefs_override": {
+        "site": { "location_type": "backyard", "area_m2": 12.0, "sun_exposure": "part_sun", "wind_exposure": "moderate", "containers": false, "container_sizes": [] },
+        "preferences": { "goal": "mixed", "edible_types": ["herbs","leafy","fruiting"], "ornamental_types": ["flowers"], "colors": [], "fragrant": false, "maintainability": "medium", "watering": "medium", "time_to_results": "standard", "season_intent": "start_now", "pollen_sensitive": false },
+        "environment": { "climate_zone": "subtropical", "month_now": "August" }
+      },
+      "invariants": {
+        "season_now_or_plan_ahead": true,
+        "different_from_cool_results": true
+      }
+    }
+  ]
+}

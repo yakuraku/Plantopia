@@ -1,0 +1,45 @@
+{
+  "user_id": "anon_mvp",
+  "site": {
+    "location_type": "indoors",
+    "area_m2": 0.5,
+    "sun_exposure": "bright_shade",
+    "wind_exposure": "sheltered",
+    "containers": true,
+    "container_sizes": [
+      "small"
+    ]
+  },
+  "preferences": {
+    "goal": "ornamental",
+    "edible_types": [
+      "herbs",
+      "leafy"
+    ],
+    "ornamental_types": [
+      "flowers"
+    ],
+    "colors": [
+      "blue"
+    ],
+    "fragrant": false,
+    "maintainability": "low",
+    "watering": "low",
+    "time_to_results": "quick",
+    "season_intent": "start_now",
+    "pollen_sensitive": false
+  },
+  "practical": {
+    "budget": "medium",
+    "has_basic_tools": true,
+    "organic_only": false
+  },
+  "environment": {
+    "climate_zone": "cool",
+    "month_now": "August",
+    "uv_index": 0.0,
+    "temperature_c": 8.0,
+    "humidity_pct": 75,
+    "wind_speed_kph": 15
+  }
+}
