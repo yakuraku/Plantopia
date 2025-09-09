@@ -10,7 +10,9 @@
       <!-- Top Search Bar - Full Width (unchanged) -->
       <div class="top-search-section">
         <div class="container-xl top-inline">
-          <SearchForm @find-plants="handleFindPlants" />
+          <div class="scale-root"><div class="scale-inner">
+            <SearchForm @find-plants="handleFindPlants" />
+          </div></div>
           <div class="filter-col">
             <FilterSidebar
               :filters="filterData"
@@ -22,6 +24,7 @@
 
       <!-- Content section with left filter and right results -->
       <div class="content-section">
+        <div class="scale-root"><div class="scale-inner results-shift">
         <div class="content-layout">
           <aside class="filters-column"></aside>
           <section class="results-column">
@@ -65,6 +68,7 @@
             </div>
           </section>
         </div>
+        </div></div>
       </div>
 
       <!-- Plant Detail Modal - shows detailed plant information when plant is selected -->
@@ -223,6 +227,25 @@ const handleUpdateFilters = (filters: typeof filterData.value) => {
 </script>
 
 <style scoped>
+/* Proportional scale wrapper (keeps layout, scales to 90%) */
+.scale-root {
+  width: 100%;
+}
+
+.scale-inner {
+  --rec-scale: 0.9;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%) scale(var(--rec-scale));
+  transform-origin: top left;
+  width: 100%;
+}
+
+/* Slightly shift results area to the right after scaling */
+.results-shift {
+  transform: translateX(calc(-50% + 25px)) scale(var(--rec-scale));
+}
+
 /* Background and Page Setup */
 .recommendations-page {
   min-height: 100vh;
@@ -311,8 +334,8 @@ const handleUpdateFilters = (filters: typeof filterData.value) => {
 
 .filter-col {
   position: absolute;
-  top: 2.3rem;
-  right: -250px;
+  top: 1.2rem;
+  right: -100px; /* move filter slightly left (reduce negative right) */
   z-index: 3;
 }
 
@@ -320,18 +343,18 @@ const handleUpdateFilters = (filters: typeof filterData.value) => {
 
 
 @media (max-width: 1870px) {
-  .filter-col { right: -240px; top: 2.9rem; }
+  .filter-col { right: -100px; top: 1.8rem; }
 }
 
 /* Responsive adjustments for filter button position */
 @media (max-width: 1600px) {
-  .filter-col { right: -220px; top: 3rem; }
+  .filter-col { right: -100px; top: 1.9rem; }
 }
 @media (max-width: 1440px) {
-  .filter-col { right: -160px; top: 3rem; }
+  .filter-col { right: -100px; top: 1.9rem; }
 }
 @media (max-width: 1320px) {
-  .filter-col { right: -100px; top: 3rem; }
+  .filter-col { right: -100px; top: 1.9rem; }
 }
 @media (max-width: 1200px) {
   .filter-col {
@@ -433,6 +456,11 @@ const handleUpdateFilters = (filters: typeof filterData.value) => {
   width: 100%;
 }
 
+/* Nudge only the second row of cards slightly to the right on wide screens (3 cols) */
+.plant-grid > *:nth-child(n+4) {
+  transform: translateX(225px);
+}
+
 /* Custom Alert Styles */
 .error-state .alert {
   background: rgba(254, 242, 242, 0.8) !important;
@@ -501,6 +529,10 @@ const handleUpdateFilters = (filters: typeof filterData.value) => {
     margin-left: 0; /* Keep safe */
     max-width: 100%;
     grid-template-columns: repeat(2, 1fr); /* 2 columns on medium screens */
+  }
+  /* When 2 columns, the second row starts from the 3rd item */
+  .plant-grid > *:nth-child(n+3) {
+    transform: translateX(12px);
   }
 }
 

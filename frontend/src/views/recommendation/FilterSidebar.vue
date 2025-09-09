@@ -227,12 +227,12 @@
           <div class="collapsible-options">
             <label v-for="color in colorOptions" :key="color" class="option-label">
               <input
-                type="checkbox"
+                type="radio"
+                name="preferred-color"
                 :id="'colors-' + color"
-                :name="'colors-' + color"
                 :value="color"
-                v-model="localFilters.colors"
-                class="option-checkbox"
+                v-model="preferredColor"
+                class="option-radio"
               >
               <span class="option-text">{{ color }}</span>
             </label>
@@ -432,6 +432,8 @@ const emit = defineEmits<{
 
 // Local filter state
 const localFilters = ref<FilterData>({ ...props.filters })
+// Single-value proxy for preferred color to simplify binding
+const preferredColor = ref<string>('')
 
 // Main filter collapse state
 const isFilterExpanded = ref(false)
@@ -466,14 +468,21 @@ const toggleFilter = (filterName: keyof typeof expandedFilters.value) => {
 
 // Watch for changes and emit to parent
 watch(localFilters, (newFilters) => {
+  // sync from single-value proxy to array form
+  newFilters.colors = preferredColor.value ? [preferredColor.value] : []
   emit('update-filters', { ...newFilters })
 }, { deep: true })
+
+// keep proxy in sync if parent provides initial colors
+if (localFilters.value.colors && localFilters.value.colors.length > 0) {
+  preferredColor.value = localFilters.value.colors[0]
+}
 
 // Dropdown options
 const windExposureOptions = ['Sheltered', 'Moderate', 'Windy']
 const maintainabilityOptions = ['Low', 'Medium', 'High']
 const wateringOptions = ['Low', 'Medium', 'High']
-const seasonIntentOptions = ['Start Now', 'Happy to Wait']
+const seasonIntentOptions = ['Start Now']
 const budgetOptions = ['Low', 'Medium', 'High']
 const containerSizes = ['Small (<=15cm)', 'Medium (16-25cm)', 'Large (26-40cm)', 'Very Large (>40cm)']
 const colorOptions = ['White', 'Yellow', 'Orange', 'Pink', 'Red', 'Purple', 'Blue']
@@ -488,6 +497,8 @@ const handleRadioToggle = (fieldName: keyof FilterData, value: string) => {
     (localFilters.value[fieldName] as string) = value
   }
 }
+
+// no handler needed; v-model preferredColor handles it
 
 // Clear all filters
 const clearAllFilters = () => {
@@ -522,6 +533,19 @@ const clearAllFilters = () => {
   position: relative;
   z-index: 2;
   transition: background-color 0.3s ease, backdrop-filter 0.3s ease;
+  width: 320px; /* keep same width collapsed/expanded to avoid horizontal shift */
+  box-sizing: border-box;
+}
+
+/* Keep the collapsed button at exactly the same horizontal position as expanded */
+/* Shift only the collapsed header slightly to the right */
+.filter-sidebar:not(.expanded) .main-filter-header {
+  padding-left: 5rem;
+}
+
+/* Keep the same left offset when expanded so it doesn't jump */
+.filter-sidebar.expanded .main-filter-header {
+  padding-left: 5rem;
 }
 
 .filter-sidebar.expanded {
@@ -533,11 +557,13 @@ const clearAllFilters = () => {
   margin-bottom: 1.5rem;
   padding-bottom: 0.5rem;
   border-bottom: 0;
+  padding-left: 0;
 }
 
-.main-filter-header {
+.main-filter-header,
+.main-filter-header.expanded {
   width: 100%;
-  padding: 1rem;
+  padding: 1rem 1rem 1rem 0;
   background: transparent;
   color: #333;
   border: none;
@@ -555,7 +581,8 @@ const clearAllFilters = () => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.filter-circle-container {
+.filter-circle-container,
+.filter-circle-container.expanded {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -570,10 +597,12 @@ const clearAllFilters = () => {
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  background: white;
+  background: #ebf2e5; /* match search bar background */
   transition: all 0.2s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   gap: 0.4rem;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .filter-icon {
@@ -621,6 +650,7 @@ const clearAllFilters = () => {
   margin-bottom: 1.5rem;
   border-bottom: 0;
   padding-bottom: 1rem;
+  padding-left: 5rem; /* align expanded items with Filter header left edge */
 }
 
 .filter-section:last-of-type {
@@ -701,9 +731,9 @@ const clearAllFilters = () => {
 
 .collapsible-header {
   width: 100%;
-  padding: 0.75rem 1rem;
-  background: #4a90a4;
-  color: white;
+  padding: 0.75rem 1rem 0.75rem 1rem; /* base padding */
+  background: #ebf2e5; /* match filter background */
+  color: #1c3d21; /* match search text color */
   border: none;
   text-align: left;
   font-weight: 600;
@@ -712,15 +742,20 @@ const clearAllFilters = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Ensure the visible blue buttons align with the Filter header's left edge */
+.filter-sidebar.expanded .collapsible-header {
+  padding-left: 1rem; /* inner padding for button itself */
 }
 
 .collapsible-header:hover {
-  background: #3d7a8c;
+  background: #e2efda;
 }
 
 .collapsible-header.expanded {
-  background: #2d5a66;
+  background: #e2efda;
 }
 
 .collapsible-icon {
@@ -740,7 +775,7 @@ const clearAllFilters = () => {
 
 .collapsible-options {
   padding: 0.75rem 1rem;
-  background: white;
+  background: #ffffff;
 }
 
 .option-label {
@@ -750,7 +785,7 @@ const clearAllFilters = () => {
   cursor: pointer;
   padding: 0.25rem 0;
   font-size: 0.875rem;
-  color: #333;
+  color: #1c3d21; /* match search text color */
 }
 
 .option-radio {
