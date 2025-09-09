@@ -205,16 +205,16 @@ const getImageUrl = (imagePath: string): string => {
   
   // For separated frontend/backend projects, we need API endpoints
   const possibleUrls = [
-    `${primaryUrl}/api/plant-image/${encodeURIComponent(imagePath)}`,
-    `${primaryUrl}/api/plant-image?path=${encodeURIComponent(imagePath)}`,
-    `${primaryUrl}/api/images/${encodeURIComponent(imagePath)}`,
+    `${primaryUrl}/api/v1/plant-image/${encodeURIComponent(imagePath)}`,
+    `${primaryUrl}/api/v1/plant-image?path=${encodeURIComponent(imagePath)}`,
+    `${primaryUrl}/api/v1/images/${encodeURIComponent(imagePath)}`,
     `${primaryUrl}/image/${encodeURIComponent(imagePath)}`,
     `${primaryUrl}/static/${imagePath}`,           
     `${primaryUrl}/media/${imagePath}`,
     // Fallback URLs
-    `${fallbackUrl}/api/plant-image/${encodeURIComponent(imagePath)}`,
-    `${fallbackUrl}/api/plant-image?path=${encodeURIComponent(imagePath)}`,
-    `${fallbackUrl}/api/images/${encodeURIComponent(imagePath)}`,
+    `${fallbackUrl}/api/v1/plant-image/${encodeURIComponent(imagePath)}`,
+    `${fallbackUrl}/api/v1/plant-image?path=${encodeURIComponent(imagePath)}`,
+    `${fallbackUrl}/api/v1/images/${encodeURIComponent(imagePath)}`,
     `${fallbackUrl}/image/${encodeURIComponent(imagePath)}`,
     `${fallbackUrl}/static/${imagePath}`,           
     `${fallbackUrl}/media/${imagePath}`,            
