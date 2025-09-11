@@ -314,6 +314,19 @@ async def load_suburbs(session: AsyncSession):
     return suburbs_loaded
 
 
+def clean_value(value):
+    """Clean a value from the CSV, handling NaN and other issues"""
+    if pd.isna(value):
+        return None
+    if isinstance(value, float) and pd.isna(value):
+        return None
+    if isinstance(value, str):
+        value = value.strip()
+        if value.lower() in ['nan', 'null', 'none', '']:
+            return None
+    return value
+
+
 async def load_plants_from_csv(session: AsyncSession):
     """Load plant data from CSV files into database"""
     print("\n🌱 Loading plants from CSV files...")
@@ -344,24 +357,24 @@ async def load_plants_from_csv(session: AsyncSession):
             # Process each plant
             for _, row in df.iterrows():
                 plant = Plant(
-                    plant_name=row.get('plant_name', row.get('name', 'Unknown')),
-                    scientific_name=row.get('scientific_name'),
+                    plant_name=clean_value(row.get('plant_name', row.get('name', 'Unknown'))) or 'Unknown',
+                    scientific_name=clean_value(row.get('scientific_name')),
                     plant_category=category,
-                    water_requirements=row.get('water_requirements', row.get('water_needs')),
-                    sunlight_requirements=row.get('sunlight_requirements', row.get('sunlight_needs')),
-                    soil_type=row.get('soil_type'),
-                    growth_time=row.get('growth_time'),
-                    maintenance_level=row.get('maintenance_level', row.get('maintenance')),
-                    climate_zone=row.get('climate_zone'),
-                    mature_height=row.get('mature_height', row.get('height')),
-                    mature_width=row.get('mature_width', row.get('width')),
-                    flower_color=row.get('flower_color', row.get('flower_colour')),
-                    flowering_season=row.get('flowering_season'),
-                    description=row.get('description'),
-                    planting_tips=row.get('planting_tips'),
-                    care_instructions=row.get('care_instructions'),
-                    companion_plants=row.get('companion_plants'),
-                    image_url=row.get('image_url', row.get('image_path'))
+                    water_requirements=clean_value(row.get('water_requirements', row.get('water_needs'))),
+                    sunlight_requirements=clean_value(row.get('sunlight_requirements', row.get('sunlight_needs'))),
+                    soil_type=clean_value(row.get('soil_type')),
+                    growth_time=clean_value(row.get('growth_time')),
+                    maintenance_level=clean_value(row.get('maintenance_level', row.get('maintenance'))),
+                    climate_zone=clean_value(row.get('climate_zone')),
+                    mature_height=clean_value(row.get('mature_height', row.get('height'))),
+                    mature_width=clean_value(row.get('mature_width', row.get('width'))),
+                    flower_color=clean_value(row.get('flower_color', row.get('flower_colour'))),
+                    flowering_season=clean_value(row.get('flowering_season')),
+                    description=clean_value(row.get('description')),
+                    planting_tips=clean_value(row.get('planting_tips')),
+                    care_instructions=clean_value(row.get('care_instructions')),
+                    companion_plants=clean_value(row.get('companion_plants')),
+                    image_url=clean_value(row.get('image_url', row.get('image_path')))
                 )
                 
                 session.add(plant)
