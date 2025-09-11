@@ -1,7 +1,7 @@
 """
 Database models for Plantopia using SQLAlchemy
 """
-from sqlalchemy import Column, Integer, String, Float, DateTime, Date, Text, JSON, ForeignKey, UniqueConstraint, Index
+from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, Date, Text, JSON, ForeignKey, UniqueConstraint, Index
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -38,6 +38,21 @@ class Plant(Base):
     care_instructions = Column(Text)
     companion_plants = Column(Text)
     image_url = Column(Text)
+    
+    # Fields for recommendation engine
+    sun_need = Column(String(50))  # full_sun, part_sun, bright_shade
+    indoor_ok = Column(Boolean, default=False)
+    container_ok = Column(Boolean, default=False)
+    edible = Column(Boolean, default=False)
+    sowing_months_by_climate = Column(JSON)  # {"temperate": ["March", "April"], ...}
+    maintainability_score = Column(Float)  # 0.0 to 1.0
+    time_to_maturity_days = Column(Integer)
+    habit = Column(String(100))  # growth habit
+    fragrant = Column(Boolean, default=False)
+    flower_colors = Column(JSON)  # ["purple", "white", ...]
+    sowing_depth_mm = Column(Integer)
+    spacing_cm = Column(Integer)
+    sowing_method = Column(Text)
     
     # Metadata
     created_at = Column(DateTime, default=datetime.utcnow)

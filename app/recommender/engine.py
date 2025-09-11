@@ -167,7 +167,10 @@ def hard_filter(plants: List[Dict[str, Any]], user: Dict[str, Any], env: Dict[st
     
     for plant in plants:
         # Season filter
-        sowing_months = plant.get("sowing_months_by_climate", {}).get(climate_zone, [])
+        sowing_data = plant.get("sowing_months_by_climate")
+        if sowing_data is None:
+            sowing_data = {}
+        sowing_months = sowing_data.get(climate_zone, [])
         if month_now not in sowing_months:
             continue
         
@@ -236,7 +239,10 @@ def relax_if_needed(eligible: List[Dict[str, Any]], all_plants: List[Dict[str, A
         if plant in eligible:
             continue
             
-        sowing_months = plant.get("sowing_months_by_climate", {}).get(climate_zone, [])
+        sowing_data = plant.get("sowing_months_by_climate")
+        if sowing_data is None:
+            sowing_data = {}
+        sowing_months = sowing_data.get(climate_zone, [])
         if any(month in sowing_months for month in near_months):
             expanded.append(plant)
             added_count += 1
@@ -342,7 +348,10 @@ def assemble_output(top: List[Tuple[float, Dict[str, Any], Dict[str, float]]],
     
     for score, plant, breakdown in top:
         # Determine season label
-        sowing_months = plant.get("sowing_months_by_climate", {}).get(climate_zone, [])
+        sowing_data = plant.get("sowing_months_by_climate")
+        if sowing_data is None:
+            sowing_data = {}
+        sowing_months = sowing_data.get(climate_zone, [])
         season_label = "Start now" if month_now in sowing_months else "Plan ahead"
         
         # Normalize sowing method

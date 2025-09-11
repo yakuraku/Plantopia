@@ -152,7 +152,10 @@ class RecommendationService:
             score, breakdown = calculate_scores(plant, user_prefs, env)
             
             # Get sowing information
-            sowing_months = plant.get("sowing_months_by_climate", {}).get(env["climate_zone"], [])
+            sowing_data = plant.get("sowing_months_by_climate")
+            if sowing_data is None:
+                sowing_data = {}
+            sowing_months = sowing_data.get(env["climate_zone"], [])
             season_label = "Start now" if env["month_now"] in sowing_months else "Plan ahead"
             
             # Prepare media
