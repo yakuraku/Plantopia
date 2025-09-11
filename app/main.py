@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
 from app.core.config import settings
-from app.api.endpoints import router
+from app.api.endpoints import api_router
 from app.core.database import init_db, close_db
 
 
@@ -37,7 +37,7 @@ app.add_middleware(
 )
 
 # Include API router
-app.include_router(router, prefix=settings.API_V1_STR)
+app.include_router(api_router, prefix=settings.API_V1_STR)
 
 # Root endpoint (outside of versioned API)
 @app.get("/")

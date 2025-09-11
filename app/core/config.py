@@ -28,7 +28,7 @@ class Settings:
         "vegetable": str(DATA_DIR / "csv" / "vegetable_plants_data.csv")
     }
     
-    CLIMATE_DATA_PATH = str(DATA_DIR / "json" / "climate_data.json")
+    # CLIMATE_DATA_PATH = str(DATA_DIR / "json" / "climate_data.json")  # No longer used - using database
     
     # Image Directories
     IMAGE_DIRS = {
