@@ -1,5 +1,6 @@
 """Data access repositories"""
 
-from app.repositories.plant_repository import PlantRepository
+from app.repositories.database_plant_repository import DatabasePlantRepository
+from app.repositories.climate_repository import ClimateRepository
 
-__all__ = ["PlantRepository"]
+__all__ = ["DatabasePlantRepository", "ClimateRepository"]

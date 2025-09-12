@@ -5,3 +5,10 @@ uvicorn
 python-multipart
 python-dotenv
 requests
+sqlalchemy==2.0.23
+asyncpg==0.29.0
+alembic==1.13.1
+supabase==2.3.0
+psycopg2-binary==2.9.9
+greenlet==3.0.3
+aiohttp==3.9.1

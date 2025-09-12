@@ -3,7 +3,8 @@ import tempfile
 import os
 from typing import Dict, Any, List, Optional, Tuple
 
-from app.repositories.plant_repository import PlantRepository
+from app.repositories.database_plant_repository import DatabasePlantRepository
+from app.repositories.climate_repository import ClimateRepository
 from app.utils.image_utils import image_to_base64
 from app.schemas.request import RecommendationRequest, PlantScoreRequest
 from app.schemas.response import (
@@ -20,10 +21,11 @@ from app.recommender.scoring import weights, calculate_scores
 class RecommendationService:
     """Service for generating plant recommendations"""
     
-    def __init__(self, plant_repository: PlantRepository):
+    def __init__(self, plant_repository: DatabasePlantRepository, climate_repository: ClimateRepository):
         self.plant_repository = plant_repository
+        self.climate_repository = climate_repository
     
-    def generate_recommendations(self, request: RecommendationRequest) -> Dict[str, Any]:
+    async def generate_recommendations(self, request: RecommendationRequest) -> Dict[str, Any]:
         """Generate plant recommendations based on user preferences.
         
         Args:
@@ -39,10 +41,21 @@ class RecommendationService:
         
         try:
             # Load all plants
-            all_plants = self.plant_repository.load_all_plants()
+            all_plants = await self.plant_repository.get_all_plants()
             
-            # Load climate data
-            climate_data = self.plant_repository.load_climate_data()
+            # Get latest climate for suburb or use default
+            climate_entry = await self.climate_repository.get_latest_climate_by_suburb(request.suburb)
+            
+            # Convert to legacy format for compatibility
+            climate_data = {}
+            if climate_entry:
+                climate_data[request.suburb] = {
+                    "temperature": climate_entry.get("weather", {}).get("temperature_current"),
+                    "humidity": climate_entry.get("weather", {}).get("humidity"),
+                    "rainfall": climate_entry.get("weather", {}).get("rainfall"),
+                    "uv_index": climate_entry.get("uv", {}).get("index"),
+                    "air_quality": climate_entry.get("air_quality", {}).get("aqi")
+                }
             
             # Select environment
             env = select_environment(
@@ -91,7 +104,7 @@ class RecommendationService:
             if os.path.exists(user_prefs_path):
                 os.unlink(user_prefs_path)
     
-    def score_plant(self, request: PlantScoreRequest) -> PlantScoreResponse:
+    async def score_plant(self, request: PlantScoreRequest) -> PlantScoreResponse:
         """Score a specific plant based on user preferences.
         
         Args:
@@ -101,7 +114,7 @@ class RecommendationService:
             PlantScoreResponse with scoring details
         """
         # Find the plant
-        plant = self.plant_repository.find_plant_by_name(request.plant_name)
+        plant = await self.plant_repository.find_plant_by_name(request.plant_name)
         if not plant:
             raise ValueError(f"Plant '{request.plant_name}' not found")
         
@@ -111,8 +124,19 @@ class RecommendationService:
             user_prefs_path = user_prefs_file.name
         
         try:
-            # Load climate data
-            climate_data = self.plant_repository.load_climate_data()
+            # Get latest climate for suburb or use default
+            climate_entry = await self.climate_repository.get_latest_climate_by_suburb(request.suburb)
+            
+            # Convert to legacy format for compatibility
+            climate_data = {}
+            if climate_entry:
+                climate_data[request.suburb] = {
+                    "temperature": climate_entry.get("weather", {}).get("temperature_current"),
+                    "humidity": climate_entry.get("weather", {}).get("humidity"),
+                    "rainfall": climate_entry.get("weather", {}).get("rainfall"),
+                    "uv_index": climate_entry.get("uv", {}).get("index"),
+                    "air_quality": climate_entry.get("air_quality", {}).get("aqi")
+                }
             
             # Select environment
             env = select_environment(
@@ -128,7 +152,10 @@ class RecommendationService:
             score, breakdown = calculate_scores(plant, user_prefs, env)
             
             # Get sowing information
-            sowing_months = plant.get("sowing_months_by_climate", {}).get(env["climate_zone"], [])
+            sowing_data = plant.get("sowing_months_by_climate")
+            if sowing_data is None:
+                sowing_data = {}
+            sowing_months = sowing_data.get(env["climate_zone"], [])
             season_label = "Start now" if env["month_now"] in sowing_months else "Plan ahead"
             
             # Prepare media
