@@ -2,15 +2,14 @@ name: Deploy to GCP
 
 on:
   push:
-    branches: [main, master, CICDsunny]  # 临时添加CICDsunny分支用于测试
+    branches: [main, master]
   pull_request:
     branches: [main, master]
     types: [closed]
-  workflow_dispatch:  # Allows manual trigger from GitHub UI
+  workflow_dispatch:
 
 jobs:
   deploy:
-    # Only run on push to main or when PR is merged or push to CICDsunny (for testing)
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true) || github.event_name == 'workflow_dispatch'
 
     runs-on: ubuntu-latest
@@ -26,7 +25,7 @@ jobs:
         username: ${{ secrets.GCP_VM_USER }}
         key: ${{ secrets.GCP_SSH_KEY }}
         script: |
-          echo "🚀 Starting deployment using advanced script..."
+          echo "🚀 Starting production deployment..."
           echo "Branch: ${{ github.ref_name }}"
           /opt/plantopia/deploy.sh deploy
 
