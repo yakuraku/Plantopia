@@ -1,0 +1,71 @@
+name: Deploy to GCP
+
+on:
+  push:
+    branches: [main, master]  # Triggers on push to main or master
+  pull_request:
+    branches: [main, master]
+    types: [closed]
+  workflow_dispatch:  # Allows manual trigger from GitHub UI
+
+jobs:
+  deploy:
+    # Only run on push to main or when PR is merged
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true) || github.event_name == 'workflow_dispatch'
+    
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Deploy to GCP VM
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.GCP_VM_IP }}
+        username: ${{ secrets.GCP_VM_USER }}
+        key: ${{ secrets.GCP_SSH_KEY }}
+        script: |
+          echo "🚀 Starting deployment..."
+          
+          # Navigate to project directory
+          cd /opt/plantopia/Plantopia
+          
+          # Pull latest code
+          echo "📥 Pulling latest code from GitHub..."
+          git pull origin main || git pull origin master
+          
+          # Activate virtual environment and update dependencies
+          echo "📦 Updating Python dependencies..."
+          source venv/bin/activate
+          pip install -r requirements.txt
+          
+          # Run any database migrations if needed
+          # python manage.py migrate  # Uncomment if using migrations
+          
+          # Restart the application
+          echo "🔄 Restarting application..."
+          sudo supervisorctl restart plantopia
+          
+          # Verify the application is running
+          sleep 5
+          if sudo supervisorctl status plantopia | grep -q RUNNING; then
+            echo "✅ Deployment successful! Application is running."
+          else
+            echo "❌ Deployment may have issues. Check logs:"
+            sudo supervisorctl tail -100 plantopia
+            exit 1
+          fi
+          
+          echo "📊 Deployment completed at $(date)"
+    
+    - name: Health Check
+      run: |
+        sleep 10
+        response=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.GCP_VM_IP }}/docs)
+        if [ $response -eq 200 ]; then
+          echo "✅ Health check passed! API is responding."
+        else
+          echo "⚠️ Health check failed with status code: $response"
+          exit 1
+        fi
