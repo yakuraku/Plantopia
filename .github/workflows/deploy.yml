@@ -1,0 +1,41 @@
+name: Deploy to GCP
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+    types: [closed]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true) || github.event_name == 'workflow_dispatch'
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Deploy to GCP VM using Advanced Script
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.GCP_VM_IP }}
+        username: ${{ secrets.GCP_VM_USER }}
+        key: ${{ secrets.GCP_SSH_KEY }}
+        script: |
+          echo "🚀 Starting production deployment..."
+          echo "Branch: ${{ github.ref_name }}"
+          /opt/plantopia/deploy.sh deploy
+
+    - name: Health Check
+      run: |
+        sleep 10
+        response=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.GCP_VM_IP }}/docs)
+        if [ $response -eq 200 ]; then
+          echo "✅ Health check passed! API is responding."
+        else
+          echo "⚠️ Health check failed with status code: $response"
+          exit 1
+        fi
