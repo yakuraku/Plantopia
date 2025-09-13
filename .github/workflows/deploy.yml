@@ -2,7 +2,7 @@ name: Deploy to GCP
 
 on:
   push:
-    branches: [main, master]  # Triggers on push to main or master
+    branches: [main, master, CICDsunny]  # 临时添加CICDsunny分支用于测试
   pull_request:
     branches: [main, master]
     types: [closed]
@@ -10,15 +10,15 @@ on:
 
 jobs:
   deploy:
-    # Only run on push to main or when PR is merged
+    # Only run on push to main or when PR is merged or push to CICDsunny (for testing)
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true) || github.event_name == 'workflow_dispatch'
-    
+
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-    
+
     - name: Deploy to GCP VM using Advanced Script
       uses: appleboy/ssh-action@v0.1.5
       with:
@@ -27,6 +27,7 @@ jobs:
         key: ${{ secrets.GCP_SSH_KEY }}
         script: |
           echo "🚀 Starting deployment using advanced script..."
+          echo "Branch: ${{ github.ref_name }}"
           /opt/plantopia/deploy.sh deploy
 
     - name: Health Check
@@ -34,8 +35,8 @@ jobs:
         sleep 10
         response=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.GCP_VM_IP }}/docs)
         if [ $response -eq 200 ]; then
-          echo "Health check passed! API is responding."
+          echo "✅ Health check passed! API is responding."
         else
-          echo "Health check failed with status code: $response"
+          echo "⚠️ Health check failed with status code: $response"
           exit 1
         fi
