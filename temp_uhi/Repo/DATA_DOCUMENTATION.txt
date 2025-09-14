@@ -1,0 +1,63 @@
+
+MELBOURNE HEAT ISLAND INTEGRATED DATASET DOCUMENTATION
+=====================================================
+
+DATA SOURCES USED IN CHOROPLETH MAP:
+-----------------------------------
+1. PRIMARY SOURCE: HEAT_URBAN_HEAT_2018.shp
+   - Original shapefile with 55,603 mesh blocks
+   - Contains geographic boundaries (polygons)
+   - Heat intensity data (UHI18_M field)
+   - Vegetation coverage data (multiple fields)
+   - Australian Bureau of Statistics geographic codes
+
+2. PROCESSING APPLIED:
+   - Dissolved mesh blocks by suburb (SA2_NAME16) to create boundaries
+   - Calculated average heat intensity per suburb
+   - Converted coordinate system to WGS84 for web mapping
+   - Added heat categories based on temperature ranges
+
+CHOROPLETH MAP DATA USAGE:
+-------------------------
+• BOUNDARY SHAPES: From dissolved mesh block geometries
+• FILL COLORS: Based on average heat intensity per suburb (UHI18_M field)
+• POPUP DATA: Aggregated vegetation and heat statistics
+• TOOLTIPS: Suburb name and average heat value
+
+CSV FILE CONTENTS:
+-----------------
+1. melbourne_heat_integrated_dataset.csv (55,603 records)
+   - Every individual mesh block with all original data
+   - Added coordinates, area calculations, and categories
+   - Complete dataset for detailed analysis
+
+2. melbourne_suburbs_aggregated.csv (323 records)
+   - One record per suburb with averaged values
+   - Same aggregation used in the choropleth map
+   - Rankings and summary statistics included
+
+FIELD DESCRIPTIONS:
+------------------
+HEAT_INTENSITY_CELSIUS: Urban Heat Island effect in degrees Celsius
+  • Positive values = hotter than surrounding rural areas
+  • Negative values = cooler than surrounding rural areas
+  • Range: -8.92°C to 16.89°C
+
+VEGETATION FIELDS: Percentage coverage of different vegetation types
+  • TOTAL_VEGETATION_PCT: All vegetation combined
+  • TREE_COVERAGE_PCT: All trees combined
+  • Tree height categories: Small (3-10m), Medium (10-15m), Large (15m+)
+
+GEOGRAPHIC CODES:
+  • MB_CODE16: Mesh Block (smallest census unit)
+  • SA2_NAME16: Suburb/locality name (used for choropleth boundaries)
+  • LGA: Local Government Area (council)
+
+HEAT CATEGORIES:
+  • Extreme Heat: 12°C and above (1,806 mesh blocks)
+  • High Heat: 8°C to 12°C (33,777 mesh blocks)
+  • Moderate Heat: 4°C to 8°C (17,700 mesh blocks)
+  • Low Heat: 0°C to 4°C (2,047 mesh blocks)
+  • Cool: Below 0°C (273 mesh blocks)
+
+Generated on: 2025-09-14 18:04:43

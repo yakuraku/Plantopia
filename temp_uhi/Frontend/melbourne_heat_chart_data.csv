@@ -1,0 +1,324 @@
+suburb_id,suburb_name,council,latitude,longitude,heat_intensity,heat_category,heat_rank,vegetation_total,vegetation_rank,tree_coverage,area_hectares
+abbotsford,Abbotsford,Yarra (C),-37.8,145.0,7.88,Moderate Heat,163,20.0,288,11.8,174.05
+airport_west,Airport West,Moonee Valley (C),-37.72,144.88,9.9,High Heat,51,24.6,256,7.2,371.88
+albert_park,Albert Park,Port Phillip (C),-37.85,144.96,6.6,Moderate Heat,219,20.3,285,13.0,467.45
+alphington___fairfield,Alphington - Fairfield,Darebin (C),-37.78,145.02,7.79,Moderate Heat,169,30.3,176,14.8,288.48
+altona,Altona,Hobsons Bay (C),-37.87,144.82,7.41,Moderate Heat,190,35.0,98,8.5,1768.32
+altona_meadows,Altona Meadows,Hobsons Bay (C),-37.88,144.78,9.42,High Heat,76,36.0,88,6.0,1053.9
+altona_north,Altona North,Hobsons Bay (C),-37.83,144.85,8.91,High Heat,106,34.5,105,7.6,1618.3
+ardeer___albion,Ardeer - Albion,Brimbank (C),-37.78,144.81,10.48,High Heat,34,32.7,132,8.4,458.79
+armadale,Armadale,Stonnington (C),-37.86,145.02,7.62,Moderate Heat,180,24.6,257,16.5,218.35
+ascot_vale,Ascot Vale,Moonee Valley (C),-37.78,144.92,9.36,High Heat,80,26.8,227,11.0,383.57
+ashburton_(vic.),Ashburton (Vic.),Boroondara (C),-37.87,145.08,7.82,Moderate Heat,167,32.0,148,17.0,283.62
+ashwood___chadstone,Ashwood - Chadstone,Monash (C),-37.87,145.1,8.41,High Heat,131,28.4,203,13.0,670.83
+aspendale_gardens___waterways,Aspendale Gardens - Waterways,Kingston (C) (Vic.),-38.02,145.12,9.73,High Heat,61,38.8,58,8.5,530.73
+bacchus_marsh,Bacchus Marsh,Moorabool (S),-37.68,144.51,9.6,High Heat,66,38.4,62,6.0,1254.04
+balwyn,Balwyn,Boroondara (C),-37.81,145.08,7.61,Moderate Heat,181,30.5,170,19.2,558.44
+balwyn_north,Balwyn North,Boroondara (C),-37.79,145.08,8.03,High Heat,156,32.4,139,18.2,884.82
+bayswater,Bayswater,Knox (C),-37.85,145.26,8.01,High Heat,158,26.0,238,11.6,804.31
+bayswater_north,Bayswater North,Maroondah (C),-37.83,145.29,7.01,Moderate Heat,205,37.2,74,18.8,990.79
+beaconsfield___officer,Beaconsfield - Officer,Cardinia (S),-38.05,145.4,10.7,High Heat,31,44.6,37,11.2,4117.85
+beaumaris,Beaumaris,Bayside (C),-37.98,145.04,6.61,Moderate Heat,218,34.4,107,19.0,596.78
+belgrave___selby,Belgrave - Selby,Cardinia (S),-37.93,145.4,2.78,Low Heat,251,73.4,3,46.0,322.82
+belgrave___selby,Belgrave - Selby,Yarra Ranges (S),-37.92,145.36,4.63,Moderate Heat,241,65.6,8,45.5,5242.14
+bentleigh___mckinnon,Bentleigh - McKinnon,Glen Eira (C),-37.92,145.04,8.73,High Heat,116,25.3,248,10.4,622.33
+bentleigh_east_(north),Bentleigh East (North),Glen Eira (C),-37.91,145.07,9.13,High Heat,91,25.2,253,9.7,459.88
+bentleigh_east_(south),Bentleigh East (South),Glen Eira (C),-37.93,145.06,9.06,High Heat,96,28.7,200,10.8,458.81
+berwick___north,Berwick - North,Casey (C),-38.03,145.34,10.92,High Heat,23,37.9,67,15.4,1974.8
+berwick___south,Berwick - South,Casey (C),-38.06,145.34,12.51,Extreme Heat,3,38.0,66,9.2,1485.56
+blackburn,Blackburn,Whitehorse (C),-37.82,145.15,7.63,Moderate Heat,179,32.3,141,20.6,860.72
+blackburn_south,Blackburn South,Whitehorse (C),-37.84,145.15,8.17,High Heat,149,32.0,149,17.4,359.66
+boronia,Boronia,Knox (C),-37.86,145.28,7.16,Moderate Heat,199,33.1,125,18.2,1126.23
+box_hill,Box Hill,Whitehorse (C),-37.83,145.12,7.88,Moderate Heat,163,28.8,199,16.3,701.12
+box_hill_north,Box Hill North,Whitehorse (C),-37.81,145.12,8.19,High Heat,147,32.5,137,17.9,620.81
+braeside,Braeside,Kingston (C) (Vic.),-38.0,145.11,9.31,High Heat,82,26.5,232,6.0,908.18
+braybrook,Braybrook,Maribyrnong (C),-37.78,144.86,9.93,High Heat,49,30.5,169,8.1,748.34
+brighton_(vic.),Brighton (Vic.),Bayside (C),-37.91,145.0,7.23,Moderate Heat,197,27.2,222,14.9,820.0
+brighton_east,Brighton East,Bayside (C),-37.92,145.02,8.37,High Heat,134,29.9,183,16.6,560.79
+broadmeadows,Broadmeadows,Hume (C),-37.68,144.92,9.22,High Heat,87,37.4,70,8.4,882.53
+brunswick,Brunswick,Moreland (C),-37.77,144.96,8.95,High Heat,104,18.8,291,8.3,514.2
+brunswick_east,Brunswick East,Moreland (C),-37.77,144.98,8.69,High Heat,118,25.6,241,10.8,216.78
+brunswick_west,Brunswick West,Moreland (C),-37.76,144.94,9.11,High Heat,93,29.5,188,11.9,317.92
+bulleen,Bulleen,Boroondara (C),-37.78,145.09,8.36,High Heat,135,17.5,292,13.8,9.94
+bulleen,Bulleen,Manningham (C),-37.77,145.09,8.51,High Heat,126,31.0,157,14.0,657.11
+bundoora___east,Bundoora - East,Banyule (C),-37.7,145.07,9.22,High Heat,87,29.2,193,11.1,400.11
+bundoora___east,Bundoora - East,Nillumbik (S),-37.69,145.07,8.02,High Heat,157,25.2,252,14.0,7.31
+bundoora___north,Bundoora - North,Whittlesea (C),-37.68,145.07,9.26,High Heat,84,26.0,237,9.2,471.39
+bundoora___west,Bundoora - West,Whittlesea (C),-37.69,145.05,8.96,High Heat,103,33.5,118,10.3,255.97
+bunyip___garfield,Bunyip - Garfield,Cardinia (S),-38.08,145.67,6.25,Moderate Heat,226,46.7,33,15.5,25712.93
+burnside,Burnside,Melton (C),-37.75,144.75,11.35,High Heat,14,25.3,250,5.4,255.15
+burnside_heights,Burnside Heights,Melton (C),-37.73,144.76,11.72,High Heat,6,22.0,277,4.8,199.49
+burwood,Burwood,Whitehorse (C),-37.85,145.11,8.11,High Heat,152,27.4,217,14.0,503.88
+burwood_east,Burwood East,Whitehorse (C),-37.85,145.15,8.52,High Heat,125,29.1,194,13.6,426.25
+cairnlea,Cairnlea,Brimbank (C),-37.76,144.79,11.57,High Heat,9,27.4,219,7.5,440.55
+camberwell,Camberwell,Boroondara (C),-37.84,145.07,7.47,Moderate Heat,187,32.0,149,19.6,729.13
+campbellfield___coolaroo,Campbellfield - Coolaroo,Hume (C),-37.67,144.95,9.21,High Heat,88,31.9,151,5.6,1818.4
+carlton,Carlton,Melbourne (C),-37.8,144.97,8.34,High Heat,137,15.3,297,11.4,181.81
+carlton_north___princes_hill,Carlton North - Princes Hill,Melbourne (C),-37.79,144.96,7.02,Moderate Heat,204,60.8,13,19.4,91.3
+carlton_north___princes_hill,Carlton North - Princes Hill,Yarra (C),-37.79,144.97,8.84,High Heat,109,20.7,284,12.6,139.11
+carnegie,Carnegie,Glen Eira (C),-37.89,145.06,8.53,High Heat,124,24.5,261,11.4,380.43
+caroline_springs,Caroline Springs,Melton (C),-37.74,144.74,9.45,High Heat,75,24.5,260,6.7,695.15
+carrum___patterson_lakes,Carrum - Patterson Lakes,Kingston (C) (Vic.),-38.07,145.14,7.5,Moderate Heat,186,29.7,185,7.9,582.45
+carrum_downs,Carrum Downs,Frankston (C),-38.1,145.18,9.49,High Heat,72,38.9,57,9.4,2030.9
+caulfield___north,Caulfield - North,Glen Eira (C),-37.87,145.02,8.16,High Heat,150,26.8,227,15.6,641.84
+caulfield___south,Caulfield - South,Glen Eira (C),-37.89,145.03,8.73,High Heat,116,25.5,242,12.8,474.24
+chelsea___bonbeach,Chelsea - Bonbeach,Kingston (C) (Vic.),-38.06,145.12,8.64,High Heat,120,32.1,146,7.1,542.32
+chelsea_heights,Chelsea Heights,Kingston (C) (Vic.),-38.04,145.13,9.84,High Heat,56,42.9,43,10.8,319.59
+cheltenham___highett_(east),Cheltenham - Highett (East),Kingston (C) (Vic.),-37.96,145.06,10.05,High Heat,46,23.8,267,9.6,873.77
+cheltenham___highett_(west),Cheltenham - Highett (West),Bayside (C),-37.95,145.04,8.35,High Heat,136,29.2,192,13.7,531.95
+chirnside_park,Chirnside Park,Yarra Ranges (S),-37.75,145.32,7.24,Moderate Heat,196,43.0,41,14.2,2219.95
+clarinda___oakleigh_south,Clarinda - Oakleigh South,Kingston (C) (Vic.),-37.94,145.1,9.92,High Heat,50,32.7,133,8.4,632.23
+clayton,Clayton,Monash (C),-37.92,145.13,9.0,High Heat,100,25.5,243,9.7,941.08
+clayton_south,Clayton South,Kingston (C) (Vic.),-37.94,145.13,9.71,High Heat,62,30.0,181,7.1,793.75
+coburg,Coburg,Moreland (C),-37.75,144.96,9.12,High Heat,92,27.1,225,9.9,693.32
+coburg_north,Coburg North,Moreland (C),-37.73,144.97,9.08,High Heat,95,28.4,204,9.9,487.73
+collingwood,Collingwood,Yarra (C),-37.8,144.99,8.72,High Heat,117,11.5,301,7.6,126.69
+craigieburn___central,Craigieburn - Central,Hume (C),-37.59,144.93,8.47,High Heat,128,27.3,221,7.6,396.8
+craigieburn___north,Craigieburn - North,Hume (C),-37.58,144.93,8.76,High Heat,113,24.2,263,6.9,1334.88
+craigieburn___south,Craigieburn - South,Hume (C),-37.6,144.92,8.79,High Heat,111,28.2,206,7.1,1191.25
+craigieburn___west,Craigieburn - West,Hume (C),-37.58,144.91,9.2,High Heat,89,16.9,294,2.6,621.07
+cranbourne,Cranbourne,Casey (C),-38.1,145.28,11.67,High Heat,8,35.2,95,10.1,1302.77
+cranbourne_east,Cranbourne East,Casey (C),-38.11,145.32,13.84,Extreme Heat,1,29.4,189,3.6,4289.27
+cranbourne_north,Cranbourne North,Casey (C),-38.08,145.29,12.41,Extreme Heat,5,34.2,110,7.5,1023.96
+cranbourne_south,Cranbourne South,Casey (C),-38.15,145.27,8.83,High Heat,110,48.6,30,12.7,8167.06
+cranbourne_west,Cranbourne West,Casey (C),-38.1,145.25,10.38,High Heat,35,32.8,131,4.9,1289.88
+croydon___east,Croydon - East,Maroondah (C),-37.8,145.29,7.29,Moderate Heat,193,33.1,124,19.0,809.73
+croydon___west,Croydon - West,Maroondah (C),-37.79,145.28,7.1,Moderate Heat,200,34.5,106,19.8,679.73
+croydon_hills___warranwood,Croydon Hills - Warranwood,Maroondah (C),-37.77,145.27,6.79,Moderate Heat,212,41.0,49,25.1,949.09
+croydon_south,Croydon South,Maroondah (C),-37.82,145.28,6.63,Moderate Heat,217,37.2,75,21.2,285.57
+dandenong,Dandenong,Greater Dandenong (C),-37.99,145.21,9.2,High Heat,89,26.6,230,7.3,6182.59
+dandenong_north,Dandenong North,Greater Dandenong (C),-37.96,145.21,8.61,High Heat,121,33.8,116,9.2,945.86
+deer_park___derrimut,Deer Park - Derrimut,Brimbank (C),-37.77,144.77,11.1,High Heat,17,25.4,245,5.3,2133.22
+delahey,Delahey,Brimbank (C),-37.72,144.77,11.41,High Heat,13,25.4,246,5.2,350.51
+dingley_village,Dingley Village,Kingston (C) (Vic.),-37.98,145.13,9.77,High Heat,58,38.6,61,13.0,724.37
+docklands,Docklands,Melbourne (C),-37.82,144.94,6.06,Moderate Heat,229,12.1,299,5.7,244.38
+doncaster,Doncaster,Boroondara (C),-37.79,145.1,9.75,High Heat,59,11.2,302,8.9,6.23
+doncaster,Doncaster,Manningham (C),-37.79,145.12,8.53,High Heat,124,27.4,218,13.7,870.55
+doncaster,Doncaster,Whitehorse (C),-37.8,145.12,7.51,Moderate Heat,185,54.1,24,40.9,0.44
+doncaster_east_(north),Doncaster East (North),Manningham (C),-37.77,145.17,8.49,High Heat,127,36.0,89,17.4,640.18
+doncaster_east_(south),Doncaster East (South),Manningham (C),-37.79,145.16,8.73,High Heat,116,26.4,233,13.4,476.76
+donvale___park_orchards,Donvale - Park Orchards,Manningham (C),-37.79,145.2,6.46,Moderate Heat,221,44.4,38,27.2,2079.99
+doreen,Doreen,Whittlesea (C),-37.6,145.13,10.06,High Heat,45,29.0,197,7.3,1445.94
+doveton,Doveton,Casey (C),-37.99,145.24,8.16,High Heat,150,36.3,86,10.5,519.34
+dromana,Dromana,Mornington Peninsula (S),-38.33,144.98,4.65,Moderate Heat,240,50.3,28,16.8,4506.82
+east_melbourne,East Melbourne,Melbourne (C),-37.81,144.98,7.68,Moderate Heat,177,25.3,249,17.4,289.96
+edithvale___aspendale,Edithvale - Aspendale,Kingston (C) (Vic.),-38.03,145.11,7.93,Moderate Heat,160,29.8,184,7.4,510.01
+elsternwick,Elsternwick,Glen Eira (C),-37.89,145.01,8.18,High Heat,148,25.9,239,14.4,286.15
+eltham,Eltham,Nillumbik (S),-37.71,145.15,7.07,Moderate Heat,201,41.4,47,29.8,1948.53
+elwood,Elwood,Port Phillip (C),-37.88,144.99,6.48,Moderate Heat,220,29.2,191,20.0,255.25
+emerald___cockatoo,Emerald - Cockatoo,Cardinia (S),-37.95,145.47,4.09,Moderate Heat,247,69.1,4,43.2,24417.31
+emerald___cockatoo,Emerald - Cockatoo,Yarra Ranges (S),-37.9,145.45,2.28,Low Heat,252,80.7,2,59.0,298.75
+endeavour_hills___north,Endeavour Hills - North,Casey (C),-37.97,145.26,7.85,Moderate Heat,165,45.8,34,13.0,1447.45
+endeavour_hills___south,Endeavour Hills - South,Casey (C),-37.98,145.26,8.69,High Heat,118,36.7,85,11.2,558.73
+epping___east,Epping - East,Whittlesea (C),-37.64,145.04,9.0,High Heat,100,30.8,163,7.9,776.73
+epping___south,Epping - South,Whittlesea (C),-37.65,145.03,9.23,High Heat,86,33.0,126,7.3,1586.86
+epping___west,Epping - West,Whittlesea (C),-37.63,145.01,9.53,High Heat,69,27.8,211,5.4,735.59
+essendon___aberfeldie,Essendon - Aberfeldie,Moonee Valley (C),-37.75,144.91,9.51,High Heat,70,27.7,213,10.8,844.2
+essendon_airport,Essendon Airport,Moonee Valley (C),-37.73,144.9,11.22,High Heat,16,37.1,76,1.4,335.44
+fawkner,Fawkner,Moreland (C),-37.71,144.97,9.37,High Heat,79,33.8,116,7.4,508.41
+ferntree_gully_(north),Ferntree Gully (North),Knox (C),-37.88,145.28,6.74,Moderate Heat,215,35.6,93,18.5,698.44
+ferntree_gully_(south)___upper_ferntree_gully,Ferntree Gully (South) - Upper Ferntree Gully,Knox (C),-37.89,145.28,7.0,Moderate Heat,206,38.2,63,16.5,914.97
+fitzroy,Fitzroy,Yarra (C),-37.8,144.98,8.23,High Heat,144,15.0,298,10.8,137.77
+fitzroy_north,Fitzroy North,Moreland (C),-37.77,144.98,7.75,Moderate Heat,173,37.0,77,15.6,16.07
+fitzroy_north,Fitzroy North,Yarra (C),-37.78,144.98,8.33,High Heat,138,24.9,255,13.9,234.41
+flemington,Flemington,Moonee Valley (C),-37.78,144.93,8.74,High Heat,115,29.0,196,17.5,158.06
+flemington_racecourse,Flemington Racecourse,Melbourne (C),-37.79,144.91,8.99,High Heat,101,44.1,39,7.3,170.91
+flinders,Flinders,Mornington Peninsula (S),-38.43,144.99,0.74,Low Heat,254,65.2,9,27.6,28746.17
+footscray,Footscray,Maribyrnong (C),-37.8,144.9,9.54,High Heat,68,20.9,283,8.2,496.65
+forest_hill,Forest Hill,Whitehorse (C),-37.84,145.17,8.03,High Heat,156,32.1,144,16.7,407.02
+frankston,Frankston,Frankston (C),-38.15,145.14,8.02,High Heat,157,30.0,182,14.9,1162.61
+frankston_north,Frankston North,Frankston (C),-38.14,145.15,8.73,High Heat,116,34.0,113,15.1,1323.93
+frankston_south,Frankston South,Frankston (C),-38.17,145.13,6.46,Moderate Heat,221,44.6,36,22.6,1456.21
+gisborne,Gisborne,Macedon Ranges (S),-37.52,144.6,6.41,Moderate Heat,223,32.1,145,12.6,8076.87
+gladstone_park___westmeadows,Gladstone Park - Westmeadows,Hume (C),-37.68,144.89,10.0,High Heat,47,38.7,59,9.2,1393.4
+glen_iris___east,Glen Iris - East,Boroondara (C),-37.85,145.07,7.33,Moderate Heat,192,34.4,108,20.6,570.45
+glen_waverley___east,Glen Waverley - East,Monash (C),-37.88,145.18,8.27,High Heat,141,35.6,94,15.6,916.38
+glen_waverley___west,Glen Waverley - West,Monash (C),-37.88,145.16,8.22,High Heat,145,29.9,183,14.8,767.55
+glenroy,Glenroy,Moreland (C),-37.7,144.92,9.64,High Heat,64,33.1,123,8.4,885.69
+gowanbrae,Gowanbrae,Moreland (C),-37.7,144.9,10.91,High Heat,24,30.6,167,5.5,152.25
+greensborough,Greensborough,Banyule (C),-37.7,145.11,8.33,High Heat,138,33.2,121,20.5,1009.59
+greenvale___bulla,Greenvale - Bulla,Hume (C),-37.64,144.89,9.33,High Heat,81,37.0,78,8.0,9588.81
+hadfield,Hadfield,Moreland (C),-37.71,144.95,9.53,High Heat,69,31.2,155,6.8,304.98
+hallam,Hallam,Casey (C),-38.01,145.27,9.12,High Heat,92,33.2,122,8.5,805.66
+hampton,Hampton,Bayside (C),-37.94,145.01,7.79,Moderate Heat,169,29.7,185,14.3,568.45
+hampton_park___lynbrook,Hampton Park - Lynbrook,Casey (C),-38.04,145.27,9.46,High Heat,74,39.3,55,8.7,1334.27
+hastings___somers,Hastings - Somers,Mornington Peninsula (S),-38.34,145.17,4.78,Moderate Heat,239,57.3,18,23.4,10873.55
+hawthorn,Hawthorn,Boroondara (C),-37.82,145.03,7.42,Moderate Heat,189,28.2,207,17.8,567.14
+hawthorn_east,Hawthorn East,Boroondara (C),-37.83,145.05,7.52,Moderate Heat,184,26.2,235,16.2,382.36
+healesville___yarra_glen,Healesville - Yarra Glen,Yarra Ranges (S),-37.66,145.49,4.6,Moderate Heat,242,62.8,11,28.8,12951.6
+heidelberg___rosanna,Heidelberg - Rosanna,Banyule (C),-37.75,145.07,8.31,High Heat,140,32.5,136,17.6,637.12
+heidelberg_west,Heidelberg West,Banyule (C),-37.74,145.05,8.19,High Heat,147,32.4,138,13.6,669.07
+hillside,Hillside,Melton (C),-37.7,144.74,10.31,High Heat,37,20.3,286,4.7,6653.76
+hoppers_crossing___north,Hoppers Crossing - North,Wyndham (C),-37.86,144.7,9.55,High Heat,67,27.8,211,6.5,1091.28
+hoppers_crossing___south,Hoppers Crossing - South,Wyndham (C),-37.87,144.69,8.39,High Heat,133,26.9,226,7.7,701.07
+hughesdale,Hughesdale,Monash (C),-37.9,145.08,8.55,High Heat,123,25.4,247,11.7,200.94
+hurstbridge,Hurstbridge,Nillumbik (S),-37.64,145.19,5.76,Moderate Heat,232,56.5,19,34.7,1483.94
+ivanhoe,Ivanhoe,Banyule (C),-37.77,145.04,7.75,Moderate Heat,173,35.8,90,19.1,504.96
+ivanhoe_east___eaglemont,Ivanhoe East - Eaglemont,Banyule (C),-37.77,145.06,7.06,Moderate Heat,202,41.9,45,25.5,427.68
+keilor,Keilor,Brimbank (C),-37.72,144.84,9.8,High Heat,57,34.0,114,10.9,1654.75
+keilor,Keilor,Hume (C),-37.71,144.85,8.2,High Heat,146,10.9,303,2.6,96.25
+keilor_downs,Keilor Downs,Brimbank (C),-37.72,144.81,10.81,High Heat,27,31.0,158,7.5,765.9
+keilor_east,Keilor East,Moonee Valley (C),-37.75,144.86,10.1,High Heat,42,32.6,134,8.1,1089.02
+kensington_(vic.),Kensington (Vic.),Melbourne (C),-37.79,144.93,9.1,High Heat,94,25.0,254,14.8,213.61
+kensington_(vic.),Kensington (Vic.),Moonee Valley (C),-37.79,144.93,9.04,High Heat,97,9.3,305,7.8,1.06
+kew,Kew,Boroondara (C),-37.8,145.04,7.54,Moderate Heat,183,33.3,120,19.4,1053.26
+kew_east,Kew East,Boroondara (C),-37.79,145.05,7.64,Moderate Heat,178,36.9,80,20.3,401.5
+keysborough,Keysborough,Greater Dandenong (C),-38.0,145.17,9.97,High Heat,48,35.6,92,6.8,3027.96
+kilsyth,Kilsyth,Yarra Ranges (S),-37.81,145.32,6.67,Moderate Heat,216,40.3,51,19.4,824.15
+kinglake,Kinglake,Murrindindi (S),-37.53,145.33,0.03,Low Heat,255,66.7,6,27.9,935.27
+kings_park_(vic.),Kings Park (Vic.),Brimbank (C),-37.74,144.77,10.97,High Heat,20,27.5,215,5.5,443.21
+kingsbury,Kingsbury,Darebin (C),-37.71,145.05,8.75,High Heat,114,35.2,96,14.2,900.8
+knoxfield___scoresby,Knoxfield - Scoresby,Knox (C),-37.89,145.24,7.88,Moderate Heat,163,28.9,198,12.3,1526.42
+koo_wee_rup,Koo Wee Rup,Cardinia (S),-38.19,145.48,10.27,High Heat,38,30.3,175,6.5,11189.97
+lalor,Lalor,Whittlesea (C),-37.67,145.01,9.38,High Heat,78,30.6,168,5.3,1205.76
+langwarrin,Langwarrin,Frankston (C),-38.15,145.19,8.02,High Heat,157,41.7,46,18.1,3762.35
+laverton,Laverton,Hobsons Bay (C),-37.86,144.77,9.66,High Heat,63,34.5,104,8.7,202.44
+laverton,Laverton,Wyndham (C),-37.85,144.77,10.86,High Heat,26,21.7,279,2.7,2021.83
+lilydale___coldstream,Lilydale - Coldstream,Yarra Ranges (S),-37.75,145.36,6.96,Moderate Heat,207,45.0,35,18.5,10936.51
+lynbrook___lyndhurst,Lynbrook - Lyndhurst,Casey (C),-38.06,145.25,10.22,High Heat,41,32.8,130,6.3,735.85
+lysterfield,Lysterfield,Knox (C),-37.92,145.28,7.28,Moderate Heat,194,47.5,32,16.5,1410.32
+lysterfield,Lysterfield,Yarra Ranges (S),-37.92,145.31,3.64,Low Heat,248,94.1,1,5.5,439.02
+malvern___glen_iris,Malvern - Glen Iris,Stonnington (C),-37.86,145.04,7.83,Moderate Heat,166,28.0,210,17.4,615.48
+malvern_east,Malvern East,Stonnington (C),-37.88,145.06,7.88,Moderate Heat,163,30.9,161,17.5,756.68
+maribyrnong,Maribyrnong,Maribyrnong (C),-37.78,144.89,10.07,High Heat,44,30.4,173,9.4,549.27
+meadow_heights,Meadow Heights,Hume (C),-37.65,144.92,9.6,High Heat,66,39.9,53,6.8,462.41
+melbourne,Melbourne,Melbourne (C),-37.81,144.96,7.26,Moderate Heat,195,6.9,306,5.9,236.89
+melbourne_airport,Melbourne Airport,Hume (C),-37.68,144.84,10.78,High Heat,29,37.2,74,4.0,3037.98
+melton,Melton,Melton (C),-37.67,144.59,10.9,High Heat,25,27.2,224,7.9,13068.12
+melton_south,Melton South,Melton (C),-37.71,144.56,10.96,High Heat,21,23.6,270,5.4,8398.99
+melton_west,Melton West,Melton (C),-37.67,144.56,11.45,High Heat,11,24.4,262,4.9,2419.73
+mentone,Mentone,Kingston (C) (Vic.),-37.98,145.07,8.77,High Heat,112,24.1,264,10.4,445.0
+mernda,Mernda,Whittlesea (C),-37.6,145.09,10.32,High Heat,36,27.8,212,6.3,2381.87
+mickleham___yuroke,Mickleham - Yuroke,Hume (C),-37.56,144.9,8.51,High Heat,126,26.7,229,6.1,7061.78
+mill_park___north,Mill Park - North,Whittlesea (C),-37.66,145.06,9.01,High Heat,99,28.1,209,9.4,813.44
+mill_park___south,Mill Park - South,Whittlesea (C),-37.67,145.06,9.25,High Heat,85,32.5,137,9.9,492.91
+mitcham_(vic.),Mitcham (Vic.),Whitehorse (C),-37.82,145.2,7.72,Moderate Heat,174,32.8,129,20.2,662.62
+monbulk___silvan,Monbulk - Silvan,Yarra Ranges (S),-37.87,145.43,5.16,Moderate Heat,235,56.5,20,31.7,6855.02
+montmorency___briar_hill,Montmorency - Briar Hill,Banyule (C),-37.72,145.12,7.86,Moderate Heat,164,37.6,69,25.2,1202.65
+montrose,Montrose,Yarra Ranges (S),-37.81,145.35,4.42,Moderate Heat,245,58.4,16,38.2,1054.24
+moonee_ponds,Moonee Ponds,Moonee Valley (C),-37.77,144.92,9.5,High Heat,71,23.4,272,9.8,435.46
+moorabbin___heatherton,Moorabbin - Heatherton,Kingston (C) (Vic.),-37.94,145.06,9.47,High Heat,73,26.0,236,9.0,1169.95
+moorabbin_airport,Moorabbin Airport,Kingston (C) (Vic.),-37.98,145.09,11.3,High Heat,15,31.1,156,2.6,307.55
+mooroolbark,Mooroolbark,Yarra Ranges (S),-37.78,145.32,7.0,Moderate Heat,206,40.4,50,18.6,1254.22
+mordialloc___parkdale,Mordialloc - Parkdale,Kingston (C) (Vic.),-38.0,145.09,8.72,High Heat,117,26.6,231,10.0,796.81
+mornington,Mornington,Mornington Peninsula (S),-38.23,145.05,7.24,Moderate Heat,196,28.2,208,12.6,2109.66
+mount_dandenong___olinda,Mount Dandenong - Olinda,Yarra Ranges (S),-37.86,145.37,1.02,Low Heat,253,68.1,5,51.4,8189.34
+mount_eliza,Mount Eliza,Mornington Peninsula (S),-38.19,145.09,5.82,Moderate Heat,231,48.1,31,22.7,2321.05
+mount_evelyn,Mount Evelyn,Yarra Ranges (S),-37.79,145.38,5.11,Moderate Heat,237,54.0,25,37.4,1698.74
+mount_martha,Mount Martha,Mornington Peninsula (S),-38.27,145.02,5.13,Moderate Heat,236,50.1,29,20.0,3021.59
+mount_waverley___north,Mount Waverley - North,Monash (C),-37.87,145.13,8.04,High Heat,155,30.7,165,16.9,648.37
+mount_waverley___south,Mount Waverley - South,Monash (C),-37.89,145.13,8.12,High Heat,151,29.4,189,14.7,870.0
+mulgrave,Mulgrave,Monash (C),-37.93,145.18,8.69,High Heat,118,34.1,112,11.0,1071.83
+murrumbeena,Murrumbeena,Glen Eira (C),-37.9,145.07,8.43,High Heat,130,27.4,218,13.9,251.45
+narre_warren___north_east,Narre Warren - North East,Casey (C),-38.01,145.31,11.47,High Heat,10,36.7,84,9.8,487.4
+narre_warren___south_west,Narre Warren - South West,Casey (C),-38.02,145.31,11.04,High Heat,18,36.8,81,10.9,930.54
+narre_warren_north,Narre Warren North,Casey (C),-37.99,145.31,7.96,Moderate Heat,159,60.7,14,16.3,3440.85
+narre_warren_south_(east),Narre Warren South (East),Casey (C),-38.06,145.31,12.89,Extreme Heat,2,37.3,72,10.1,622.06
+narre_warren_south_(west),Narre Warren South (West),Casey (C),-38.05,145.29,12.48,Extreme Heat,4,38.2,64,8.6,677.72
+newport,Newport,Hobsons Bay (C),-37.84,144.88,7.47,Moderate Heat,187,32.9,127,10.3,884.0
+niddrie___essendon_west,Niddrie - Essendon West,Moonee Valley (C),-37.74,144.89,9.74,High Heat,60,30.7,166,9.3,280.27
+noble_park___east,Noble Park - East,Greater Dandenong (C),-37.96,145.18,8.87,High Heat,108,31.8,153,10.8,376.69
+noble_park___west,Noble Park - West,Greater Dandenong (C),-37.97,145.17,9.47,High Heat,73,30.3,174,8.1,479.45
+noble_park_north,Noble Park North,Greater Dandenong (C),-37.95,145.19,8.55,High Heat,123,34.8,102,9.0,375.74
+north_melbourne,North Melbourne,Melbourne (C),-37.8,144.95,8.74,High Heat,115,19.0,290,13.7,324.91
+northcote,Northcote,Darebin (C),-37.77,145.0,7.9,Moderate Heat,162,30.5,171,13.6,614.45
+nunawading,Nunawading,Manningham (C),-37.8,145.18,8.03,High Heat,156,38.1,65,22.4,12.66
+nunawading,Nunawading,Whitehorse (C),-37.82,145.18,7.92,Moderate Heat,161,28.3,205,16.3,495.12
+oakleigh___huntingdale,Oakleigh - Huntingdale,Monash (C),-37.91,145.1,8.69,High Heat,118,24.6,258,10.5,1016.95
+ormond___glen_huntly,Ormond - Glen Huntly,Glen Eira (C),-37.9,145.04,8.98,High Heat,102,24.5,259,12.7,293.7
+pakenham___north,Pakenham - North,Cardinia (S),-38.06,145.49,11.67,High Heat,8,30.3,176,7.9,3722.23
+pakenham___south,Pakenham - South,Cardinia (S),-38.08,145.47,11.7,High Heat,7,30.8,162,6.3,4976.05
+panton_hill___st_andrews,Panton Hill - St Andrews,Nillumbik (S),-37.61,145.26,4.55,Moderate Heat,244,63.7,10,32.1,29214.15
+parkville,Parkville,Melbourne (C),-37.79,144.95,8.65,High Heat,119,32.2,142,16.8,404.86
+pascoe_vale,Pascoe Vale,Moreland (C),-37.72,144.93,9.37,High Heat,79,32.9,128,10.6,698.32
+pascoe_vale_south,Pascoe Vale South,Moreland (C),-37.74,144.94,9.06,High Heat,96,31.0,159,10.6,298.86
+pearcedale___tooradin,Pearcedale - Tooradin,Casey (C),-38.21,145.3,7.71,Moderate Heat,175,51.3,27,17.0,9852.49
+plenty___yarrambat,Plenty - Yarrambat,Nillumbik (S),-37.67,145.11,7.77,Moderate Heat,171,36.9,79,20.5,2911.19
+point_cook___east,Point Cook - East,Wyndham (C),-37.9,144.77,8.61,High Heat,121,25.7,240,3.1,1903.48
+point_cook___north,Point Cook - North,Wyndham (C),-37.89,144.74,11.03,High Heat,19,23.9,265,5.3,849.0
+point_cook___south,Point Cook - South,Wyndham (C),-37.9,144.73,11.1,High Heat,17,19.7,289,2.8,942.18
+point_nepean,Point Nepean,Mornington Peninsula (S),-38.37,144.79,3.07,Low Heat,250,40.0,52,22.2,6720.54
+port_melbourne,Port Melbourne,Port Phillip (C),-37.84,144.94,6.8,Moderate Heat,211,23.2,273,11.9,278.91
+port_melbourne_industrial,Port Melbourne Industrial,Melbourne (C),-37.83,144.92,6.78,Moderate Heat,213,10.3,304,3.6,498.61
+port_melbourne_industrial,Port Melbourne Industrial,Port Phillip (C),-37.83,144.93,7.76,Moderate Heat,172,21.9,278,7.2,188.28
+prahran___windsor,Prahran - Windsor,Stonnington (C),-37.85,145.0,7.69,Moderate Heat,176,21.2,280,14.1,290.5
+preston___east,Preston - East,Darebin (C),-37.74,145.01,8.83,High Heat,110,23.8,268,8.2,774.46
+preston___west,Preston - West,Darebin (C),-37.74,144.99,8.6,High Heat,122,32.1,147,10.6,356.74
+research___north_warrandyte,Research - North Warrandyte,Nillumbik (S),-37.71,145.2,4.89,Moderate Heat,238,54.6,23,36.3,4978.74
+reservoir___east,Reservoir - East,Darebin (C),-37.72,145.02,8.98,High Heat,102,33.4,119,9.2,896.45
+reservoir___west,Reservoir - West,Darebin (C),-37.71,145.0,8.76,High Heat,113,33.8,117,8.7,1015.29
+richmond_(vic.),Richmond (Vic.),Yarra (C),-37.82,145.0,8.24,High Heat,143,15.9,296,9.1,621.19
+ringwood,Ringwood,Maroondah (C),-37.81,145.23,7.52,Moderate Heat,184,26.3,234,15.5,990.97
+ringwood_east,Ringwood East,Maroondah (C),-37.82,145.25,6.76,Moderate Heat,214,34.8,101,22.6,939.23
+ringwood_north,Ringwood North,Maroondah (C),-37.8,145.23,6.45,Moderate Heat,222,37.3,73,24.6,473.04
+rockbank___mount_cottrell,Rockbank - Mount Cottrell,Melton (C),-37.76,144.69,10.25,High Heat,39,24.5,261,2.5,12574.47
+rosebud___mccrae,Rosebud - McCrae,Mornington Peninsula (S),-38.37,144.9,5.2,Moderate Heat,234,39.7,54,19.0,2380.16
+rowville___central,Rowville - Central,Knox (C),-37.92,145.25,7.92,Moderate Heat,161,32.2,143,12.4,819.99
+rowville___north,Rowville - North,Knox (C),-37.91,145.26,7.85,Moderate Heat,165,35.0,99,11.1,416.85
+rowville___south,Rowville - South,Knox (C),-37.93,145.24,8.09,High Heat,153,37.3,71,13.7,935.29
+roxburgh_park___somerton,Roxburgh Park - Somerton,Hume (C),-37.63,144.93,9.39,High Heat,77,29.4,190,7.0,1228.75
+sandringham___black_rock,Sandringham - Black Rock,Bayside (C),-37.96,145.02,6.32,Moderate Heat,224,34.1,111,16.1,643.0
+seabrook,Seabrook,Hobsons Bay (C),-37.88,144.76,9.62,High Heat,65,43.0,42,9.0,161.95
+seaford_(vic.),Seaford (Vic.),Frankston (C),-38.11,145.14,7.78,Moderate Heat,170,37.7,68,13.0,1243.31
+seddon___kingsville,Seddon - Kingsville,Maribyrnong (C),-37.81,144.89,8.16,High Heat,150,21.2,281,9.4,167.98
+skye___sandhurst,Skye - Sandhurst,Frankston (C),-38.1,145.2,9.86,High Heat,55,43.4,40,9.0,1981.67
+somerville,Somerville,Mornington Peninsula (S),-38.23,145.17,6.01,Moderate Heat,230,53.6,26,16.0,11737.38
+south_melbourne,South Melbourne,Port Phillip (C),-37.83,144.96,8.39,High Heat,133,17.0,293,12.4,249.44
+south_morang_(north),South Morang (North),Whittlesea (C),-37.63,145.08,9.88,High Heat,53,30.9,160,7.7,1370.71
+south_morang_(south),South Morang (South),Whittlesea (C),-37.65,145.09,9.39,High Heat,77,27.2,223,9.3,774.29
+south_yarra___east,South Yarra - East,Stonnington (C),-37.84,144.99,7.26,Moderate Heat,195,23.7,269,17.1,251.7
+south_yarra___west,South Yarra - West,Melbourne (C),-37.84,144.98,7.05,Moderate Heat,203,25.3,251,18.6,150.23
+southbank,Southbank,Melbourne (C),-37.83,144.96,7.22,Moderate Heat,198,11.6,300,7.3,307.38
+springvale,Springvale,Greater Dandenong (C),-37.95,145.15,9.27,High Heat,83,31.1,156,7.5,1110.49
+springvale_south,Springvale South,Greater Dandenong (C),-37.97,145.15,9.87,High Heat,54,34.2,109,8.8,456.0
+st_albans___north,St Albans - North,Brimbank (C),-37.74,144.8,10.61,High Heat,33,27.4,216,6.6,652.15
+st_albans___south,St Albans - South,Brimbank (C),-37.75,144.81,10.95,High Heat,22,29.7,187,5.4,626.39
+st_kilda,St Kilda,Port Phillip (C),-37.86,144.98,7.63,Moderate Heat,179,21.0,282,15.0,390.06
+st_kilda_east,St Kilda East,Port Phillip (C),-37.87,145.0,8.09,High Heat,153,22.3,275,15.0,241.34
+strathmore,Strathmore,Moonee Valley (C),-37.73,144.91,9.92,High Heat,50,35.7,91,13.2,414.39
+sunbury,Sunbury,Hume (C),-37.57,144.74,8.45,High Heat,129,29.7,186,13.7,12462.14
+sunbury___south,Sunbury - South,Hume (C),-37.58,144.71,9.19,High Heat,90,24.1,264,10.0,7922.77
+sunbury___south,Sunbury - South,Melton (C),-37.62,144.71,10.22,High Heat,41,25.4,244,5.7,5188.23
+sunshine,Sunshine,Brimbank (C),-37.79,144.83,10.09,High Heat,43,30.1,179,9.1,473.18
+sunshine_north,Sunshine North,Brimbank (C),-37.76,144.84,10.63,High Heat,32,26.7,228,5.0,802.26
+sunshine_west,Sunshine West,Brimbank (C),-37.8,144.81,10.23,High Heat,40,32.8,129,6.7,1296.71
+surrey_hills_(east)___mont_albert,Surrey Hills (East) - Mont Albert,Whitehorse (C),-37.82,145.11,7.58,Moderate Heat,182,33.2,121,21.4,332.75
+surrey_hills_(west)___canterbury,Surrey Hills (West) - Canterbury,Boroondara (C),-37.82,145.08,6.85,Moderate Heat,210,32.6,135,22.4,570.2
+sydenham,Sydenham,Brimbank (C),-37.7,144.76,11.57,High Heat,9,22.1,276,5.6,394.73
+tarneit,Tarneit,Wyndham (C),-37.85,144.67,8.87,High Heat,108,20.2,287,3.3,6213.61
+taylors_hill,Taylors Hill,Melton (C),-37.71,144.75,10.8,High Heat,28,23.6,271,5.0,596.68
+taylors_lakes,Taylors Lakes,Brimbank (C),-37.7,144.79,10.75,High Heat,30,30.4,172,7.2,1846.01
+templestowe,Templestowe,Manningham (C),-37.76,145.15,8.32,High Heat,139,39.1,56,18.7,1611.49
+templestowe_lower,Templestowe Lower,Manningham (C),-37.77,145.11,8.9,High Heat,107,30.8,164,15.7,593.81
+the_basin,The Basin,Knox (C),-37.86,145.31,4.36,Moderate Heat,246,55.0,21,35.5,571.56
+thomastown,Thomastown,Whittlesea (C),-37.68,145.01,9.25,High Heat,85,28.5,202,5.3,1468.17
+thornbury,Thornbury,Darebin (C),-37.76,145.0,8.41,High Heat,131,28.7,201,11.1,499.62
+toorak,Toorak,Stonnington (C),-37.84,145.01,6.92,Moderate Heat,208,32.0,150,22.8,432.29
+truganina,Truganina,Wyndham (C),-37.85,144.73,11.44,High Heat,12,23.0,274,2.4,2716.23
+tullamarine,Tullamarine,Hume (C),-37.7,144.88,9.89,High Heat,52,27.3,220,7.0,385.91
+upwey___tecoma,Upwey - Tecoma,Yarra Ranges (S),-37.91,145.33,4.56,Moderate Heat,243,60.4,15,44.2,889.03
+vermont,Vermont,Maroondah (C),-37.84,145.21,7.39,Moderate Heat,191,42.8,44,19.5,22.25
+vermont,Vermont,Whitehorse (C),-37.84,145.2,7.63,Moderate Heat,179,36.2,87,19.6,438.68
+vermont_south,Vermont South,Whitehorse (C),-37.85,145.19,8.2,High Heat,146,36.8,83,17.0,618.37
+viewbank___yallambie,Viewbank - Yallambie,Banyule (C),-37.73,145.09,8.61,High Heat,121,33.9,115,17.5,1023.67
+wallan,Wallan,Mitchell (S),-37.41,144.98,6.13,Moderate Heat,228,34.9,100,9.6,17558.64
+wandin___seville,Wandin - Seville,Yarra Ranges (S),-37.78,145.45,6.28,Moderate Heat,225,54.7,22,24.3,11174.13
+wantirna,Wantirna,Knox (C),-37.85,145.23,8.03,High Heat,156,31.6,154,15.2,830.57
+wantirna_south,Wantirna South,Knox (C),-37.87,145.23,8.25,High Heat,142,30.2,178,13.0,1335.47
+warrandyte___wonga_park,Warrandyte - Wonga Park,Manningham (C),-37.75,145.23,5.13,Moderate Heat,236,57.4,17,34.3,4390.62
+warrandyte___wonga_park,Warrandyte - Wonga Park,Yarra Ranges (S),-37.76,145.29,5.55,Moderate Heat,233,66.6,7,21.8,184.66
+watsonia,Watsonia,Banyule (C),-37.71,145.08,9.02,High Heat,98,29.0,195,14.2,378.49
+wattle_glen___diamond_creek,Wattle Glen - Diamond Creek,Nillumbik (S),-37.67,145.16,7.45,Moderate Heat,188,41.2,48,23.3,2681.98
+werribee___east,Werribee - East,Wyndham (C),-37.89,144.66,7.63,Moderate Heat,179,30.0,180,8.3,775.65
+werribee___south,Werribee - South,Wyndham (C),-37.92,144.67,6.9,Moderate Heat,209,35.1,97,9.4,11402.98
+werribee___west,Werribee - West,Wyndham (C),-37.9,144.64,8.07,High Heat,154,34.6,103,9.4,5989.36
+west_footscray___tottenham,West Footscray - Tottenham,Maribyrnong (C),-37.8,144.87,9.66,High Heat,63,27.5,214,8.7,598.01
+west_melbourne,West Melbourne,Melbourne (C),-37.81,144.92,7.24,Moderate Heat,196,5.5,307,2.1,619.86
+wheelers_hill,Wheelers Hill,Monash (C),-37.91,145.18,8.25,High Heat,142,36.8,82,15.9,1043.86
+whittlesea,Whittlesea,Whittlesea (C),-37.51,145.11,7.93,Moderate Heat,160,38.6,60,12.6,22016.33
+williamstown,Williamstown,Hobsons Bay (C),-37.86,144.89,6.16,Moderate Heat,227,32.3,140,9.9,734.6
+wollert,Wollert,Whittlesea (C),-37.61,145.02,10.0,High Heat,47,16.2,295,1.9,5388.11
+wyndham_vale,Wyndham Vale,Wyndham (C),-37.88,144.61,8.94,High Heat,105,23.9,266,4.9,7113.1
+yarra___north,Yarra - North,Yarra (C),-37.79,145.01,7.81,Moderate Heat,168,31.9,152,16.3,520.84
+yarra_valley,Yarra Valley,Yarra Ranges (S),-37.78,145.63,3.6,Low Heat,249,61.1,12,35.0,33380.98
+yarraville,Yarraville,Maribyrnong (C),-37.82,144.88,8.4,High Heat,132,30.2,177,10.8,561.93

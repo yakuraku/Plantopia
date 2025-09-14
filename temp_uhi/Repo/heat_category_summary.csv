@@ -1,0 +1,5 @@
+category,suburb_count,avg_heat,avg_vegetation,total_area,color
+Extreme Heat,5,12.83,35.42,8098.57,#8B0000
+High Heat,202,9.34,29.36,288488.96,#FF0000
+Low Heat,8,2.14,68.66,79032.89,#FFD700
+Moderate Heat,108,6.87,37.44,308997.84,#FF8C00
