@@ -15,7 +15,14 @@ class Settings:
     VERSION: str = "1.0.0"
     
     # CORS Settings
-    BACKEND_CORS_ORIGINS: List[str] = ["*"]  # In production, replace with specific origins
+    BACKEND_CORS_ORIGINS: List[str] = [
+        "https://plantopia-frontend-theta.vercel.app",
+        "https://plantopia-frontend-*.vercel.app",  # Vercel preview deployments
+        "https://plantopia.vercel.app",  # If you have a custom domain
+        "http://localhost:5173",  # Vite dev server
+        "http://localhost:3000",  # Alternative dev port
+        "http://localhost:8080"   # Alternative dev port
+    ]
     
     # File Paths
     BASE_DIR = Path(__file__).resolve().parent.parent.parent
