@@ -60,6 +60,9 @@ class Settings:
     OPEN_METEO_API_KEY: str = os.getenv("OPEN_METEO_API_KEY", "")
     EPA_VIC_API_KEY: str = os.getenv("EPA_VIC_API_KEY", "")
     
+    # Google Cloud Storage
+    GCS_BUCKET_URL: str = os.getenv("GCS_BUCKET_URL", "https://storage.googleapis.com/plantopia-images-1757656642/plant_images")
+
     # Environment
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
     DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"

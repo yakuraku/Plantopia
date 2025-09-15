@@ -7,6 +7,7 @@ from app.repositories.database_plant_repository import DatabasePlantRepository
 from app.repositories.climate_repository import ClimateRepository
 from app.utils.image_utils import image_to_base64
 from app.schemas.request import RecommendationRequest, PlantScoreRequest
+from app.core.config import settings
 from app.schemas.response import (
     RecommendationResponse, PlantScoreResponse, 
     PlantMedia, PlantFit, PlantSowing, PlantRecommendation
@@ -201,23 +202,49 @@ class RecommendationService:
                 os.unlink(user_prefs_path)
     
     def _enhance_recommendations_with_images(self, output: Dict[str, Any]) -> Dict[str, Any]:
-        """Add base64 encoded images to recommendations.
-        
+        """Add GCS image URLs to recommendations.
+
         Args:
             output: Recommendation output dictionary
-            
+
         Returns:
-            Enhanced output with images
+            Enhanced output with GCS image URLs
         """
         for recommendation in output.get("recommendations", []):
-            if "media" in recommendation and "image_path" in recommendation["media"]:
-                image_path = recommendation["media"]["image_path"]
-                base64_image = image_to_base64(image_path)
-                
-                recommendation["media"] = {
-                    "image_path": image_path,
-                    "image_base64": base64_image,
-                    "has_image": bool(base64_image)
-                }
-        
+            plant_name = recommendation.get("plant_name", "")
+            plant_category = recommendation.get("plant_category", "flower")
+            scientific_name = recommendation.get("scientific_name", "")
+
+            # Generate GCS image URL
+            image_url = self._generate_gcs_image_url(plant_name, plant_category, scientific_name)
+
+            # Add media with GCS URL
+            recommendation["media"] = {
+                "image_url": image_url,
+                "has_image": bool(image_url)
+            }
+
         return output
+
+    def _generate_gcs_image_url(self, plant_name: str, plant_category: str, scientific_name: str = None) -> str:
+        """Generate primary GCS image URL for a plant.
+
+        Args:
+            plant_name: Name of the plant
+            plant_category: Category of the plant
+            scientific_name: Scientific name of the plant (optional)
+
+        Returns:
+            Primary GCS image URL
+        """
+        # Map category to folder name
+        category_folder = f"{plant_category.lower()}_plant_images"
+
+        # The folder name format is: "Plant Name_Scientific Name"
+        if scientific_name and scientific_name.lower() != 'unknown':
+            folder_name = f"{plant_name}_{scientific_name}"
+        else:
+            folder_name = f"{plant_name}_unknown"
+
+        # Return the first image URL
+        return f"{settings.GCS_BUCKET_URL}/{category_folder}/{folder_name}/{folder_name}_1.jpg"
