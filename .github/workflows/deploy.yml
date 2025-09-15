@@ -2,16 +2,11 @@ name: Deploy to GCP
 
 on:
   push:
-    branches: [main, master]
-  pull_request:
-    branches: [main, master]
-    types: [closed]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
   deploy:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true) || github.event_name == 'workflow_dispatch'
-
     runs-on: ubuntu-latest
 
     steps:
@@ -26,18 +21,64 @@ jobs:
         key: ${{ secrets.GCP_SSH_KEY }}
         command_timeout: 10m
         script: |
-          echo " Starting deployment..."
-          cd /opt/plantopia/Plantopia
-          git pull origin main || git pull origin master
-          source venv/bin/activate
-          pip install -r requirements.txt
-          sudo supervisorctl restart plantopia
-          
-          sleep 5
-          if sudo supervisorctl status plantopia | grep -q RUNNING; then
-            echo " Application restarted successfully"
-          else
-            echo " Application failed to start"
-            sudo supervisorctl tail -50 plantopia
+          set -e  # Exit immediately if any command fails
+
+          echo "Starting deployment to GCP..."
+
+          # Check if project directory exists
+          if [ ! -d "/opt/plantopia/Plantopia" ]; then
+            echo "Project directory /opt/plantopia/Plantopia not found"
             exit 1
           fi
+
+          cd /opt/plantopia/Plantopia
+          echo "Current directory: $(pwd)"
+
+          # Fix potential Git reference issues
+          echo "Fetching latest code..."
+          git fetch --prune origin
+          git reset --hard origin/main
+
+          echo "Activating Python environment..."
+          source venv/bin/activate
+
+          echo "Installing dependencies..."
+          pip install -r requirements.txt
+
+          echo "Restarting application..."
+          sudo supervisorctl restart plantopia
+
+          # Wait for service to start
+          echo "Waiting for service to start..."
+          sleep 10
+
+          # Check service status
+          echo "Checking service health..."
+          if sudo supervisorctl status plantopia | grep -q RUNNING; then
+            echo "Process is running, checking API response..."
+
+            # Check if API is responding
+            if curl -f -s -o /dev/null -w "%{http_code}" http://localhost:8000/health | grep -q "200"; then
+              echo "API is responding successfully!"
+            else
+              echo "Process is running but API is not responding properly"
+              echo "Application logs (last 100 lines):"
+              sudo supervisorctl tail -100 plantopia
+              exit 1
+            fi
+          else
+            echo "Application failed to start"
+            echo "Application logs (last 100 lines):"
+            sudo supervisorctl tail -100 plantopia
+            exit 1
+          fi
+
+          # Deployment summary
+          echo ""
+          echo "✅ Deployment completed successfully!"
+          echo "Deployment Information:"
+          echo "  - Server: ${{ secrets.GCP_VM_IP }}"
+          echo "  - Project: /opt/plantopia/Plantopia"
+          echo "  - Time: $(date)"
+          echo "  - Commit: $(git rev-parse --short HEAD)"
+          echo "  - Branch: $(git branch --show-current)"
