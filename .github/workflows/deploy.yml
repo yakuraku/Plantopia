@@ -58,10 +58,12 @@ jobs:
             echo "Process is running, checking API response..."
 
             # Check if API is responding
-            if curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/docs | grep -q "200"; then
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/docs)
+            echo "Health check HTTP status: $HTTP_STATUS"
+            if [ "$HTTP_STATUS" = "200" ]; then
               echo "API is responding successfully!"
             else
-              echo "Process is running but API is not responding properly"
+              echo "Process is running but API is not responding properly (HTTP: $HTTP_STATUS)"
               echo "Application logs (last 100 lines):"
               sudo supervisorctl tail -100 plantopia
               exit 1
