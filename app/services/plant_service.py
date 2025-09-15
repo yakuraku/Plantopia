@@ -1,6 +1,6 @@
 from typing import List, Dict, Any, Optional
 
-from app.repositories.plant_repository import PlantRepository
+from app.repositories.database_plant_repository import DatabasePlantRepository
 from app.utils.image_utils import image_to_base64
 from app.schemas.response import PlantMedia, AllPlantsResponse
 
@@ -8,16 +8,16 @@ from app.schemas.response import PlantMedia, AllPlantsResponse
 class PlantService:
     """Service for plant-related operations"""
     
-    def __init__(self, plant_repository: PlantRepository):
+    def __init__(self, plant_repository: DatabasePlantRepository):
         self.plant_repository = plant_repository
     
-    def get_all_plants_with_images(self) -> AllPlantsResponse:
+    async def get_all_plants_with_images(self) -> AllPlantsResponse:
         """Get all plants with base64 encoded images.
         
         Returns:
             AllPlantsResponse with all plants and images
         """
-        plants = self.plant_repository.load_all_plants()
+        plants = await self.plant_repository.get_all_plants()
         
         # Add base64 images to each plant
         for plant in plants:
@@ -35,7 +35,7 @@ class PlantService:
             total_count=len(plants)
         )
     
-    def find_plant_with_details(self, plant_name: str) -> Optional[Dict[str, Any]]:
+    async def find_plant_with_details(self, plant_name: str) -> Optional[Dict[str, Any]]:
         """Find a plant by name and include all details.
         
         Args:
@@ -44,7 +44,7 @@ class PlantService:
         Returns:
             Plant dictionary with full details or None
         """
-        plant = self.plant_repository.find_plant_by_name(plant_name)
+        plant = await self.plant_repository.find_plant_by_name(plant_name)
         
         if plant:
             # Add image data
@@ -59,7 +59,7 @@ class PlantService:
         
         return plant
     
-    def get_plants_by_category(self, category: str) -> List[Dict[str, Any]]:
+    async def get_plants_by_category(self, category: str) -> List[Dict[str, Any]]:
         """Get all plants of a specific category.
         
         Args:
@@ -68,4 +68,4 @@ class PlantService:
         Returns:
             List of plants in the category
         """
-        return self.plant_repository.get_plants_by_category(category)
+        return await self.plant_repository.get_plants_by_category(category)

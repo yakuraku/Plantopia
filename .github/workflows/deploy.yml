@@ -1,0 +1,43 @@
+name: Deploy to GCP
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+    types: [closed]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true) || github.event_name == 'workflow_dispatch'
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Deploy to GCP VM
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.GCP_VM_IP }}
+        username: ${{ secrets.GCP_VM_USER }}
+        key: ${{ secrets.GCP_SSH_KEY }}
+        command_timeout: 10m
+        script: |
+          echo " Starting deployment..."
+          cd /opt/plantopia/Plantopia
+          git pull origin main || git pull origin master
+          source venv/bin/activate
+          pip install -r requirements.txt
+          sudo supervisorctl restart plantopia
+          
+          sleep 5
+          if sudo supervisorctl status plantopia | grep -q RUNNING; then
+            echo " Application restarted successfully"
+          else
+            echo " Application failed to start"
+            sudo supervisorctl tail -50 plantopia
+            exit 1
+          fi
