@@ -71,7 +71,7 @@ jobs:
 
         # Wait for service to start
         echo "⏳ Waiting for service to start..."
-        sleep 20
+        sleep 30
 
         # Check process status
         if ! sudo supervisorctl status plantopia | grep -q RUNNING; then
