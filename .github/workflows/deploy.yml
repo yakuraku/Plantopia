@@ -58,7 +58,7 @@ jobs:
             echo "Process is running, checking API response..."
 
             # Check if API is responding
-            if curl -f -s -o /dev/null -w "%{http_code}" http://localhost:8000/api/v1/ | grep -q "200"; then
+            if curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/docs | grep -q "200"; then
               echo "API is responding successfully!"
             else
               echo "Process is running but API is not responding properly"
