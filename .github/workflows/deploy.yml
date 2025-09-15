@@ -50,20 +50,35 @@ jobs:
 
           # Wait for service to start
           echo "Waiting for service to start..."
-          sleep 10
+          sleep 15  # Increased wait time
 
           # Check service status
           echo "Checking service health..."
           if sudo supervisorctl status plantopia | grep -q RUNNING; then
             echo "Process is running, checking API response..."
 
-            # Check if API is responding
-            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/docs)
-            echo "Health check HTTP status: $HTTP_STATUS"
-            if [ "$HTTP_STATUS" = "200" ]; then
-              echo "API is responding successfully!"
-            else
-              echo "Process is running but API is not responding properly (HTTP: $HTTP_STATUS)"
+            # Try health check with retries
+            MAX_RETRIES=3
+            RETRY_COUNT=0
+            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+              HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 http://localhost:8000/docs 2>&1 || echo "000")
+              echo "Health check attempt $((RETRY_COUNT + 1)): HTTP status = $HTTP_STATUS"
+
+              if [ "$HTTP_STATUS" = "200" ]; then
+                echo "API is responding successfully!"
+                break
+              elif [ "$HTTP_STATUS" = "000" ]; then
+                echo "Connection failed, waiting 5 seconds before retry..."
+                sleep 5
+              else
+                echo "Unexpected HTTP status: $HTTP_STATUS"
+              fi
+
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+            done
+
+            if [ "$HTTP_STATUS" != "200" ]; then
+              echo "API health check failed after $MAX_RETRIES attempts"
               echo "Application logs (last 100 lines):"
               sudo supervisorctl tail -100 plantopia
               exit 1
