@@ -240,11 +240,25 @@ class RecommendationService:
         # Map category to folder name
         category_folder = f"{plant_category.lower()}_plant_images"
 
+        # Clean plant name to match GCS folder naming
+        # GCS folders remove these special characters: ' ( ) , . / : &
+        special_chars_to_remove = ["'", "(", ")", ",", ".", "/", ":", "&"]
+        cleaned_plant_name = plant_name
+        for char in special_chars_to_remove:
+            cleaned_plant_name = cleaned_plant_name.replace(char, "")
+        cleaned_plant_name = cleaned_plant_name.strip()
+
+        cleaned_scientific_name = scientific_name
+        if scientific_name:
+            for char in special_chars_to_remove:
+                cleaned_scientific_name = cleaned_scientific_name.replace(char, "")
+            cleaned_scientific_name = cleaned_scientific_name.strip()
+
         # The folder name format is: "Plant Name_Scientific Name"
-        if scientific_name and scientific_name.lower() != 'unknown':
-            folder_name = f"{plant_name}_{scientific_name}"
+        if cleaned_scientific_name and cleaned_scientific_name.lower() != 'unknown':
+            folder_name = f"{cleaned_plant_name}_{cleaned_scientific_name}"
         else:
-            folder_name = f"{plant_name}_unknown"
+            folder_name = f"{cleaned_plant_name}_unknown"
 
         # Return the first image URL
         return f"{settings.GCS_BUCKET_URL}/{category_folder}/{folder_name}/{folder_name}_1.jpg"

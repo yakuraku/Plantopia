@@ -15,23 +15,32 @@ class PlantService:
     
     async def get_all_plants_with_images(self) -> AllPlantsResponse:
         """Get all plants with base64 encoded images.
-        
+
         Returns:
             AllPlantsResponse with all plants and images
         """
         plants = await self.plant_repository.get_all_plants()
-        
-        # Add base64 images to each plant
+
+        # Add base64 images and GCS URL to each plant
         for plant in plants:
             image_path = plant.get("image_path", "")
             base64_image = image_to_base64(image_path)
-            
+
+            # Generate GCS image URL with cleaned special characters
+            plant_name = plant.get("plant_name", "")
+            plant_category = plant.get("plant_category", "flower")
+            scientific_name = plant.get("scientific_name", "")
+
+            # Use the same method that generates clean URLs
+            image_url = self.get_primary_image_url(plant_name, plant_category, scientific_name)
+
             plant["media"] = {
+                "image_url": image_url,  # Add the cleaned URL
                 "image_path": image_path,
                 "image_base64": base64_image,
-                "has_image": bool(base64_image)
+                "has_image": bool(base64_image) or bool(image_url)
             }
-        
+
         return AllPlantsResponse(
             plants=plants,
             total_count=len(plants)
@@ -86,13 +95,27 @@ class PlantService:
         # Map category to folder name
         category_folder = f"{plant_category.lower()}_plant_images"
 
+        # Clean plant name to match GCS folder naming
+        # GCS folders remove these special characters: ' ( ) , . / : &
+        special_chars_to_remove = ["'", "(", ")", ",", ".", "/", ":", "&"]
+        cleaned_plant_name = plant_name
+        for char in special_chars_to_remove:
+            cleaned_plant_name = cleaned_plant_name.replace(char, "")
+        cleaned_plant_name = cleaned_plant_name.strip()
+
+        cleaned_scientific_name = scientific_name
+        if scientific_name:
+            for char in special_chars_to_remove:
+                cleaned_scientific_name = cleaned_scientific_name.replace(char, "")
+            cleaned_scientific_name = cleaned_scientific_name.strip()
+
         # The folder name format is: "Plant Name_Scientific Name"
         # If scientific name is not provided or is 'unknown', use just the plant name
-        if scientific_name and scientific_name.lower() != 'unknown':
-            folder_name = f"{plant_name}_{scientific_name}"
+        if cleaned_scientific_name and cleaned_scientific_name.lower() != 'unknown':
+            folder_name = f"{cleaned_plant_name}_{cleaned_scientific_name}"
         else:
             # For cases where scientific name is unknown, try just the plant name
-            folder_name = f"{plant_name}_unknown"
+            folder_name = f"{cleaned_plant_name}_unknown"
 
         # Generate URLs for potential multiple images (1-4)
         base_url = f"{settings.GCS_BUCKET_URL}/{category_folder}/{folder_name}"
