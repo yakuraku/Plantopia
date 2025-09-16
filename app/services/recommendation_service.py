@@ -8,9 +8,10 @@ from app.repositories.climate_repository import ClimateRepository
 from app.utils.image_utils import image_to_base64
 from app.schemas.request import RecommendationRequest, PlantScoreRequest
 from app.schemas.response import (
-    RecommendationResponse, PlantScoreResponse, 
-    PlantMedia, PlantFit, PlantSowing, PlantRecommendation
+    RecommendationResponse, PlantScoreResponse,
+    PlantMedia, PlantFit, PlantSowing, PlantRecommendation, QuantifiedImpactResponse
 )
+from app.services.quantification_service import QuantificationService
 from app.recommender.engine import (
     load_all_plants, select_environment, get_user_preferences,
     hard_filter, relax_if_needed, score_and_rank, assemble_output, category_diversity
@@ -20,10 +21,11 @@ from app.recommender.scoring import weights, calculate_scores
 
 class RecommendationService:
     """Service for generating plant recommendations"""
-    
+
     def __init__(self, plant_repository: DatabasePlantRepository, climate_repository: ClimateRepository):
         self.plant_repository = plant_repository
         self.climate_repository = climate_repository
+        self.quantification_service = QuantificationService()
     
     async def generate_recommendations(self, request: RecommendationRequest) -> Dict[str, Any]:
         """Generate plant recommendations based on user preferences.
