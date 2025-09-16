@@ -70,8 +70,8 @@ jobs:
         sudo supervisorctl restart plantopia
 
         # Wait for service to start
-        echo "⏳ Waiting for service to start (45 seconds initial delay)..."
-        sleep 45
+        echo "⏳ Waiting for service to start..."
+        sleep 30
 
         # Check process status
         if ! sudo supervisorctl status plantopia | grep -q RUNNING; then
@@ -82,46 +82,28 @@ jobs:
         fi
 
         # Check service status locally on server
-        echo "🔍 Checking service health..."
-        MAX_RETRIES=6
+        echo "🔍 Checking service status..."
+        MAX_RETRIES=3
         RETRY_COUNT=0
         SUCCESS=false
-        RETRY_DELAY=10
 
         while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-          echo "⏳ Health check attempt $((RETRY_COUNT + 1))/$MAX_RETRIES..."
-
-          # Check both the health endpoint and docs endpoint
-          HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 http://localhost:8000/health 2>/dev/null || echo "000")
-          DOCS_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 http://localhost:8000/docs 2>/dev/null || echo "000")
-
-          if [ "$HEALTH_STATUS" = "200" ] || [ "$DOCS_STATUS" = "200" ]; then
-            echo "✅ Service is healthy (Health: $HEALTH_STATUS, Docs: $DOCS_STATUS)"
+          if curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/docs | grep -q "200"; then
+            echo "✅ Service is running"
             SUCCESS=true
             break
           else
-            echo "  ⚠️ Not ready yet (Health: $HEALTH_STATUS, Docs: $DOCS_STATUS)"
-            if [ $RETRY_COUNT -lt $((MAX_RETRIES - 1)) ]; then
-              echo "  ⏳ Waiting $RETRY_DELAY seconds before next check..."
-              sleep $RETRY_DELAY
-            fi
+            echo "⏳ Attempt $((RETRY_COUNT + 1)) failed, waiting 5 seconds before retry..."
+            sleep 5
             RETRY_COUNT=$((RETRY_COUNT + 1))
           fi
         done
 
         if [ "$SUCCESS" = false ]; then
-          echo "⚠️ Health check timed out after $((MAX_RETRIES * RETRY_DELAY + 45)) seconds"
-          echo "📋 Application status:"
-          sudo supervisorctl status plantopia
-          echo ""
-          echo "📋 Application logs (last 100 lines):"
-          sudo supervisorctl tail -100 plantopia
-          echo ""
-          echo "🔍 Server IP: ${{ secrets.GCP_VM_IP }}"
-          echo "🔍 Please check manually: http://${{ secrets.GCP_VM_IP }}/docs"
-          echo ""
-          echo "⚠️ Deployment completed but service health check failed."
-          echo "   The service may still be initializing. Please verify manually."
+          echo "⚠️ Health check failed, but application process is running"
+          echo "📋 Application logs (last 50 lines):"
+          sudo supervisorctl tail -50 plantopia
+          echo "🔍 Please check manually: http://$HOST/docs"
         fi
 
         # Get deployment information
