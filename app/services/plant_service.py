@@ -1,9 +1,10 @@
 from typing import List, Dict, Any, Optional
 import re
+import math
 
 from app.repositories.database_plant_repository import DatabasePlantRepository
 from app.utils.image_utils import image_to_base64
-from app.schemas.response import PlantMedia, AllPlantsResponse
+from app.schemas.response import PlantMedia, AllPlantsResponse, PaginatedPlantsResponse
 from app.core.config import settings
 
 
@@ -187,4 +188,61 @@ class PlantService:
             plant["plant_name"],
             plant.get("plant_category", "flower"),
             plant.get("scientific_name")
+        )
+
+    async def get_plants_paginated(
+        self,
+        page: int = 1,
+        limit: int = 12,
+        category: Optional[str] = None,
+        search_term: Optional[str] = None
+    ) -> PaginatedPlantsResponse:
+        """Get paginated plants with optional filters.
+
+        Args:
+            page: Page number (1-based)
+            limit: Number of items per page
+            category: Optional category filter (flower, herb, vegetable)
+            search_term: Optional search term for name/scientific name/description
+
+        Returns:
+            PaginatedPlantsResponse with paginated plants and metadata
+        """
+        # Get paginated data from repository
+        plants, total_count = await self.plant_repository.get_plants_paginated(
+            page=page,
+            limit=limit,
+            category=category,
+            search_term=search_term
+        )
+
+        # Add image URLs to each plant
+        for plant in plants:
+            plant_name = plant.get("plant_name", "")
+            plant_category = plant.get("plant_category", "flower")
+            scientific_name = plant.get("scientific_name", "")
+
+            # Generate primary image URL
+            image_url = self.get_primary_image_url(plant_name, plant_category, scientific_name)
+
+            # Add media information
+            plant["media"] = {
+                "image_url": image_url,
+                "image_path": plant.get("image_path", ""),
+                "has_image": bool(image_url)
+            }
+
+        # Calculate pagination metadata
+        total_pages = math.ceil(total_count / limit) if total_count > 0 else 0
+        has_next = page < total_pages
+        has_previous = page > 1
+
+        return PaginatedPlantsResponse(
+            plants=plants,
+            page=page,
+            limit=limit,
+            total=total_count,
+            total_pages=total_pages,
+            has_next=has_next,
+            has_previous=has_previous
         )

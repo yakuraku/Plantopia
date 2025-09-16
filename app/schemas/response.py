@@ -111,3 +111,14 @@ class PlantQuantificationResponse(BaseModel):
     suburb: str = Field(..., description="Suburb")
     climate_zone: str = Field(..., description="Climate zone")
     plant_count: int = Field(default=1, description="Number of plants quantified")
+
+
+class PaginatedPlantsResponse(BaseModel):
+    """Response containing paginated plants list"""
+    plants: List[Dict[str, Any]] = Field(..., description="List of plants for current page")
+    page: int = Field(..., description="Current page number (1-based)")
+    limit: int = Field(..., description="Number of items per page")
+    total: int = Field(..., description="Total number of plants")
+    total_pages: int = Field(..., description="Total number of pages")
+    has_next: bool = Field(..., description="Whether there is a next page")
+    has_previous: bool = Field(..., description="Whether there is a previous page")

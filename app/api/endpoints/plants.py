@@ -1,7 +1,8 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Optional
 
-from app.schemas.response import AllPlantsResponse
+from app.schemas.response import AllPlantsResponse, PaginatedPlantsResponse
 from app.services.plant_service import PlantService
 from app.repositories.database_plant_repository import DatabasePlantRepository
 from app.core.database import get_async_db
@@ -67,3 +68,40 @@ async def get_all_plant_images(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error getting image URLs: {str(e)}")
+
+
+@router.get("/plants/paginated", response_model=PaginatedPlantsResponse)
+async def get_plants_paginated(
+    page: int = Query(1, ge=1, description="Page number (starts from 1)"),
+    limit: int = Query(12, ge=1, le=100, description="Number of items per page"),
+    category: Optional[str] = Query(None, description="Filter by category (flower, herb, vegetable)"),
+    search: Optional[str] = Query(None, description="Search term for plant name, scientific name, or description"),
+    plant_service: PlantService = Depends(get_plant_service)
+):
+    """Get paginated plants with optional filtering.
+
+    This endpoint supports:
+    - Pagination with customizable page size
+    - Filtering by plant category
+    - Searching by plant name, scientific name, or description
+
+    Args:
+        page: Page number (1-based indexing)
+        limit: Number of plants per page (max 100)
+        category: Optional category filter
+        search: Optional search term
+
+    Returns:
+        PaginatedPlantsResponse with plants and pagination metadata
+    """
+    try:
+        return await plant_service.get_plants_paginated(
+            page=page,
+            limit=limit,
+            category=category,
+            search_term=search
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error loading plants: {str(e)}")
