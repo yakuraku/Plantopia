@@ -14,7 +14,7 @@ class Settings:
     PROJECT_DESCRIPTION: str = "API for the Plantopia plant recommendation engine"
     VERSION: str = "1.0.0"
     
-    # CORS Settings
+    # CORS Settings (used when not behind Cloudflare Tunnel)
     BACKEND_CORS_ORIGINS: List[str] = [
         "https://plantopia-frontend-theta.vercel.app",
         "https://plantopia-frontend-*.vercel.app",  # Vercel preview deployments
