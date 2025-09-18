@@ -374,9 +374,36 @@ async def load_plants_from_csv(session: AsyncSession):
                     planting_tips=clean_value(row.get('planting_tips')),
                     care_instructions=clean_value(row.get('care_instructions')),
                     companion_plants=clean_value(row.get('companion_plants')),
-                    image_url=clean_value(row.get('image_url', row.get('image_path')))
+                    image_url=clean_value(row.get('image_url', row.get('image_path'))),
+
+                    # Position and characteristics from CSV
+                    position=clean_value(row.get('position')),
+                    characteristics=clean_value(row.get('characteristics')),
+
+                    # Additional CSV fields
+                    plant_type=clean_value(row.get('plant_type', row.get('type'))),
+                    season=clean_value(row.get('season')),
+                    germination=clean_value(row.get('germination')),
+                    additional_information=clean_value(row.get('additional_information')),
+                    days_to_maturity=clean_value(row.get('days_to_maturity')),
+                    plant_spacing=clean_value(row.get('plant_spacing', row.get('spacing'))),
+                    sowing_depth=clean_value(row.get('sowing_depth')),
+                    hardiness_life_cycle=clean_value(row.get('hardiness_life_cycle', row.get('hardiness'))),
+                    seed_type=clean_value(row.get('seed_type')),
+
+                    # Companion planting fields
+                    beneficial_companions=clean_value(row.get('beneficial_companions', row.get('good_companions'))),
+                    harmful_companions=clean_value(row.get('harmful_companions', row.get('bad_companions'))),
+                    neutral_companions=clean_value(row.get('neutral_companions')),
+
+                    # Climate-specific sowing periods
+                    cool_climate_sowing_period=clean_value(row.get('cool_climate_sowing_period', row.get('cool_climate_sowing'))),
+                    temperate_climate_sowing_period=clean_value(row.get('temperate_climate_sowing_period', row.get('temperate_climate_sowing'))),
+                    subtropical_climate_sowing_period=clean_value(row.get('subtropical_climate_sowing_period', row.get('subtropical_climate_sowing'))),
+                    tropical_climate_sowing_period=clean_value(row.get('tropical_climate_sowing_period', row.get('tropical_climate_sowing'))),
+                    arid_climate_sowing_period=clean_value(row.get('arid_climate_sowing_period', row.get('arid_climate_sowing')))
                 )
-                
+
                 session.add(plant)
                 plants_loaded += 1
             
