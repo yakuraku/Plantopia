@@ -14,7 +14,7 @@ class Settings:
     PROJECT_DESCRIPTION: str = "API for the Plantopia plant recommendation engine"
     VERSION: str = "1.0.0"
     
-    # CORS Settings
+    # CORS Settings (used when not behind Cloudflare Tunnel)
     BACKEND_CORS_ORIGINS: List[str] = [
         "https://plantopia-frontend-theta.vercel.app",
         "https://plantopia-frontend-*.vercel.app",  # Vercel preview deployments
@@ -60,6 +60,9 @@ class Settings:
     OPEN_METEO_API_KEY: str = os.getenv("OPEN_METEO_API_KEY", "")
     EPA_VIC_API_KEY: str = os.getenv("EPA_VIC_API_KEY", "")
     
+    # Google Cloud Storage
+    GCS_BUCKET_URL: str = os.getenv("GCS_BUCKET_URL", "https://storage.googleapis.com/plantopia-images-1757656642/plant_images")
+
     # Environment
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
     DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"

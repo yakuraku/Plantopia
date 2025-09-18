@@ -22,8 +22,8 @@ else:
 # Sync engine for migrations and data loading
 engine = create_engine(
     DATABASE_URL,
-    pool_size=int(os.getenv("DATABASE_POOL_SIZE", "10")),
-    max_overflow=int(os.getenv("DATABASE_MAX_OVERFLOW", "20")),
+    pool_size=int(os.getenv("DATABASE_POOL_SIZE", "3")),
+    max_overflow=int(os.getenv("DATABASE_MAX_OVERFLOW", "5")),
     pool_pre_ping=True,  # Verify connections before using
     echo=os.getenv("DEBUG", "False").lower() == "true"  # SQL logging in debug mode
 )
@@ -31,8 +31,8 @@ engine = create_engine(
 # Async engine for API operations
 async_engine = create_async_engine(
     ASYNC_DATABASE_URL,
-    pool_size=int(os.getenv("DATABASE_POOL_SIZE", "10")),
-    max_overflow=int(os.getenv("DATABASE_MAX_OVERFLOW", "20")),
+    pool_size=int(os.getenv("DATABASE_POOL_SIZE", "3")),
+    max_overflow=int(os.getenv("DATABASE_MAX_OVERFLOW", "5")),
     pool_pre_ping=True,
     echo=os.getenv("DEBUG", "False").lower() == "true"
 )

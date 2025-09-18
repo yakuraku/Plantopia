@@ -1,3 +1,4 @@
+from __future__ import annotations
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any, List
 
@@ -39,6 +40,7 @@ class PlantRecommendation(BaseModel):
     sowing: PlantSowing = Field(..., description="Sowing information")
     media: Optional[PlantMedia] = Field(default=None, description="Media information")
     care_tips: Optional[List[str]] = Field(default=None, description="Care tips")
+    quantified_impact: Optional[QuantifiedImpactResponse] = Field(default=None, description="Quantified climate impact")
 
 
 class RecommendationResponse(BaseModel):
@@ -75,3 +77,48 @@ class AllPlantsResponse(BaseModel):
 class HealthCheckResponse(BaseModel):
     """Health check response"""
     message: str = Field(default="Plantopia Recommendation Engine API", description="API status message")
+
+
+class QuantifiedImpactResponse(BaseModel):
+    """Response containing quantified climate impact for a plant"""
+    temperature_reduction_c: float = Field(..., description="Temperature reduction in Celsius")
+    air_quality_points: int = Field(..., description="Air quality improvement points")
+    co2_absorption_kg_year: float = Field(..., description="CO2 absorption in kg/year")
+    water_processed_l_week: float = Field(..., description="Water processed in L/week")
+    pollinator_support: str = Field(..., description="Pollinator support level")
+    edible_yield: Optional[str] = Field(default=None, description="Edible yield if applicable")
+    maintenance_time: str = Field(..., description="Maintenance time requirement")
+    water_requirement: str = Field(..., description="Water requirement")
+    risk_badge: str = Field(..., description="Risk level (low/medium/high)")
+    confidence_level: str = Field(..., description="Confidence level with percentage")
+    why_this_plant: str = Field(..., description="Explanation of why this plant is suitable")
+    community_impact_potential: Optional[str] = Field(default=None, description="Potential community-wide impact")
+
+
+class SuitabilityScoreResponse(BaseModel):
+    """Response containing suitability score with breakdown"""
+    total_score: float = Field(..., description="Total suitability score (0-100)")
+    breakdown: Dict[str, float] = Field(..., description="Score breakdown by factors")
+
+
+class PlantQuantificationResponse(BaseModel):
+    """Complete response for plant quantification"""
+    plant_name: str = Field(..., description="Name of the plant")
+    scientific_name: Optional[str] = Field(default=None, description="Scientific name")
+    plant_category: str = Field(..., description="Plant category")
+    quantified_impact: QuantifiedImpactResponse = Field(..., description="Quantified climate impact")
+    suitability_score: SuitabilityScoreResponse = Field(..., description="Suitability score")
+    suburb: str = Field(..., description="Suburb")
+    climate_zone: str = Field(..., description="Climate zone")
+    plant_count: int = Field(default=1, description="Number of plants quantified")
+
+
+class PaginatedPlantsResponse(BaseModel):
+    """Response containing paginated plants list"""
+    plants: List[Dict[str, Any]] = Field(..., description="List of plants for current page")
+    page: int = Field(..., description="Current page number (1-based)")
+    limit: int = Field(..., description="Number of items per page")
+    total: int = Field(..., description="Total number of plants")
+    total_pages: int = Field(..., description="Total number of pages")
+    has_next: bool = Field(..., description="Whether there is a next page")
+    has_previous: bool = Field(..., description="Whether there is a previous page")

@@ -2,42 +2,134 @@ name: Deploy to GCP
 
 on:
   push:
-    branches: [main, master]
+    branches: [ main ]
   pull_request:
-    branches: [main, master]
-    types: [closed]
+    branches: [ main ]
+    types: [ closed ]
   workflow_dispatch:
 
 jobs:
   deploy:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true) || github.event_name == 'workflow_dispatch'
+    # Only run on push to main branch or when PR is merged
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch')
 
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Deploy to GCP VM
-      uses: appleboy/ssh-action@v0.1.5
+    # Configure SSH key and known_hosts for the runner
+    - name: Install SSH key
+      uses: shimataro/ssh-key-action@v2
       with:
-        host: ${{ secrets.GCP_VM_IP }}
-        username: ${{ secrets.GCP_VM_USER }}
         key: ${{ secrets.GCP_SSH_KEY }}
-        command_timeout: 10m
-        script: |
-          echo " Starting deployment..."
-          cd /opt/plantopia/Plantopia
-          git pull origin main || git pull origin master
-          source venv/bin/activate
-          pip install -r requirements.txt
-          sudo supervisorctl restart plantopia
-          
-          sleep 5
-          if sudo supervisorctl status plantopia | grep -q RUNNING; then
-            echo " Application restarted successfully"
+        known_hosts: unnecessary
+        if_key_exists: replace
+
+    # Add server public key to known_hosts
+    - name: Add server to known hosts
+      run: |
+        ssh-keyscan -H ${{ secrets.GCP_VM_IP }} >> ~/.ssh/known_hosts
+
+    - name: Deploy to GCP
+      env: # Environment variables for deployment
+        HOST: ${{ secrets.GCP_VM_IP }}
+        USER: ${{ secrets.GCP_VM_USER }}
+        PROJECT_NAME: Plantopia
+        PROJECT_PATH: /opt/plantopia/Plantopia
+      run: |
+        # Create deployment script
+        cat > deploy.sh << 'EOF'
+        #!/bin/bash
+        set -e
+
+        echo "🚀 Starting deployment to GCP server..."
+
+        # SSH to server and execute deployment
+        ssh $USER@$HOST << 'ENDSSH'
+        # Check and enter project directory
+        if [ ! -d "/opt/plantopia/Plantopia" ]; then
+          echo "❌ Project directory /opt/plantopia/Plantopia does not exist"
+          exit 1
+        fi
+
+        cd /opt/plantopia/Plantopia
+        echo "📂 Current directory: $(pwd)"
+
+        echo "📥 Pulling latest code..."
+        # Ensure we're on the correct branch
+        git fetch --prune origin
+        git checkout main 2>/dev/null || git checkout -b main origin/main
+        git reset --hard origin/main
+
+        echo "🐍 Activating Python environment..."
+        source venv/bin/activate
+
+        echo "📦 Installing dependencies..."
+        pip install -q -r requirements.txt
+
+        echo "🔄 Restarting application..."
+        sudo supervisorctl restart plantopia
+
+        # Wait for service to start
+        echo "⏳ Waiting for service to start..."
+        sleep 30
+
+        # Check process status
+        if ! sudo supervisorctl status plantopia | grep -q RUNNING; then
+          echo "❌ Application failed to start"
+          echo "📋 Application logs (last 100 lines):"
+          sudo supervisorctl tail -100 plantopia
+          exit 1
+        fi
+
+        # Check service status locally on server
+        echo "🔍 Checking service status..."
+        MAX_RETRIES=3
+        RETRY_COUNT=0
+        SUCCESS=false
+
+        while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+          if curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/docs | grep -q "200"; then
+            echo "✅ Service is running"
+            SUCCESS=true
+            break
           else
-            echo " Application failed to start"
-            sudo supervisorctl tail -50 plantopia
-            exit 1
+            echo "⏳ Attempt $((RETRY_COUNT + 1)) failed, waiting 5 seconds before retry..."
+            sleep 5
+            RETRY_COUNT=$((RETRY_COUNT + 1))
           fi
+        done
+
+        if [ "$SUCCESS" = false ]; then
+          echo "⚠️ Health check failed, but application process is running"
+          echo "📋 Application logs (last 50 lines):"
+          sudo supervisorctl tail -50 plantopia
+          echo "🔍 Please check manually: http://$HOST/docs"
+        fi
+
+        # Get deployment information
+        COMMIT_HASH=$(git rev-parse --short HEAD)
+        BRANCH_NAME=$(git branch --show-current)
+
+        echo ""
+        echo "✅ Deployment completed!"
+        echo "📋 Deployment information:"
+        echo "  - Branch: $BRANCH_NAME"
+        echo "  - Commit: $COMMIT_HASH"
+        echo "  - Time: $(date '+%Y-%m-%d %H:%M:%S %Z')"
+        ENDSSH
+        EOF
+
+        chmod +x deploy.sh
+        ./deploy.sh # Execute deployment script
+
+    # Health check is done in deployment script, additional validation can be added here
+    - name: Deployment Summary
+      run: |
+        echo "✅ Deployment process completed!"
+        echo "📋 Deployment Information:"
+        echo "  - Server: ${{ secrets.GCP_VM_IP }}"
+        echo "  - Project path: /opt/plantopia/Plantopia"
+        echo "  - Python version: 3.10"
+        echo "  - Deployment time: $(date '+%Y-%m-%d %H:%M:%S %Z')"
+        echo "  - Access URL: http://${{ secrets.GCP_VM_IP }}"
+        echo "  - API Documentation: http://${{ secrets.GCP_VM_IP }}/docs"

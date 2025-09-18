@@ -55,7 +55,7 @@ class UserRequest(BaseModel):
 class RecommendationRequest(BaseModel):
     """Request for plant recommendations"""
     suburb: str = Field(default="Richmond", description="Suburb for climate data")
-    n: int = Field(default=5, ge=1, le=20, description="Number of recommendations")
+    n: int = Field(default=6, ge=1, le=9, description="Number of recommendations")
     climate_zone: Optional[str] = Field(default=None, description="Override climate zone")
     user_preferences: UserRequest = Field(..., description="User preferences")
 
@@ -65,4 +65,13 @@ class PlantScoreRequest(BaseModel):
     plant_name: str = Field(..., description="Name of the plant to score")
     suburb: str = Field(default="Richmond", description="Suburb for climate data")
     climate_zone: Optional[str] = Field(default=None, description="Override climate zone")
+    user_preferences: UserRequest = Field(..., description="User preferences")
+
+
+class PlantQuantificationRequest(BaseModel):
+    """Request for quantifying climate impact of a specific plant"""
+    plant_name: str = Field(..., description="Name of the plant to quantify")
+    suburb: str = Field(default="Richmond", description="Suburb for climate data")
+    climate_zone: Optional[str] = Field(default=None, description="Override climate zone")
+    plant_count: int = Field(default=1, ge=1, le=100, description="Number of plants to quantify")
     user_preferences: UserRequest = Field(..., description="User preferences")

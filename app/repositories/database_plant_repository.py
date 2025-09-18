@@ -135,7 +135,7 @@ class DatabasePlantRepository:
     
     async def count_plants_by_category(self) -> Dict[str, int]:
         """Get count of plants per category.
-        
+
         Returns:
             Dictionary with category names as keys and counts as values
         """
@@ -143,11 +143,105 @@ class DatabasePlantRepository:
             Plant.plant_category,
             func.count(Plant.id).label('count')
         ).group_by(Plant.plant_category)
-        
+
         result = await self.db.execute(query)
         counts = result.all()
-        
+
         return {row.plant_category: row.count for row in counts if row.plant_category}
+
+    async def get_plants_paginated(
+        self,
+        page: int = 1,
+        limit: int = 12,
+        category: Optional[str] = None,
+        search_term: Optional[str] = None
+    ) -> tuple[List[Dict[str, Any]], int]:
+        """Get paginated plants with optional filters.
+
+        Args:
+            page: Page number (1-based)
+            limit: Number of items per page
+            category: Optional category filter
+            search_term: Optional search term for name/scientific name/description
+
+        Returns:
+            Tuple of (plants list, total count)
+        """
+        # Build base query
+        query = select(Plant)
+        count_query = select(func.count(Plant.id))
+
+        filters = []
+
+        # Add search filter
+        if search_term:
+            search_lower = f"%{search_term.lower()}%"
+            search_filter = or_(
+                func.lower(Plant.plant_name).like(search_lower),
+                func.lower(Plant.scientific_name).like(search_lower),
+                func.lower(Plant.description).like(search_lower)
+            )
+            filters.append(search_filter)
+
+        # Add category filter
+        if category:
+            filters.append(Plant.plant_category == category)
+
+        # Apply filters to both queries
+        if filters:
+            query = query.where(and_(*filters))
+            count_query = count_query.where(and_(*filters))
+
+        # Get total count
+        count_result = await self.db.execute(count_query)
+        total_count = count_result.scalar() or 0
+
+        # Apply pagination
+        offset = (page - 1) * limit
+        query = query.offset(offset).limit(limit)
+
+        # Execute paginated query
+        result = await self.db.execute(query)
+        plants = result.scalars().all()
+
+        return [self._plant_to_dict(plant) for plant in plants], total_count
+
+    async def count_plants(
+        self,
+        category: Optional[str] = None,
+        search_term: Optional[str] = None
+    ) -> int:
+        """Count plants with optional filters.
+
+        Args:
+            category: Optional category filter
+            search_term: Optional search term
+
+        Returns:
+            Total count of matching plants
+        """
+        query = select(func.count(Plant.id))
+
+        filters = []
+
+        if search_term:
+            search_lower = f"%{search_term.lower()}%"
+            filters.append(
+                or_(
+                    func.lower(Plant.plant_name).like(search_lower),
+                    func.lower(Plant.scientific_name).like(search_lower),
+                    func.lower(Plant.description).like(search_lower)
+                )
+            )
+
+        if category:
+            filters.append(Plant.plant_category == category)
+
+        if filters:
+            query = query.where(and_(*filters))
+
+        result = await self.db.execute(query)
+        return result.scalar() or 0
     
     def _plant_to_dict(self, plant: Plant) -> Dict[str, Any]:
         """Convert Plant model to dictionary.
