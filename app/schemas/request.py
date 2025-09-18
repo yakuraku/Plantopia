@@ -55,7 +55,7 @@ class UserRequest(BaseModel):
 class RecommendationRequest(BaseModel):
     """Request for plant recommendations"""
     suburb: str = Field(default="Richmond", description="Suburb for climate data")
-    n: int = Field(default=5, ge=1, le=20, description="Number of recommendations")
+    n: int = Field(default=6, ge=1, le=9, description="Number of recommendations")
     climate_zone: Optional[str] = Field(default=None, description="Override climate zone")
     user_preferences: UserRequest = Field(..., description="User preferences")
 
