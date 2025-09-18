@@ -67,18 +67,22 @@ class Plant(Base):
 class Suburb(Base):
     """Suburb model - stores Melbourne suburb information"""
     __tablename__ = 'suburbs'
-    
+
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False, unique=True, index=True)
     postcode = Column(String(10))
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
     state = Column(String(50), default='VIC')
-    
+
+    # Urban Heat Island data
+    suburb_heat_category = Column(String(50))  # Low Heat, Moderate Heat, High Heat, Extreme Heat
+    suburb_heat_intensity = Column(Float)  # Heat intensity value in Celsius
+
     # Relationships
     climate_data = relationship("ClimateData", back_populates="suburb", cascade="all, delete-orphan")
     recommendations = relationship("UserRecommendation", back_populates="suburb", cascade="all, delete-orphan")
-    
+
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
