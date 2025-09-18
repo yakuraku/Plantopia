@@ -56,7 +56,7 @@ async def quantify_plant_impact(
     """
     try:
         # Get plant data
-        plant = await plant_repository.get_plant_by_name(request.plant_name)
+        plant = await plant_repository.get_plant_object_by_name(request.plant_name)
         if not plant:
             raise HTTPException(
                 status_code=404,

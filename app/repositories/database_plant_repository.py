@@ -27,15 +27,15 @@ class DatabasePlantRepository:
     
     async def find_plant_by_name(self, plant_name: str) -> Optional[Dict[str, Any]]:
         """Find a specific plant by name.
-        
+
         Args:
             plant_name: Name of the plant to find
-            
+
         Returns:
             Plant dictionary or None if not found
         """
         plant_name_lower = plant_name.lower().strip()
-        
+
         query = select(Plant).where(
             or_(
                 func.lower(Plant.plant_name) == plant_name_lower,
@@ -44,11 +44,37 @@ class DatabasePlantRepository:
                 func.lower(Plant.scientific_name).contains(plant_name_lower)
             )
         )
-        
+
         result = await self.db.execute(query)
         plant = result.scalar_one_or_none()
-        
+
         return self._plant_to_dict(plant) if plant else None
+
+    async def get_plant_object_by_name(self, plant_name: str) -> Optional[Plant]:
+        """Get Plant object (not dictionary) by name for services that need the SQLAlchemy model.
+
+        This method is specifically for services like quantification_service that expect
+        a Plant object with attributes, not a dictionary with keys.
+
+        Args:
+            plant_name: Name of the plant to find
+
+        Returns:
+            Plant SQLAlchemy object or None if not found
+        """
+        plant_name_lower = plant_name.lower().strip()
+
+        query = select(Plant).where(
+            or_(
+                func.lower(Plant.plant_name) == plant_name_lower,
+                func.lower(Plant.scientific_name) == plant_name_lower,
+                func.lower(Plant.plant_name).contains(plant_name_lower),
+                func.lower(Plant.scientific_name).contains(plant_name_lower)
+            )
+        )
+
+        result = await self.db.execute(query)
+        return result.scalar_one_or_none()  # Return Plant object directly, not dictionary
     
     async def get_plants_by_category(self, category: str) -> List[Dict[str, Any]]:
         """Get all plants of a specific category.
