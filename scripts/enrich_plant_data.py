@@ -56,10 +56,23 @@ def parse_days_to_maturity(days_str):
     """Extract days to maturity as integer"""
     if not days_str or pd.isna(days_str):
         return None
-    
-    days_str = str(days_str)
-    
-    # Look for number patterns
+
+    days_str = str(days_str).lower()
+
+    # Check if it contains "year" and convert to days
+    if 'year' in days_str:
+        # Extract numbers before handling years
+        numbers = re.findall(r'\d+', days_str)
+        if numbers:
+            # If it's something like "2 years" or "1-2 years"
+            if len(numbers) == 1:
+                return int(numbers[0]) * 365
+            elif len(numbers) >= 2:
+                # Average for ranges like "1-2 years"
+                avg_years = (int(numbers[0]) + int(numbers[1])) / 2
+                return int(avg_years * 365)
+
+    # Look for number patterns (for days)
     numbers = re.findall(r'\d+', days_str)
     if numbers:
         # Return the first number found (or average if range)
@@ -67,7 +80,7 @@ def parse_days_to_maturity(days_str):
             return int(numbers[0])
         elif len(numbers) >= 2:
             return (int(numbers[0]) + int(numbers[1])) // 2
-    
+
     return None
 
 

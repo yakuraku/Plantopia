@@ -259,12 +259,12 @@ class QuantificationService:
 
     def _calculate_growth_speed(self, plant: Plant) -> float:
         """Calculate growth speed factor"""
-        if not plant.days_to_maturity:
+        if not plant.time_to_maturity_days:
             return 1.0
 
-        if plant.days_to_maturity <= 60:
+        if plant.time_to_maturity_days <= 60:
             return 1.2  # fast
-        elif plant.days_to_maturity > 120:
+        elif plant.time_to_maturity_days > 120:
             return 0.8  # slow
 
         return 1.0
@@ -627,6 +627,6 @@ class QuantificationService:
         collective_cooling = impact.temperature_reduction_c * household_adoption_rate * estimated_households
 
         if collective_cooling > 0.1:
-            return f"If adopted by 5% of {suburb.suburb_name} households, could contribute ~{round(collective_cooling, 1)}°C cooling effect community-wide"
+            return f"If adopted by 5% of {suburb.name} households, could contribute ~{round(collective_cooling, 1)}°C cooling effect community-wide"
 
         return None
