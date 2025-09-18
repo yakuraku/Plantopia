@@ -38,7 +38,34 @@ class Plant(Base):
     care_instructions = Column(Text)
     companion_plants = Column(Text)
     image_url = Column(Text)
-    
+
+    # Position and characteristics from CSV
+    position = Column(Text)  # e.g., "Full sun, well drained soil"
+    characteristics = Column(Text)  # e.g., "Fast growing, drought tolerant"
+
+    # Additional CSV fields
+    plant_type = Column(Text)  # e.g., "Dwarf perennial to 25cm; Lavender coloured flower spikes"
+    season = Column(String(100))  # e.g., "Spring", "Spring and summer"
+    germination = Column(String(200))  # e.g., "10-14 days @ 18-20°C"
+    additional_information = Column(Text)  # Extra details about the plant
+    days_to_maturity = Column(String(100))  # Raw days to maturity string from CSV
+    plant_spacing = Column(String(100))  # Raw spacing string from CSV
+    sowing_depth = Column(String(100))  # Raw sowing depth string from CSV
+    hardiness_life_cycle = Column(String(200))  # e.g., "Half Hardy Annual", "Hardy Perennial"
+    seed_type = Column(String(100))  # Type of seed
+
+    # Companion planting fields
+    beneficial_companions = Column(Text)  # Plants that grow well together
+    harmful_companions = Column(Text)  # Plants to avoid planting nearby
+    neutral_companions = Column(Text)  # Compatible plants
+
+    # Climate-specific sowing periods
+    cool_climate_sowing_period = Column(String(200))
+    temperate_climate_sowing_period = Column(String(200))
+    subtropical_climate_sowing_period = Column(String(200))
+    tropical_climate_sowing_period = Column(String(200))
+    arid_climate_sowing_period = Column(String(200))
+
     # Fields for recommendation engine
     sun_need = Column(String(50))  # full_sun, part_sun, bright_shade
     indoor_ok = Column(Boolean, default=False)
