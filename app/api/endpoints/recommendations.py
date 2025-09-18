@@ -94,7 +94,7 @@ async def get_recommendations_with_quantified_impact(
         for rec in recommendations.get("recommendations", []):
             try:
                 # Get plant from database
-                plant = await recommendation_service.plant_repository.get_plant_by_name(rec["plant_name"])
+                plant = await recommendation_service.plant_repository.get_plant_object_by_name(rec["plant_name"])
                 if not plant:
                     # Skip if plant not found, use original recommendation
                     enhanced_recommendations.append(rec)
