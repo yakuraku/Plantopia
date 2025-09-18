@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.endpoints import health, recommendations, plants, climate, admin, markdown_content, quantification
+from app.api.endpoints import health, recommendations, plants, climate, admin, markdown_content, quantification, uhi
 
 # Create main API router
 api_router = APIRouter()
@@ -13,3 +13,4 @@ api_router.include_router(climate.router, prefix="", tags=["climate"])
 api_router.include_router(quantification.router, prefix="", tags=["quantification"])
 api_router.include_router(admin.router, prefix="", tags=["admin"])  # admin router already has /admin prefix
 api_router.include_router(markdown_content.router, prefix="", tags=["markdown-content"])
+api_router.include_router(uhi.router, prefix="/uhi", tags=["uhi"])
