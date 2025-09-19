@@ -74,7 +74,8 @@ class DatabasePlantRepository:
         )
 
         result = await self.db.execute(query)
-        return result.scalar_one_or_none()  # Return Plant object directly, not dictionary
+        # Use first() instead of scalar_one_or_none() to handle duplicates
+        return result.scalars().first()  # Return first Plant object if duplicates exist
     
     async def get_plants_by_category(self, category: str) -> List[Dict[str, Any]]:
         """Get all plants of a specific category.
