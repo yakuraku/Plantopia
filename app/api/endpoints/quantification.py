@@ -101,8 +101,8 @@ async def quantify_plant_impact(
                              60.0 if quantified_impact.pollinator_support == "Medium" else
                              40.0 if quantified_impact.pollinator_support == "Low" else 20.0,
             edible_yield_g_week=50.0 if quantified_impact.edible_yield else None,
-            water_need_l_week=float(quantified_impact.water_requirement.split('L')[0]),
-            maintenance_mins_week=float(quantified_impact.maintenance_time.split('mins')[0]),
+            water_need_l_week=float(quantified_impact.water_requirement.split('L/week')[0]),
+            maintenance_mins_week=float(quantified_impact.maintenance_time.split('mins/week')[0]),
             risk_level=quantified_impact.risk_badge,
             confidence_score=80.0  # Default confidence
         )
