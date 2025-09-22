@@ -259,12 +259,29 @@ class QuantificationService:
 
     def _calculate_growth_speed(self, plant: Plant) -> float:
         """Calculate growth speed factor"""
-        if not plant.time_to_maturity_days:
+        # Try integer field first, then parse string field
+        days_to_maturity = plant.time_to_maturity_days
+
+        if not days_to_maturity and plant.days_to_maturity:
+            # Parse from string field like "180 days" or "90-130 days"
+            import re
+            days_str = plant.days_to_maturity
+            numbers = re.findall(r'\d+', days_str)
+            if numbers:
+                if len(numbers) == 1:
+                    days_to_maturity = int(numbers[0])
+                elif len(numbers) == 2:
+                    # Range like "90-130 days" - take the average
+                    days_to_maturity = int((int(numbers[0]) + int(numbers[1])) / 2)
+                else:
+                    days_to_maturity = int(numbers[0])
+
+        if not days_to_maturity:
             return 1.0
 
-        if plant.time_to_maturity_days <= 60:
+        if days_to_maturity <= 60:
             return 1.2  # fast
-        elif plant.time_to_maturity_days > 120:
+        elif days_to_maturity > 120:
             return 0.8  # slow
 
         return 1.0
