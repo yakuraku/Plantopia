@@ -56,7 +56,7 @@ async def quantify_plant_impact(
     """
     try:
         # Get plant data
-        plant = await plant_repository.get_plant_by_name(request.plant_name)
+        plant = await plant_repository.get_plant_object_by_name(request.plant_name)
         if not plant:
             raise HTTPException(
                 status_code=404,
@@ -66,14 +66,14 @@ async def quantify_plant_impact(
         # Get suburb data for UHI context
         suburb = await climate_repository.get_suburb_by_name(request.suburb)
         if not suburb:
-            # Use default suburb data if not found
-            from app.models.database import Suburb
-            suburb = Suburb(
-                suburb_name=request.suburb,
-                suburb_heat_category="Moderate Heat",
-                avg_heat_celsius=8.0,
-                avg_vegetation_pct=20.0
-            )
+            # Use default suburb data if not found - create a simple object with required attributes
+            class DefaultSuburb:
+                def __init__(self, name):
+                    self.name = name
+                    self.suburb_heat_category = "Moderate Heat"
+                    self.suburb_heat_intensity = 8.0
+
+            suburb = DefaultSuburb(request.suburb)
 
         # Extract preferences
         site_prefs = request.user_preferences.site
@@ -101,8 +101,8 @@ async def quantify_plant_impact(
                              60.0 if quantified_impact.pollinator_support == "Medium" else
                              40.0 if quantified_impact.pollinator_support == "Low" else 20.0,
             edible_yield_g_week=50.0 if quantified_impact.edible_yield else None,
-            water_need_l_week=float(quantified_impact.water_requirement.split('L')[0]),
-            maintenance_mins_week=float(quantified_impact.maintenance_time.split('mins')[0]),
+            water_need_l_week=float(quantified_impact.water_requirement.split('L/week')[0]),
+            maintenance_mins_week=float(quantified_impact.maintenance_time.split('mins/week')[0]),
             risk_level=quantified_impact.risk_badge,
             confidence_score=80.0  # Default confidence
         )

@@ -1,1416 +1,1048 @@
-# Frontend Implementation Guide - Climate Action Quantification
+# Frontend Implementation Guide - Plantopia API
 
-## Overview
+This comprehensive guide provides documentation for all API endpoints available in the Plantopia backend, including plant data, companion planting, markdown content, recommendations, and more.
 
-This guide provides frontend developers with everything needed to implement the Climate Action Quantification feature in the Plantopia Vue.js application. The feature adds environmental impact metrics to plant recommendations, helping users understand the real-world climate benefits of their gardening choices.
+## Table of Contents
 
-## Quick Start
+1. [Base Configuration](#base-configuration)
+2. [Plants API](#plants-api)
+3. [Companion Planting API](#companion-planting-api)
+4. [Recommendations API](#recommendations-api)
+5. [Markdown Content API](#markdown-content-api)
+6. [Climate & Environmental Data API](#climate--environmental-data-api)
+7. [Error Handling](#error-handling)
+8. [Frontend Implementation Examples](#frontend-implementation-examples)
 
-### 1. API Endpoints Available
+---
 
-The backend provides these new endpoints for quantification:
+## Base Configuration
 
-```typescript
-// Base URL: http://localhost:8000/api/v1 (development) or /api/v1 (production)
+**API Base URL:** `http://localhost:8000/api/v1` (adjust for production)
+**Content Type:** `application/json`
+**Authentication:** None required (currently)
 
-POST /quantify-plant              // Quantify a specific plant
-POST /batch-quantify             // Quantify multiple plants
-POST /recommendations-with-impact // Enhanced recommendations with climate data
-GET  /quantification-info        // Framework documentation
-```
+---
 
-### 2. Key Components to Create
+## Plants API
 
-1. **ImpactCard.vue** - Display quantified impact metrics
-2. **EnhancedPlantCard.vue** - Plant card with impact preview
-3. **QuantificationService.ts** - API integration service
-4. **ImpactMetrics types** - TypeScript interfaces
+The Plants API provides access to the complete database of 2,117+ plants (flowers, herbs, and vegetables) with detailed information about growing requirements, characteristics, and companion planting data.
 
-## TypeScript Interfaces
+### Get All Plants
 
-### Core Data Types
+**Endpoint:** `GET /plants`
 
-```typescript
-// File: src/types/quantification.ts
+**Description:** Retrieve all plants from the database with complete information including companion planting data.
 
-export interface QuantifiedImpact {
-  temperature_reduction_c: number
-  air_quality_points: number
-  co2_absorption_kg_year: number
-  water_processed_l_week: number
-  pollinator_support: 'Minimal' | 'Low' | 'Medium' | 'High'
-  edible_yield?: string  // e.g., "80g/week after day 45"
-  maintenance_time: string  // e.g., "8mins/week"
-  water_requirement: string  // e.g., "4.5L/week"
-  risk_badge: 'low' | 'medium' | 'high'
-  confidence_level: string  // e.g., "High (87%)"
-  why_this_plant: string
-  community_impact_potential?: string
-}
-
-export interface SuitabilityScore {
-  total_score: number  // 0-100
-  breakdown: {
-    [key: string]: number  // Individual factor scores
-  }
-}
-
-export interface PlantQuantificationResponse {
-  plant_name: string
-  scientific_name?: string
-  plant_category: string
-  quantified_impact: QuantifiedImpact
-  suitability_score: SuitabilityScore
-  suburb: string
-  climate_zone: string
-  plant_count: number
-}
-
-export interface PlantQuantificationRequest {
-  plant_name: string
-  suburb: string
-  plant_count: number
-  user_preferences: {
-    site: {
-      location_type: string
-      area_m2: number
-      sun_exposure: string
-      wind_exposure: string
-      containers: boolean
-      container_sizes?: string[]
-    }
-    preferences: {
-      goal: string
-      maintainability: string
-      watering: string
-      time_to_results: string
-      season_intent: string
-    }
-  }
-}
-```
-
-### Enhanced Plant Interface
-
-```typescript
-// File: src/types/plant.ts (extend existing Plant interface)
-
-export interface Plant {
-  // ... existing fields
-  quantified_impact?: QuantifiedImpact  // Optional quantified impact data
-  suitability_score?: number           // Optional suitability score
-}
-```
-
-## API Service Integration
-
-### Quantification Service
-
-```typescript
-// File: src/services/quantificationService.ts
-
-import type {
-  PlantQuantificationRequest,
-  PlantQuantificationResponse,
-  QuantifiedImpact
-} from '@/types/quantification'
-
-class QuantificationApiService {
-  private baseUrl: string
-
-  constructor() {
-    this.baseUrl = process.env.NODE_ENV === 'production'
-      ? '/api/v1'
-      : 'http://localhost:8000/api/v1'
-  }
-
-  /**
-   * Quantify climate impact for a single plant
-   */
-  async quantifyPlant(request: PlantQuantificationRequest): Promise<PlantQuantificationResponse> {
-    const response = await fetch(`${this.baseUrl}/quantify-plant`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+**Response:**
+```json
+{
+  "plants": [
+    {
+      "id": 1,
+      "plant_name": "Basil",
+      "scientific_name": "Ocimum basilicum",
+      "plant_category": "herb",
+      "water_requirements": "Regular watering",
+      "sunlight_requirements": "Full sun",
+      "soil_type": "Well-drained, fertile soil",
+      "growth_time": "60-90 days",
+      "maintenance_level": "Easy",
+      "description": "Popular culinary herb...",
+      "sun_need": "full_sun",
+      "indoor_ok": true,
+      "container_ok": true,
+      "edible": true,
+      "time_to_maturity_days": 75,
+      "beneficial_companions": "Tomatoes, Peppers, Oregano",
+      "harmful_companions": "Rue, Sage",
+      "neutral_companions": "Lettuce, Spinach, Beans",
+      "media": {
+        "image_url": "https://storage.googleapis.com/.../basil_1.jpg",
+        "image_path": "herb_plant_images/Basil_Ocimum basilicum/...",
+        "image_base64": "base64encodedstring...",
+        "has_image": true
       },
-      body: JSON.stringify(request)
-    })
-
-    if (!response.ok) {
-      throw new Error(`Quantification failed: ${response.statusText}`)
+      "created_at": "2024-01-15T10:30:00",
+      "updated_at": "2024-09-04T14:20:00"
     }
-
-    return response.json()
-  }
-
-  /**
-   * Quantify multiple plants in batch
-   */
-  async batchQuantifyPlants(requests: PlantQuantificationRequest[]): Promise<PlantQuantificationResponse[]> {
-    if (requests.length > 20) {
-      throw new Error('Maximum 20 plants can be quantified in batch')
-    }
-
-    const response = await fetch(`${this.baseUrl}/batch-quantify`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requests)
-    })
-
-    if (!response.ok) {
-      throw new Error(`Batch quantification failed: ${response.statusText}`)
-    }
-
-    return response.json()
-  }
-
-  /**
-   * Get enhanced recommendations with quantified impact
-   */
-  async getRecommendationsWithImpact(request: any): Promise<any> {
-    const response = await fetch(`${this.baseUrl}/recommendations-with-impact`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(request)
-    })
-
-    if (!response.ok) {
-      throw new Error(`Enhanced recommendations failed: ${response.statusText}`)
-    }
-
-    return response.json()
-  }
-
-  /**
-   * Get quantification framework information
-   */
-  async getQuantificationInfo(): Promise<any> {
-    const response = await fetch(`${this.baseUrl}/quantification-info`)
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch quantification info: ${response.statusText}`)
-    }
-
-    return response.json()
-  }
+  ],
+  "total_count": 2117
 }
-
-export const quantificationService = new QuantificationApiService()
 ```
 
-## Vue Components
-
-### 1. ImpactCard Component
-
-```vue
-<!-- File: src/components/ImpactCard.vue -->
-<template>
-  <div class="impact-card">
-    <div class="impact-header">
-      <h4 class="impact-title">Climate Impact</h4>
-      <div class="suitability-score" v-if="suitabilityScore">
-        {{ Math.round(suitabilityScore) }}/100
-      </div>
-    </div>
-
-    <div class="impact-metrics">
-      <!-- Cooling Effect -->
-      <div class="metric-item cooling">
-        <div class="metric-icon">🌡️</div>
-        <div class="metric-content">
-          <div class="metric-value">~{{ impact.temperature_reduction_c }}°C</div>
-          <div class="metric-label">Cooling nearby</div>
-        </div>
-      </div>
-
-      <!-- Air Quality -->
-      <div class="metric-item air-quality">
-        <div class="metric-icon">💨</div>
-        <div class="metric-content">
-          <div class="metric-value">+{{ impact.air_quality_points }}</div>
-          <div class="metric-label">AQ points</div>
-        </div>
-      </div>
-
-      <!-- CO2 Absorption -->
-      <div class="metric-item co2">
-        <div class="metric-icon">🌱</div>
-        <div class="metric-content">
-          <div class="metric-value">{{ impact.co2_absorption_kg_year }}kg/yr</div>
-          <div class="metric-label">CO₂ absorbed</div>
-        </div>
-      </div>
-
-      <!-- Water Processing -->
-      <div class="metric-item water">
-        <div class="metric-icon">💧</div>
-        <div class="metric-content">
-          <div class="metric-value">{{ impact.water_processed_l_week }}L/wk</div>
-          <div class="metric-label">Water cycled</div>
-        </div>
-      </div>
-
-      <!-- Pollinator Support -->
-      <div class="metric-item pollinator">
-        <div class="metric-icon">🦋</div>
-        <div class="metric-content">
-          <div class="metric-value">{{ impact.pollinator_support }}</div>
-          <div class="metric-label">Pollinator support</div>
-        </div>
-      </div>
-
-      <!-- Edible Yield (if applicable) -->
-      <div class="metric-item edible" v-if="impact.edible_yield">
-        <div class="metric-icon">🍃</div>
-        <div class="metric-content">
-          <div class="metric-value">{{ formatEdibleYield(impact.edible_yield) }}</div>
-          <div class="metric-label">Edible yield</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="impact-footer">
-      <!-- Requirements -->
-      <div class="requirements">
-        <div class="req-item">
-          <span class="req-label">Maintenance:</span>
-          <span class="req-value">{{ impact.maintenance_time }}</span>
-        </div>
-        <div class="req-item">
-          <span class="req-label">Water:</span>
-          <span class="req-value">{{ impact.water_requirement }}</span>
-        </div>
-      </div>
-
-      <!-- Risk & Confidence -->
-      <div class="badges">
-        <div class="risk-badge" :class="`risk-${impact.risk_badge}`">
-          Risk: {{ impact.risk_badge }}
-        </div>
-        <div class="confidence-badge">
-          {{ impact.confidence_level }}
-        </div>
-      </div>
-
-      <!-- Why This Plant -->
-      <div class="why-plant">
-        <strong>{{ impact.why_this_plant }}</strong>
-      </div>
-
-      <!-- Community Impact (if available) -->
-      <div class="community-impact" v-if="impact.community_impact_potential">
-        <p class="community-text">{{ impact.community_impact_potential }}</p>
-      </div>
-    </div>
-  </div>
-</template>
-
-<script setup lang="ts">
-import type { QuantifiedImpact } from '@/types/quantification'
-
-defineProps<{
-  impact: QuantifiedImpact
-  suitabilityScore?: number
-}>()
-
-function formatEdibleYield(yield: string): string {
-  // Extract just the amount for display
-  // "80g/week after day 45" -> "80g/week"
-  return yield.split(' after ')[0]
-}
-</script>
-
-<style scoped>
-.impact-card {
-  background: linear-gradient(135deg, #ecfdf5, #f0fdf4);
-  border: 2px solid #86efac;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  margin-top: 1rem;
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.1);
-}
-
-.impact-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #86efac;
-}
-
-.impact-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #065f46;
-  margin: 0;
-}
-
-.suitability-score {
-  background: #059669;
-  color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.impact-metrics {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.metric-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  background: white;
-  border-radius: 0.75rem;
-  border: 1px solid #d1fae5;
-  transition: transform 0.2s ease;
-}
-
-.metric-item:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.15);
-}
-
-.metric-icon {
-  font-size: 1.25rem;
-  flex-shrink: 0;
-}
-
-.metric-value {
-  font-weight: 700;
-  color: #059669;
-  font-size: 0.875rem;
-  line-height: 1.2;
-}
-
-.metric-label {
-  font-size: 0.75rem;
-  color: #065f46;
-  font-weight: 500;
-  line-height: 1.2;
-}
-
-.requirements {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
-}
-
-.req-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-}
-
-.req-label {
-  font-weight: 600;
-  color: #065f46;
-}
-
-.req-value {
-  color: #047857;
-  font-weight: 500;
-}
-
-.badges {
-  display: flex;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
-}
-
-.risk-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: capitalize;
-}
-
-.risk-low {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.risk-medium {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.risk-high {
-  background: #fecaca;
-  color: #991b1b;
-}
-
-.confidence-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  background: #e5e7eb;
-  color: #374151;
-}
-
-.why-plant {
-  padding: 0.75rem;
-  background: rgba(34, 197, 94, 0.1);
-  border-radius: 0.75rem;
-  border-left: 3px solid #22c55e;
-  font-size: 0.875rem;
-  color: #065f46;
-  line-height: 1.4;
-  margin-bottom: 1rem;
-}
-
-.community-impact {
-  padding: 0.5rem;
-  background: rgba(59, 130, 246, 0.1);
-  border-radius: 0.5rem;
-  border-left: 3px solid #3b82f6;
-}
-
-.community-text {
-  font-size: 0.75rem;
-  color: #1e40af;
-  margin: 0;
-  font-style: italic;
-}
-
-/* Responsive design */
-@media (max-width: 768px) {
-  .impact-metrics {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-  }
-
-  .requirements {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .badges {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-}
-</style>
-```
-
-### 2. Enhanced Plant Card Component
-
-```vue
-<!-- File: src/components/EnhancedPlantCard.vue -->
-<template>
-  <div class="enhanced-plant-card" @click="$emit('select', plant)">
-    <!-- Plant Image -->
-    <div class="plant-card-image">
-      <img
-        :src="getImageSource()"
-        :alt="plant.name"
-        class="plant-image"
-        @error="handleImageError"
-      />
-    </div>
-
-    <!-- Plant Information -->
-    <div class="plant-card-content">
-      <!-- Header -->
-      <div class="plant-header">
-        <h3 class="plant-title">{{ plant.name }}</h3>
-        <div class="plant-score" v-if="plant.score">
-          {{ plant.score.toFixed(1) }}/100
-        </div>
-      </div>
-
-      <!-- Description -->
-      <div class="plant-description">
-        {{ truncateDescription(plant.description) }}
-      </div>
-
-      <!-- Climate Impact Preview -->
-      <div class="impact-preview" v-if="plant.quantified_impact">
-        <h4 class="impact-preview-title">Climate Impact Preview</h4>
-
-        <div class="impact-highlights">
-          <div class="highlight-item">
-            <span class="highlight-icon">🌡️</span>
-            <span class="highlight-text">{{ plant.quantified_impact.temperature_reduction_c }}°C cooling</span>
-          </div>
-
-          <div class="highlight-item">
-            <span class="highlight-icon">🌱</span>
-            <span class="highlight-text">{{ plant.quantified_impact.co2_absorption_kg_year }}kg CO₂/yr</span>
-          </div>
-
-          <div class="highlight-item">
-            <span class="highlight-icon">💨</span>
-            <span class="highlight-text">+{{ plant.quantified_impact.air_quality_points }} AQ points</span>
-          </div>
-
-          <div class="highlight-item" v-if="plant.quantified_impact.pollinator_support !== 'Minimal'">
-            <span class="highlight-icon">🦋</span>
-            <span class="highlight-text">{{ plant.quantified_impact.pollinator_support }} pollinator support</span>
-          </div>
-        </div>
-
-        <!-- Quick maintenance info -->
-        <div class="maintenance-info">
-          <span class="maintenance-label">Care:</span>
-          <span class="maintenance-value">{{ plant.quantified_impact.maintenance_time }}</span>
-          <span class="maintenance-divider">•</span>
-          <span class="water-value">{{ plant.quantified_impact.water_requirement }}</span>
-        </div>
-      </div>
-
-      <!-- Fallback traditional care info -->
-      <div class="traditional-care" v-else>
-        <div class="care-item">
-          <span class="care-label">Sun:</span>
-          <span class="care-value">{{ getSunRequirement(plant) }}</span>
-        </div>
-        <div class="care-item">
-          <span class="care-label">Water:</span>
-          <span class="care-value">{{ getWaterRequirement(plant) }}</span>
-        </div>
-      </div>
-
-      <!-- Why Recommended -->
-      <div class="why-recommended">
-        {{ getRecommendationReason(plant) }}
-      </div>
-
-      <!-- Action Button -->
-      <button class="learn-more-button" @click.stop="$emit('select', plant)">
-        {{ plant.quantified_impact ? 'View Full Impact' : 'Learn More' }}
-      </button>
-    </div>
-  </div>
-</template>
-
-<script setup lang="ts">
-import { computed } from 'vue'
-import type { Plant } from '@/types/plant'
-
-const props = defineProps<{
-  plant: Plant
-}>()
-
-defineEmits<{
-  select: [plant: Plant]
-}>()
-
-function getImageSource(): string {
-  if (props.plant.image_base64) {
-    return props.plant.image_base64.startsWith('data:')
-      ? props.plant.image_base64
-      : `data:image/jpeg;base64,${props.plant.image_base64}`
-  }
-
-  return getCategoryPlaceholder()
-}
-
-function getCategoryPlaceholder(): string {
-  const category = props.plant.category?.toLowerCase()
-
-  switch (category) {
-    case 'flower': return '/Flower.jpg'
-    case 'herb': return '/Herb.jpg'
-    case 'vegetable': return '/Vegetable.jpg'
-    default: return '/placeholder-plant.svg'
-  }
-}
-
-function handleImageError(event: Event) {
-  const img = event.target as HTMLImageElement
-  const placeholder = getCategoryPlaceholder()
-
-  if (img.src !== placeholder) {
-    img.src = placeholder
-  }
-}
-
-function truncateDescription(description: string | undefined): string {
-  if (!description) return 'No description available.'
-  return description.length > 100 ? description.substring(0, 97) + '...' : description
-}
-
-function getSunRequirement(plant: Plant): string {
-  return plant.sunlight || plant.care_requirements?.sunlight || 'Full Sun'
-}
-
-function getWaterRequirement(plant: Plant): string {
-  return plant.water || plant.care_requirements?.watering || 'Medium'
-}
-
-function getRecommendationReason(plant: Plant): string {
-  if (plant.quantified_impact?.why_this_plant) {
-    return plant.quantified_impact.why_this_plant
-  }
-
-  if (Array.isArray(plant.whyRecommended)) {
-    return plant.whyRecommended.join(' ')
-  }
-
-  return plant.whyRecommended || 'Great choice for your garden!'
-}
-</script>
-
-<style scoped>
-.enhanced-plant-card {
-  border: 2px solid #a7f3d0;
-  border-radius: 1rem;
-  background: white;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.08);
-}
-
-.enhanced-plant-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 40px rgba(5, 150, 105, 0.15);
-  border-color: #059669;
-}
-
-.plant-card-image {
-  height: 200px;
-  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-  border-bottom: 2px solid #a7f3d0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.plant-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.enhanced-plant-card:hover .plant-image {
-  transform: scale(1.05);
-}
-
-.plant-card-content {
-  padding: 1.5rem;
-}
-
-.plant-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 0.75rem;
-  gap: 0.5rem;
-}
-
-.plant-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #1c3d21;
-  margin: 0;
-  flex: 1;
-}
-
-.plant-score {
-  background: #047857;
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  flex-shrink: 0;
-}
-
-.plant-description {
-  color: #1c3d21;
-  font-size: 0.875rem;
-  margin-bottom: 1rem;
-  line-height: 1.5;
-}
-
-/* Impact Preview Styles */
-.impact-preview {
-  background: linear-gradient(135deg, #ecfdf5, #f0fdf4);
-  border: 1px solid #86efac;
-  border-radius: 0.75rem;
-  padding: 1rem;
-  margin-bottom: 1rem;
-}
-
-.impact-preview-title {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #065f46;
-  margin: 0 0 0.75rem 0;
-  text-align: center;
-}
-
-.impact-highlights {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
-}
-
-.highlight-item {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: #047857;
-}
-
-.highlight-icon {
-  font-size: 0.875rem;
-}
-
-.highlight-text {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.maintenance-info {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  font-size: 0.75rem;
-  border-top: 1px solid #d1fae5;
-  padding-top: 0.5rem;
-}
-
-.maintenance-label {
-  font-weight: 600;
-  color: #065f46;
-}
-
-.maintenance-value, .water-value {
-  color: #047857;
-  font-weight: 500;
-}
-
-.maintenance-divider {
-  color: #9ca3af;
-}
-
-/* Traditional care fallback */
-.traditional-care {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  justify-content: space-between;
-}
-
-.care-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-  flex: 1;
-}
-
-.care-label {
-  font-weight: 600;
-  color: #047857;
-  font-size: 0.75rem;
-}
-
-.care-value {
-  font-weight: 500;
-  color: #374151;
-  font-size: 0.875rem;
-}
-
-.why-recommended {
-  font-size: 0.875rem;
-  color: #1c3d21;
-  margin-bottom: 1rem;
-  padding: 0.75rem;
-  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-  border-radius: 0.75rem;
-  border-left: 3px solid #1c3d21;
-  font-weight: 500;
-}
-
-.learn-more-button {
-  width: 100%;
-  padding: 0.75rem;
-  background: transparent;
-  border: 2px solid #1c3d21;
-  color: #1c3d21;
-  border-radius: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.learn-more-button:hover {
-  background: #1c3d21;
-  color: white;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(28, 61, 33, 0.3);
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .impact-highlights {
-    grid-template-columns: 1fr;
-    gap: 0.375rem;
-  }
-
-  .maintenance-info {
-    flex-direction: column;
-    gap: 0.375rem;
-  }
-
-  .plant-card-content {
-    padding: 1rem;
-  }
-}
-</style>
-```
-
-## Integration with Existing Views
-
-### 1. Update RecommendationsView
-
-```typescript
-// File: src/views/RecommendationsView.vue
-import { quantificationService } from '@/services/quantificationService'
-
-// Add method to get enhanced recommendations
-async function getEnhancedRecommendations() {
+**Frontend Usage:**
+```javascript
+// Fetch all plants
+const fetchAllPlants = async () => {
   try {
-    // Build request from existing form data
-    const request = buildApiRequest(formData)
-
-    // Use enhanced endpoint
-    const response = await quantificationService.getRecommendationsWithImpact(request)
-
-    // Transform and display as usual
-    recommendations.value = transformRecommendations(response)
-
+    const response = await fetch('/api/v1/plants');
+    const data = await response.json();
+    return data.plants;
   } catch (error) {
-    console.error('Enhanced recommendations failed:', error)
-    // Fallback to standard recommendations
-    await getStandardRecommendations()
+    console.error('Error fetching plants:', error);
+    throw error;
   }
-}
-
-// Add toggle for impact view
-const showImpactMetrics = ref(false)
+};
 ```
 
-### 2. Update PlantDetailModal
+### Get Paginated Plants
 
-```vue
-<!-- File: src/views/recommendation/PlantDetailModal.vue -->
-<template>
-  <div class="modal-content">
-    <!-- Existing plant details -->
+**Endpoint:** `GET /plants/paginated`
 
-    <!-- Add Impact Section -->
-    <div class="impact-section" v-if="plant.quantified_impact">
-      <h3>Climate Impact Analysis</h3>
-      <ImpactCard
-        :impact="plant.quantified_impact"
-        :suitability-score="plant.suitability_score"
-      />
-    </div>
+**Query Parameters:**
+- `page` (integer, default: 1): Page number (1-based)
+- `limit` (integer, default: 12, max: 100): Items per page
+- `category` (string, optional): Filter by category (`flower`, `herb`, `vegetable`)
+- `search` (string, optional): Search by plant name, scientific name, or description
 
-    <!-- Quantify Button (if no impact data) -->
-    <div class="quantify-action" v-else>
-      <button
-        @click="quantifyPlant"
-        :disabled="quantifying"
-        class="quantify-button"
-      >
-        {{ quantifying ? 'Calculating Impact...' : 'Analyze Climate Impact' }}
-      </button>
-    </div>
-  </div>
-</template>
+**Description:** Get paginated plants with optional filtering and search. Recommended for better performance with large datasets.
 
-<script setup>
-import ImpactCard from '@/components/ImpactCard.vue'
-import { quantificationService } from '@/services/quantificationService'
+**Response:**
+```json
+{
+  "plants": [
+    {
+      "id": 1,
+      "plant_name": "Basil",
+      "scientific_name": "Ocimum basilicum",
+      "plant_category": "herb",
+      "beneficial_companions": "Tomatoes, Peppers, Oregano",
+      "harmful_companions": "Rue, Sage",
+      "neutral_companions": "Lettuce, Spinach, Beans",
+      "media": {
+        "image_url": "https://storage.googleapis.com/.../basil_1.jpg",
+        "has_image": true
+      }
+    }
+  ],
+  "page": 1,
+  "limit": 12,
+  "total": 2117,
+  "total_pages": 177,
+  "has_next": true,
+  "has_previous": false
+}
+```
 
-const quantifying = ref(false)
-
-async function quantifyPlant() {
-  quantifying.value = true
-
+**Frontend Usage:**
+```javascript
+// Fetch paginated plants with filters
+const fetchPaginatedPlants = async (page = 1, category = null, searchTerm = null) => {
   try {
-    // Build quantification request
-    const request = {
-      plant_name: plant.value.name,
-      suburb: getCurrentSuburb(), // From your app state
-      plant_count: 1,
-      user_preferences: getCurrentPreferences() // From your app state
-    }
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: '12'
+    });
 
-    const response = await quantificationService.quantifyPlant(request)
+    if (category) params.append('category', category);
+    if (searchTerm) params.append('search', searchTerm);
 
-    // Update plant with quantified impact
-    plant.value.quantified_impact = response.quantified_impact
-    plant.value.suitability_score = response.suitability_score.total_score
-
+    const response = await fetch(`/api/v1/plants/paginated?${params}`);
+    const data = await response.json();
+    return data;
   } catch (error) {
-    console.error('Quantification failed:', error)
-    // Show error message to user
-  } finally {
-    quantifying.value = false
+    console.error('Error fetching paginated plants:', error);
+    throw error;
   }
-}
-</script>
+};
+
+// Usage examples
+const herbsPage1 = await fetchPaginatedPlants(1, 'herb');
+const searchResults = await fetchPaginatedPlants(1, null, 'tomato');
+const flowersPage2 = await fetchPaginatedPlants(2, 'flower');
 ```
 
-## User Settings & Preferences
+### Get Plant Image URLs
 
-### Toggle Impact Display
+**Endpoint:** `GET /plants/{plant_id}/image-url`
 
-```vue
-<!-- File: src/components/ImpactToggle.vue -->
-<template>
-  <div class="impact-toggle">
-    <label class="toggle-label">
-      <input
-        type="checkbox"
-        v-model="showImpact"
-        @change="updateSettings"
-        class="toggle-input"
-      />
-      <span class="toggle-slider"></span>
-      <span class="toggle-text">Show Climate Impact</span>
-    </label>
+**Description:** Get the primary Google Cloud Storage image URL for a specific plant.
 
-    <div class="impact-info" v-if="showInfo">
-      <p class="info-text">
-        See real-world environmental benefits: cooling effect, CO₂ absorption,
-        air quality improvement, and pollinator support for each plant.
-      </p>
+**Response:**
+```json
+{
+  "image_url": "https://storage.googleapis.com/plantopia-images/herb_plant_images/Basil_Ocimum basilicum/Basil_Ocimum basilicum_1.jpg"
+}
+```
+
+**Frontend Usage:**
+```javascript
+const getPlantImage = async (plantId) => {
+  const response = await fetch(`/api/v1/plants/${plantId}/image-url`);
+  const data = await response.json();
+  return data.image_url;
+};
+```
+
+### Get All Plant Images
+
+**Endpoint:** `GET /plants/{plant_id}/all-images`
+
+**Description:** Get all available GCS image URLs for a plant (typically 2-4 images per plant).
+
+**Response:**
+```json
+{
+  "image_urls": [
+    "https://storage.googleapis.com/.../Basil_1.jpg",
+    "https://storage.googleapis.com/.../Basil_2.jpg",
+    "https://storage.googleapis.com/.../Basil_3.jpg"
+  ]
+}
+```
+
+**Frontend Usage:**
+```javascript
+const getAllPlantImages = async (plantId) => {
+  const response = await fetch(`/api/v1/plants/${plantId}/all-images`);
+  const data = await response.json();
+  return data.image_urls;
+};
+```
+
+---
+
+## Companion Planting API
+
+The Companion Planting API provides detailed information about which plants grow well together, which plants should be avoided, and neutral companions. This data is sourced from the three CSV files with companion data.
+
+### Get Companion Data for a Plant
+
+**Endpoint:** `GET /plants/{plant_id}/companions`
+
+**Description:** Get detailed companion planting information for a specific plant. Returns lists of beneficial, harmful, and neutral companion plants.
+
+**Response:**
+```json
+{
+  "plant_id": 123,
+  "plant_name": "Tomatoes",
+  "scientific_name": "Solanum lycopersicum",
+  "plant_category": "vegetable",
+  "companion_planting": {
+    "beneficial_companions": [
+      "Basil",
+      "Carrots",
+      "Onions",
+      "Parsley",
+      "Marigold",
+      "Nasturtium"
+    ],
+    "harmful_companions": [
+      "Cabbage",
+      "Fennel",
+      "Corn",
+      "Kohlrabi"
+    ],
+    "neutral_companions": [
+      "Lettuce",
+      "Spinach",
+      "Radish",
+      "Beans"
+    ]
+  }
+}
+```
+
+**Companion Data Explanation:**
+- **Beneficial Companions**: Plants that grow well together and provide mutual benefits (pest control, nutrient sharing, improved growth)
+- **Harmful Companions**: Plants that should NOT be planted together (compete for nutrients, attract same pests, inhibit growth)
+- **Neutral Companions**: Compatible plants that can coexist without significant positive or negative effects
+
+**Frontend Usage:**
+```javascript
+// Fetch companion planting data
+const getCompanionPlanting = async (plantId) => {
+  try {
+    const response = await fetch(`/api/v1/plants/${plantId}/companions`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch companion data');
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching companion planting data:', error);
+    throw error;
+  }
+};
+
+// Usage example
+const tomatoCompanions = await getCompanionPlanting(123);
+console.log('Plant with tomatoes:', tomatoCompanions.companion_planting.beneficial_companions);
+console.log('Avoid planting with tomatoes:', tomatoCompanions.companion_planting.harmful_companions);
+```
+
+### React Component Example - Companion Planting Display
+
+```jsx
+import React, { useState, useEffect } from 'react';
+
+const CompanionPlantingCard = ({ plantId }) => {
+  const [companionData, setCompanionData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchCompanions = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/v1/plants/${plantId}/companions`);
+        if (!response.ok) throw new Error('Plant not found');
+        const data = await response.json();
+        setCompanionData(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (plantId) fetchCompanions();
+  }, [plantId]);
+
+  if (loading) return <div className="loading">Loading companion data...</div>;
+  if (error) return <div className="error">Error: {error}</div>;
+  if (!companionData) return null;
+
+  const { plant_name, companion_planting } = companionData;
+
+  return (
+    <div className="companion-planting-card">
+      <h2>Companion Planting Guide for {plant_name}</h2>
+
+      {/* Beneficial Companions */}
+      <div className="companion-section beneficial">
+        <h3>✅ Good Companions</h3>
+        <p className="description">Plant these together for mutual benefits</p>
+        <ul className="companion-list">
+          {companion_planting.beneficial_companions.length > 0 ? (
+            companion_planting.beneficial_companions.map((plant, index) => (
+              <li key={index} className="companion-item good">
+                🌱 {plant}
+              </li>
+            ))
+          ) : (
+            <li className="no-data">No beneficial companions listed</li>
+          )}
+        </ul>
+      </div>
+
+      {/* Harmful Companions */}
+      <div className="companion-section harmful">
+        <h3>❌ Avoid These Plants</h3>
+        <p className="description">Keep these plants away from each other</p>
+        <ul className="companion-list">
+          {companion_planting.harmful_companions.length > 0 ? (
+            companion_planting.harmful_companions.map((plant, index) => (
+              <li key={index} className="companion-item bad">
+                🚫 {plant}
+              </li>
+            ))
+          ) : (
+            <li className="no-data">No harmful companions listed</li>
+          )}
+        </ul>
+      </div>
+
+      {/* Neutral Companions */}
+      <div className="companion-section neutral">
+        <h3>➖ Neutral Companions</h3>
+        <p className="description">Can be planted together without issues</p>
+        <ul className="companion-list">
+          {companion_planting.neutral_companions.length > 0 ? (
+            companion_planting.neutral_companions.map((plant, index) => (
+              <li key={index} className="companion-item neutral">
+                ⚪ {plant}
+              </li>
+            ))
+          ) : (
+            <li className="no-data">No neutral companions listed</li>
+          )}
+        </ul>
+      </div>
     </div>
-  </div>
-</template>
+  );
+};
 
-<script setup>
-const showImpact = ref(true)
-const showInfo = ref(false)
-
-function updateSettings() {
-  // Save to localStorage or user preferences
-  localStorage.setItem('showClimateImpact', showImpact.value.toString())
-
-  // Emit to parent component
-  emit('impact-visibility-changed', showImpact.value)
-}
-
-// Load saved preference
-onMounted(() => {
-  const saved = localStorage.getItem('showClimateImpact')
-  if (saved !== null) {
-    showImpact.value = saved === 'true'
-  }
-})
-</script>
+export default CompanionPlantingCard;
 ```
 
-## Error Handling & Loading States
-
-### Loading Component
+### Vue.js Component Example - Companion Planting
 
 ```vue
-<!-- File: src/components/ImpactLoading.vue -->
 <template>
-  <div class="impact-loading">
-    <div class="loading-spinner"></div>
-    <p class="loading-text">Calculating climate impact...</p>
-    <div class="loading-metrics">
-      <div class="loading-metric">🌡️ Cooling effect</div>
-      <div class="loading-metric">🌱 CO₂ absorption</div>
-      <div class="loading-metric">💨 Air quality</div>
-      <div class="loading-metric">🦋 Pollinator support</div>
+  <div class="companion-planting-widget">
+    <div v-if="loading" class="loading">Loading...</div>
+    <div v-else-if="error" class="error">{{ error }}</div>
+    <div v-else-if="companionData" class="companion-content">
+      <h3>Companion Planting: {{ companionData.plant_name }}</h3>
+
+      <!-- Beneficial -->
+      <div class="companion-group">
+        <h4 class="beneficial-header">✅ Plant With:</h4>
+        <div class="plant-tags">
+          <span
+            v-for="plant in companionData.companion_planting.beneficial_companions"
+            :key="plant"
+            class="tag beneficial"
+          >
+            {{ plant }}
+          </span>
+          <span v-if="companionData.companion_planting.beneficial_companions.length === 0" class="no-data">
+            None listed
+          </span>
+        </div>
+      </div>
+
+      <!-- Harmful -->
+      <div class="companion-group">
+        <h4 class="harmful-header">❌ Keep Away From:</h4>
+        <div class="plant-tags">
+          <span
+            v-for="plant in companionData.companion_planting.harmful_companions"
+            :key="plant"
+            class="tag harmful"
+          >
+            {{ plant }}
+          </span>
+          <span v-if="companionData.companion_planting.harmful_companions.length === 0" class="no-data">
+            None listed
+          </span>
+        </div>
+      </div>
+
+      <!-- Neutral -->
+      <div class="companion-group">
+        <h4 class="neutral-header">➖ Neutral:</h4>
+        <div class="plant-tags">
+          <span
+            v-for="plant in companionData.companion_planting.neutral_companions"
+            :key="plant"
+            class="tag neutral"
+          >
+            {{ plant }}
+          </span>
+        </div>
+      </div>
     </div>
-  </div>
-</template>
-
-<style scoped>
-.impact-loading {
-  padding: 2rem;
-  text-align: center;
-  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-  border-radius: 1rem;
-  border: 1px solid #86efac;
-}
-
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #86efac;
-  border-top: 4px solid #059669;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 1rem;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.loading-text {
-  color: #065f46;
-  font-weight: 600;
-  margin-bottom: 1rem;
-}
-
-.loading-metrics {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.loading-metric {
-  font-size: 0.75rem;
-  color: #047857;
-  padding: 0.25rem 0.5rem;
-  background: white;
-  border-radius: 0.5rem;
-  border: 1px solid #d1fae5;
-}
-</style>
-```
-
-### Error Handling
-
-```typescript
-// File: src/composables/useQuantification.ts
-import { ref, computed } from 'vue'
-import { quantificationService } from '@/services/quantificationService'
-
-export function useQuantification() {
-  const loading = ref(false)
-  const error = ref<string | null>(null)
-  const quantifiedPlants = ref<Map<string, any>>(new Map())
-
-  async function quantifyPlant(plantName: string, preferences: any) {
-    loading.value = true
-    error.value = null
-
-    try {
-      const request = {
-        plant_name: plantName,
-        suburb: preferences.suburb,
-        plant_count: preferences.plantCount || 1,
-        user_preferences: preferences
-      }
-
-      const response = await quantificationService.quantifyPlant(request)
-
-      // Cache the result
-      quantifiedPlants.value.set(plantName, response)
-
-      return response
-
-    } catch (err: any) {
-      error.value = err.message || 'Failed to quantify plant impact'
-      console.error('Quantification error:', err)
-      return null
-
-    } finally {
-      loading.value = false
-    }
-  }
-
-  function getQuantifiedImpact(plantName: string) {
-    return quantifiedPlants.value.get(plantName)
-  }
-
-  function clearError() {
-    error.value = null
-  }
-
-  return {
-    loading: readonly(loading),
-    error: readonly(error),
-    quantifyPlant,
-    getQuantifiedImpact,
-    clearError
-  }
-}
-```
-
-## Performance Optimization
-
-### Lazy Loading & Caching
-
-```typescript
-// File: src/services/quantificationCache.ts
-class QuantificationCache {
-  private cache = new Map<string, any>()
-  private maxAge = 30 * 60 * 1000 // 30 minutes
-
-  private getCacheKey(plantName: string, preferences: any): string {
-    return `${plantName}-${JSON.stringify(preferences)}`
-  }
-
-  get(plantName: string, preferences: any): any | null {
-    const key = this.getCacheKey(plantName, preferences)
-    const cached = this.cache.get(key)
-
-    if (!cached) return null
-
-    // Check if expired
-    if (Date.now() - cached.timestamp > this.maxAge) {
-      this.cache.delete(key)
-      return null
-    }
-
-    return cached.data
-  }
-
-  set(plantName: string, preferences: any, data: any): void {
-    const key = this.getCacheKey(plantName, preferences)
-    this.cache.set(key, {
-      data,
-      timestamp: Date.now()
-    })
-
-    // Cleanup old entries
-    if (this.cache.size > 100) {
-      const oldest = Array.from(this.cache.entries())[0]
-      this.cache.delete(oldest[0])
-    }
-  }
-
-  clear(): void {
-    this.cache.clear()
-  }
-}
-
-export const quantificationCache = new QuantificationCache()
-```
-
-### Intersection Observer for Lazy Quantification
-
-```typescript
-// File: src/composables/useLazyQuantification.ts
-import { ref, onMounted, onUnmounted } from 'vue'
-
-export function useLazyQuantification() {
-  const observer = ref<IntersectionObserver | null>(null)
-  const quantificationTargets = ref<Set<HTMLElement>>(new Set())
-
-  onMounted(() => {
-    observer.value = new IntersectionObserver(
-      (entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            // Trigger quantification when element becomes visible
-            const plantName = entry.target.getAttribute('data-plant-name')
-            if (plantName) {
-              triggerQuantification(plantName)
-            }
-
-            // Stop observing this element
-            observer.value?.unobserve(entry.target)
-            quantificationTargets.value.delete(entry.target as HTMLElement)
-          }
-        })
-      },
-      {
-        rootMargin: '100px', // Start quantifying 100px before element is visible
-        threshold: 0.1
-      }
-    )
-  })
-
-  onUnmounted(() => {
-    observer.value?.disconnect()
-  })
-
-  function observeElement(element: HTMLElement) {
-    if (observer.value && !quantificationTargets.value.has(element)) {
-      observer.value.observe(element)
-      quantificationTargets.value.add(element)
-    }
-  }
-
-  function triggerQuantification(plantName: string) {
-    // Emit event or call quantification service
-    console.log(`Triggering quantification for ${plantName}`)
-  }
-
-  return {
-    observeElement
-  }
-}
-```
-
-## Testing Strategy
-
-### Unit Tests
-
-```typescript
-// File: src/services/__tests__/quantificationService.test.ts
-import { describe, it, expect, vi } from 'vitest'
-import { quantificationService } from '../quantificationService'
-
-describe('QuantificationService', () => {
-  it('should quantify a plant successfully', async () => {
-    // Mock fetch
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({
-        plant_name: 'Basil',
-        quantified_impact: {
-          temperature_reduction_c: 0.8,
-          air_quality_points: 12,
-          co2_absorption_kg_year: 2.5
-        }
-      })
-    })
-
-    const request = {
-      plant_name: 'Basil',
-      suburb: 'Richmond',
-      plant_count: 1,
-      user_preferences: {
-        site: { location_type: 'balcony', area_m2: 4 },
-        preferences: { goal: 'mixed', maintainability: 'low' }
-      }
-    }
-
-    const result = await quantificationService.quantifyPlant(request)
-
-    expect(result.plant_name).toBe('Basil')
-    expect(result.quantified_impact.temperature_reduction_c).toBe(0.8)
-  })
-
-  it('should handle API errors gracefully', async () => {
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: false,
-      statusText: 'Plant not found'
-    })
-
-    const request = {
-      plant_name: 'NonexistentPlant',
-      suburb: 'Richmond',
-      plant_count: 1,
-      user_preferences: {}
-    }
-
-    await expect(quantificationService.quantifyPlant(request))
-      .rejects.toThrow('Quantification failed: Plant not found')
-  })
-})
-```
-
-### Component Tests
-
-```typescript
-// File: src/components/__tests__/ImpactCard.test.ts
-import { describe, it, expect } from 'vitest'
-import { mount } from '@vue/test-utils'
-import ImpactCard from '../ImpactCard.vue'
-
-describe('ImpactCard', () => {
-  const mockImpact = {
-    temperature_reduction_c: 1.2,
-    air_quality_points: 8,
-    co2_absorption_kg_year: 3.4,
-    water_processed_l_week: 15.0,
-    pollinator_support: 'High',
-    maintenance_time: '10mins/week',
-    water_requirement: '5.5L/week',
-    risk_badge: 'low',
-    confidence_level: 'High (89%)',
-    why_this_plant: 'Selected for excellent cooling and air purification'
-  }
-
-  it('displays impact metrics correctly', () => {
-    const wrapper = mount(ImpactCard, {
-      props: {
-        impact: mockImpact,
-        suitabilityScore: 85
-      }
-    })
-
-    expect(wrapper.text()).toContain('1.2°C')
-    expect(wrapper.text()).toContain('+8')
-    expect(wrapper.text()).toContain('3.4kg/yr')
-    expect(wrapper.text()).toContain('High')
-    expect(wrapper.text()).toContain('85/100')
-  })
-
-  it('handles missing edible yield gracefully', () => {
-    const impactWithoutYield = { ...mockImpact }
-    delete impactWithoutYield.edible_yield
-
-    const wrapper = mount(ImpactCard, {
-      props: { impact: impactWithoutYield }
-    })
-
-    expect(wrapper.find('.metric-item.edible').exists()).toBe(false)
-  })
-})
-```
-
-## Deployment Checklist
-
-### 1. Environment Variables
-```bash
-# .env.production
-VITE_API_BASE_URL=/api/v1
-VITE_ENABLE_QUANTIFICATION=true
-```
-
-### 2. Build Configuration
-```typescript
-// vite.config.ts
-export default defineConfig({
-  // ... existing config
-  define: {
-    __ENABLE_QUANTIFICATION__: JSON.stringify(process.env.VITE_ENABLE_QUANTIFICATION === 'true')
-  }
-})
-```
-
-### 3. Feature Flag Usage
-```vue
-<template>
-  <div v-if="isQuantificationEnabled">
-    <!-- Quantification features -->
   </div>
 </template>
 
 <script>
-const isQuantificationEnabled = __ENABLE_QUANTIFICATION__
+export default {
+  name: 'CompanionPlantingWidget',
+  props: {
+    plantId: {
+      type: Number,
+      required: true
+    }
+  },
+  data() {
+    return {
+      companionData: null,
+      loading: false,
+      error: null
+    };
+  },
+  watch: {
+    plantId: {
+      immediate: true,
+      handler(newPlantId) {
+        if (newPlantId) {
+          this.fetchCompanionData(newPlantId);
+        }
+      }
+    }
+  },
+  methods: {
+    async fetchCompanionData(plantId) {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const response = await fetch(`/api/v1/plants/${plantId}/companions`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch companion data');
+        }
+        this.companionData = await response.json();
+      } catch (err) {
+        this.error = err.message;
+      } finally {
+        this.loading = false;
+      }
+    }
+  }
+};
 </script>
+
+<style scoped>
+.companion-planting-widget {
+  padding: 1rem;
+  border-radius: 8px;
+  background: #f9f9f9;
+}
+
+.companion-group {
+  margin: 1rem 0;
+}
+
+.plant-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.tag {
+  padding: 0.25rem 0.75rem;
+  border-radius: 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.tag.beneficial {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.tag.harmful {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.tag.neutral {
+  background-color: #e2e3e5;
+  color: #383d41;
+  border: 1px solid #d6d8db;
+}
+
+.no-data {
+  color: #6c757d;
+  font-style: italic;
+}
+</style>
 ```
 
-### 4. Progressive Enhancement
-- Quantification features should enhance, not replace existing functionality
-- Always provide fallbacks for when quantification fails
-- Load quantification assets lazily to avoid impacting initial page load
-- Cache quantified results to minimize API calls
+### Companion Data in Main Plant Responses
 
-This implementation guide provides everything needed to integrate the Climate Action Quantification feature seamlessly into the existing Plantopia frontend while maintaining performance and user experience standards.
+**Important:** The companion data fields are now automatically included in all plant API responses:
+
+- `GET /plants` - Includes companion data for all plants
+- `GET /plants/paginated` - Includes companion data in paginated results
+- `GET /plants/{plant_id}/image-url` - Basic endpoint, use `/companions` for detailed companion data
+
+**Plant Object Structure with Companion Data:**
+```typescript
+interface Plant {
+  id: number;
+  plant_name: string;
+  scientific_name: string;
+  plant_category: 'flower' | 'herb' | 'vegetable';
+  // ... other plant fields ...
+
+  // Companion planting data (comma-separated strings in raw format)
+  beneficial_companions: string;  // "Basil, Carrots, Onions, Marigold"
+  harmful_companions: string;     // "Cabbage, Fennel"
+  neutral_companions: string;     // "Lettuce, Spinach, Radish"
+}
+```
+
+**Parsing Companion Data from Plant Response:**
+```javascript
+// Helper function to parse companion strings
+const parseCompanions = (companionStr) => {
+  if (!companionStr || companionStr.trim() === '') return [];
+  return companionStr.split(',').map(c => c.trim()).filter(c => c);
+};
+
+// Usage with plant data
+const plant = await fetchPlantById(123);
+const beneficialCompanions = parseCompanions(plant.beneficial_companions);
+const harmfulCompanions = parseCompanions(plant.harmful_companions);
+const neutralCompanions = parseCompanions(plant.neutral_companions);
+
+console.log('Beneficial:', beneficialCompanions);  // ['Basil', 'Carrots', 'Onions']
+console.log('Harmful:', harmfulCompanions);        // ['Cabbage', 'Fennel']
+console.log('Neutral:', neutralCompanions);        // ['Lettuce', 'Spinach']
+```
+
+---
+
+## Recommendations API
+
+### Get Personalized Plant Recommendations
+
+**Endpoint:** `POST /recommendations`
+
+**Description:** Get personalized plant recommendations based on user preferences and location.
+
+**Request Body:**
+```json
+{
+  "suburb": "Richmond",
+  "n": 5,
+  "user_preferences": {
+    "sun_exposure": "full_sun",
+    "maintenance_level": "easy",
+    "plant_goals": ["edible", "flowers"],
+    "time_to_results": "quick"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "recommendations": [
+    {
+      "plant_name": "Basil",
+      "score": 0.92,
+      "category": "herb",
+      "why": "Perfect match for full sun, easy maintenance, edible herb with quick maturity",
+      "media": {
+        "image_url": "https://storage.googleapis.com/..."
+      },
+      "beneficial_companions": "Tomatoes, Peppers, Oregano",
+      "harmful_companions": "Rue, Sage"
+    }
+  ]
+}
+```
+
+---
+
+## Markdown Content API
+
+The Markdown Content API provides access to 465+ educational articles organized into 10 categories covering various gardening topics.
+
+### Available Categories
+
+| Category | Endpoint Slug | File Count | Description |
+|----------|---------------|------------|-------------|
+| Beneficial Insects | `beneficial-insects` | 6 | Attracting helpful garden insects |
+| Companion Planting | `companion-planting` | 4 | Plant pairing strategies |
+| Composting | `composting` | 8 | Composting techniques and tips |
+| Craft | `craft` | 8 | DIY garden projects and crafts |
+| Fertiliser Soil | `fertiliser-soil` | 22 | Soil management and fertilization |
+| Flowers | `flowers` | 36 | Flower growing guides |
+| Grow Guide | `grow-guide` | 255 | Comprehensive growing instructions |
+| Herbs | `herbs` | 12 | Herb cultivation guides |
+| Informational | `informational` | 69 | General gardening information |
+| Pests Diseases | `pests-diseases` | 45 | Pest and disease management |
+
+### Get All Categories
+
+**Endpoint:** `GET /markdown/categories`
+
+**Response:**
+```json
+{
+  "categories": [
+    {
+      "name": "Companion Planting",
+      "slug": "companion-planting",
+      "file_count": 4
+    }
+  ],
+  "total_categories": 10
+}
+```
+
+### Get Category Content
+
+**Endpoint:** `GET /markdown/category/{category_slug}`
+
+**Response:**
+```json
+{
+  "category": "Companion Planting",
+  "files": [
+    {
+      "filename": "Companion Planting Guide.md",
+      "title": "Companion Planting Guide",
+      "content": "# Companion Planting Guide\n\n...",
+      "file_size": 4532,
+      "file_path": "Companion Planting/Companion Planting Guide.md"
+    }
+  ]
+}
+```
+
+---
+
+## Climate & Environmental Data API
+
+### Get Climate Data for Suburb
+
+**Endpoint:** `GET /climate/{suburb_name}`
+
+**Description:** Get current climate data including temperature, UV index, air quality for a specific suburb.
+
+**Response:**
+```json
+{
+  "suburb": "Richmond",
+  "temperature_current": 24.5,
+  "uv_index": 7.2,
+  "air_quality_index": 42,
+  "rainfall": 0.0
+}
+```
+
+---
+
+## Error Handling
+
+### Common Error Responses
+
+**404 - Not Found:**
+```json
+{
+  "detail": "Plant not found"
+}
+```
+
+**400 - Bad Request:**
+```json
+{
+  "detail": "Invalid category. Must be one of: flower, herb, vegetable"
+}
+```
+
+**500 - Server Error:**
+```json
+{
+  "detail": "Error loading plants: [error details]"
+}
+```
+
+### Frontend Error Handling Example
+
+```javascript
+const apiRequest = async (url, options = {}) => {
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+      },
+      ...options
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('API Error:', error);
+    throw error;
+  }
+};
+
+// Usage
+try {
+  const companions = await apiRequest('/api/v1/plants/123/companions');
+  console.log(companions);
+} catch (error) {
+  // Handle error in UI
+  showErrorMessage(error.message);
+}
+```
+
+---
+
+## Frontend Implementation Examples
+
+### Complete Plant Detail Component with Companion Planting
+
+```jsx
+import React, { useState, useEffect } from 'react';
+
+const PlantDetailPage = ({ plantId }) => {
+  const [plant, setPlant] = useState(null);
+  const [companions, setCompanions] = useState(null);
+  const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPlantData = async () => {
+      try {
+        setLoading(true);
+
+        // Fetch plant details, companions, and images in parallel
+        const [plantRes, companionsRes, imagesRes] = await Promise.all([
+          fetch(`/api/v1/plants/paginated?page=1&limit=1`), // Or specific plant endpoint
+          fetch(`/api/v1/plants/${plantId}/companions`),
+          fetch(`/api/v1/plants/${plantId}/all-images`)
+        ]);
+
+        const plantData = await plantRes.json();
+        const companionsData = await companionsRes.json();
+        const imagesData = await imagesRes.json();
+
+        setPlant(plantData.plants[0]);
+        setCompanions(companionsData);
+        setImages(imagesData.image_urls);
+      } catch (error) {
+        console.error('Error loading plant data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPlantData();
+  }, [plantId]);
+
+  if (loading) return <div>Loading...</div>;
+  if (!plant) return <div>Plant not found</div>;
+
+  return (
+    <div className="plant-detail-page">
+      {/* Image Gallery */}
+      <div className="image-gallery">
+        {images.map((url, index) => (
+          <img key={index} src={url} alt={`${plant.plant_name} ${index + 1}`} />
+        ))}
+      </div>
+
+      {/* Plant Info */}
+      <div className="plant-info">
+        <h1>{plant.plant_name}</h1>
+        <p className="scientific-name">{plant.scientific_name}</p>
+        <span className="category-badge">{plant.plant_category}</span>
+
+        <div className="growing-info">
+          <p><strong>Sun:</strong> {plant.sunlight_requirements}</p>
+          <p><strong>Water:</strong> {plant.water_requirements}</p>
+          <p><strong>Maintenance:</strong> {plant.maintenance_level}</p>
+          <p><strong>Days to Maturity:</strong> {plant.time_to_maturity_days}</p>
+        </div>
+
+        <p className="description">{plant.description}</p>
+      </div>
+
+      {/* Companion Planting Section */}
+      {companions && (
+        <div className="companion-planting-section">
+          <h2>Companion Planting Guide</h2>
+
+          <div className="companions-grid">
+            <div className="companion-box good">
+              <h3>✅ Plant Together</h3>
+              <ul>
+                {companions.companion_planting.beneficial_companions.map((comp, i) => (
+                  <li key={i}>{comp}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="companion-box bad">
+              <h3>❌ Keep Apart</h3>
+              <ul>
+                {companions.companion_planting.harmful_companions.map((comp, i) => (
+                  <li key={i}>{comp}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="companion-box neutral">
+              <h3>➖ Neutral</h3>
+              <ul>
+                {companions.companion_planting.neutral_companions.map((comp, i) => (
+                  <li key={i}>{comp}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default PlantDetailPage;
+```
+
+### Garden Planner with Companion Validation
+
+```javascript
+class GardenPlanner {
+  constructor() {
+    this.selectedPlants = [];
+    this.companionDataCache = new Map();
+  }
+
+  async addPlant(plantId) {
+    // Get plant companion data
+    const companions = await this.getCompanionData(plantId);
+
+    // Check compatibility with existing plants
+    const conflicts = this.checkCompatibility(companions);
+
+    if (conflicts.length > 0) {
+      return {
+        success: false,
+        message: `Warning: ${companions.plant_name} conflicts with: ${conflicts.join(', ')}`,
+        conflicts: conflicts
+      };
+    }
+
+    this.selectedPlants.push(plantId);
+    return {
+      success: true,
+      message: `${companions.plant_name} added to garden plan`
+    };
+  }
+
+  async getCompanionData(plantId) {
+    if (this.companionDataCache.has(plantId)) {
+      return this.companionDataCache.get(plantId);
+    }
+
+    const response = await fetch(`/api/v1/plants/${plantId}/companions`);
+    const data = await response.json();
+    this.companionDataCache.set(plantId, data);
+    return data;
+  }
+
+  checkCompatibility(newPlantCompanions) {
+    const conflicts = [];
+    const newPlantName = newPlantCompanions.plant_name;
+    const harmfulToNew = newPlantCompanions.companion_planting.harmful_companions;
+
+    for (const existingPlantId of this.selectedPlants) {
+      const existingCompanions = this.companionDataCache.get(existingPlantId);
+
+      if (!existingCompanions) continue;
+
+      const existingPlantName = existingCompanions.plant_name;
+
+      // Check if new plant is harmful to existing plant
+      if (existingCompanions.companion_planting.harmful_companions.includes(newPlantName)) {
+        conflicts.push(existingPlantName);
+      }
+
+      // Check if existing plant is harmful to new plant
+      if (harmfulToNew.includes(existingPlantName)) {
+        conflicts.push(existingPlantName);
+      }
+    }
+
+    return [...new Set(conflicts)]; // Remove duplicates
+  }
+
+  getSuggestions(plantId) {
+    const companions = this.companionDataCache.get(plantId);
+    if (!companions) return [];
+
+    return companions.companion_planting.beneficial_companions;
+  }
+}
+
+// Usage
+const planner = new GardenPlanner();
+
+const result1 = await planner.addPlant(123); // Tomatoes
+console.log(result1); // { success: true, message: "Tomatoes added..." }
+
+const result2 = await planner.addPlant(456); // Basil (good companion)
+console.log(result2); // { success: true, message: "Basil added..." }
+
+const result3 = await planner.addPlant(789); // Cabbage (bad companion)
+console.log(result3); // { success: false, conflicts: ['Tomatoes'], ... }
+
+// Get suggestions for companion plants
+const suggestions = planner.getSuggestions(123);
+console.log('Good companions for tomatoes:', suggestions);
+```
+
+---
+
+## Performance & Best Practices
+
+### 1. Use Pagination for Plant Lists
+
+```javascript
+// ✅ Good - Use paginated endpoint
+const plants = await fetch('/api/v1/plants/paginated?page=1&limit=20');
+
+// ❌ Avoid - Fetching all 2117 plants at once
+const allPlants = await fetch('/api/v1/plants');
+```
+
+### 2. Cache Companion Data
+
+```javascript
+const companionCache = new Map();
+
+const getCachedCompanions = async (plantId) => {
+  if (companionCache.has(plantId)) {
+    return companionCache.get(plantId);
+  }
+
+  const data = await fetch(`/api/v1/plants/${plantId}/companions`).then(r => r.json());
+  companionCache.set(plantId, data);
+  return data;
+};
+```
+
+### 3. Batch Requests When Possible
+
+```javascript
+// Fetch multiple resources in parallel
+const fetchPlantDetails = async (plantId) => {
+  const [plant, companions, images] = await Promise.all([
+    fetch(`/api/v1/plants/${plantId}`).then(r => r.json()),
+    fetch(`/api/v1/plants/${plantId}/companions`).then(r => r.json()),
+    fetch(`/api/v1/plants/${plantId}/all-images`).then(r => r.json())
+  ]);
+
+  return { plant, companions, images };
+};
+```
+
+---
+
+## Integration Checklist
+
+### Companion Planting Features
+- [ ] Display companion data on plant detail pages
+- [ ] Create companion planting visualization/widget
+- [ ] Implement garden planner with compatibility checking
+- [ ] Add companion plant suggestions based on selected plants
+- [ ] Show warnings for incompatible plant combinations
+- [ ] Create companion planting educational content section
+- [ ] Add search/filter by companion compatibility
+
+### General Integration
+- [ ] Set up API base URL configuration
+- [ ] Implement error handling and loading states
+- [ ] Add pagination for plant lists
+- [ ] Set up image lazy loading
+- [ ] Implement caching for frequently accessed data
+- [ ] Test all API endpoints
+- [ ] Add accessibility features
+- [ ] Responsive design for all screen sizes
+
+---
+
+## Support & Documentation
+
+- **Backend API Code:** `/app/api/endpoints/plants.py`
+- **Database Models:** `/app/models/database.py`
+- **Plant Service:** `/app/services/plant_service.py`
+- **CSV Data:** `/data/csv/` (flower_plants_data.csv, herbs_plants_data.csv, vegetable_plants_data.csv)
+
+For questions about the API or issues with companion data, contact the backend development team.
+
+---
+
+**Last Updated:** December 2024
+**API Version:** v1
+**Total Plants:** 2,117+ (flowers, herbs, vegetables)
+**Total Markdown Files:** 465+ across 10 categories
+**New Features:** Companion Planting Data (beneficial_companions, harmful_companions, neutral_companions)
