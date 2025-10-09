@@ -105,3 +105,32 @@ async def get_plants_paginated(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error loading plants: {str(e)}")
+
+
+@router.get("/plants/{plant_id}/companions")
+async def get_plant_companions(
+    plant_id: int,
+    plant_service: PlantService = Depends(get_plant_service)
+):
+    """Get companion planting information for a specific plant.
+
+    Returns detailed companion planting data including:
+    - Beneficial companions: Plants that grow well together and provide mutual benefits
+    - Harmful companions: Plants that should be avoided as they may compete or harm each other
+    - Neutral companions: Compatible plants that can be grown together without issues
+
+    Args:
+        plant_id: Database ID of the plant
+
+    Returns:
+        Dictionary containing companion planting information
+    """
+    try:
+        companion_data = await plant_service.get_plant_companions(plant_id)
+        if not companion_data:
+            raise HTTPException(status_code=404, detail="Plant not found")
+        return companion_data
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting companion data: {str(e)}")
