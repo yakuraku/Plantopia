@@ -246,3 +246,37 @@ class PlantService:
             has_next=has_next,
             has_previous=has_previous
         )
+
+    async def get_plant_companions(self, plant_id: int) -> Optional[Dict[str, Any]]:
+        """Get companion planting information for a specific plant.
+
+        Args:
+            plant_id: ID of the plant
+
+        Returns:
+            Dictionary containing companion planting data or None if plant not found
+        """
+        plant = await self.plant_repository.get_plant_by_id(plant_id)
+
+        if not plant:
+            return None
+
+        # Parse companion data (they are comma-separated strings)
+        def parse_companions(companion_str: Optional[str]) -> List[str]:
+            """Parse companion string into list of plant names"""
+            if not companion_str or companion_str.strip() == '':
+                return []
+            # Split by comma and strip whitespace
+            return [c.strip() for c in companion_str.split(',') if c.strip()]
+
+        return {
+            "plant_id": plant_id,
+            "plant_name": plant.get("plant_name"),
+            "scientific_name": plant.get("scientific_name"),
+            "plant_category": plant.get("plant_category"),
+            "companion_planting": {
+                "beneficial_companions": parse_companions(plant.get("beneficial_companions")),
+                "harmful_companions": parse_companions(plant.get("harmful_companions")),
+                "neutral_companions": parse_companions(plant.get("neutral_companions"))
+            }
+        }
