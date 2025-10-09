@@ -66,14 +66,14 @@ async def quantify_plant_impact(
         # Get suburb data for UHI context
         suburb = await climate_repository.get_suburb_by_name(request.suburb)
         if not suburb:
-            # Use default suburb data if not found
-            from app.models.database import Suburb
-            suburb = Suburb(
-                suburb_name=request.suburb,
-                suburb_heat_category="Moderate Heat",
-                avg_heat_celsius=8.0,
-                avg_vegetation_pct=20.0
-            )
+            # Use default suburb data if not found - create a simple object with required attributes
+            class DefaultSuburb:
+                def __init__(self, name):
+                    self.name = name
+                    self.suburb_heat_category = "Moderate Heat"
+                    self.suburb_heat_intensity = 8.0
+
+            suburb = DefaultSuburb(request.suburb)
 
         # Extract preferences
         site_prefs = request.user_preferences.site
