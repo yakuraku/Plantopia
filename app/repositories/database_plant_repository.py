@@ -16,14 +16,16 @@ class DatabasePlantRepository:
     
     async def get_all_plants(self) -> List[Dict[str, Any]]:
         """Get all plants from database.
-        
+
         Returns:
             List of plant dictionaries
         """
         result = await self.db.execute(select(Plant))
         plants = result.scalars().all()
-        
-        return [self._plant_to_dict(plant) for plant in plants]
+
+        # Filter out None or empty dicts, and ensure plant_name exists
+        plant_dicts = [self._plant_to_dict(plant) for plant in plants if plant]
+        return [p for p in plant_dicts if p and p.get("plant_name")]
     
     async def find_plant_by_name(self, plant_name: str) -> Optional[Dict[str, Any]]:
         """Find a specific plant by name.
@@ -46,7 +48,8 @@ class DatabasePlantRepository:
         )
 
         result = await self.db.execute(query)
-        plant = result.scalar_one_or_none()
+        # Use first() instead of scalar_one_or_none() to handle duplicate plant names
+        plant = result.scalars().first()
 
         return self._plant_to_dict(plant) if plant else None
 

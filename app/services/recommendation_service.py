@@ -92,8 +92,8 @@ class RecommendationService:
             # Assemble output
             output = assemble_output(top_plants, user_prefs, env, [])
             
-            # Enhance with images
-            output = self._enhance_recommendations_with_images(output)
+            # Enhance with images and plant IDs
+            output = await self._enhance_recommendations_with_images(output)
             
             # Add metadata
             output["suburb"] = request.suburb
@@ -203,19 +203,24 @@ class RecommendationService:
             if os.path.exists(user_prefs_path):
                 os.unlink(user_prefs_path)
     
-    def _enhance_recommendations_with_images(self, output: Dict[str, Any]) -> Dict[str, Any]:
-        """Add GCS image URLs to recommendations.
+    async def _enhance_recommendations_with_images(self, output: Dict[str, Any]) -> Dict[str, Any]:
+        """Add GCS image URLs and plant database IDs to recommendations.
 
         Args:
             output: Recommendation output dictionary
 
         Returns:
-            Enhanced output with GCS image URLs
+            Enhanced output with GCS image URLs and plant IDs
         """
         for recommendation in output.get("recommendations", []):
             plant_name = recommendation.get("plant_name", "")
             plant_category = recommendation.get("plant_category", "flower")
             scientific_name = recommendation.get("scientific_name", "")
+
+            # Look up plant by name to get database ID
+            plant = await self.plant_repository.find_plant_by_name(plant_name)
+            if plant:
+                recommendation["id"] = plant.get("id")  # Add database ID
 
             # Generate GCS image URL
             image_url = self._generate_gcs_image_url(plant_name, plant_category, scientific_name)
