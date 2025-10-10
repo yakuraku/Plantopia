@@ -34,7 +34,8 @@ async_engine = create_async_engine(
     pool_size=int(os.getenv("DATABASE_POOL_SIZE", "3")),
     max_overflow=int(os.getenv("DATABASE_MAX_OVERFLOW", "5")),
     pool_pre_ping=True,
-    echo=os.getenv("DEBUG", "False").lower() == "true"
+    echo=os.getenv("DEBUG", "False").lower() == "true",
+    connect_args={"statement_cache_size": 0}  # Disable prepared statements for pgbouncer transaction mode
 )
 
 # Session factories
