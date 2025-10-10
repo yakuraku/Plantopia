@@ -298,6 +298,184 @@ Implementing comprehensive plant tracking feature allowing users to monitor grow
 **Verified:**
 - ✅ suburb_id already exists in UserDataInput schema (confirmed line 18)
 
+### Session 3 (2025-10-11) - AI Chat Feature Implementation
+**Focus**: Complete AI Chat System with Gemini Integration
+
+**MAJOR FEATURE COMPLETE:**
+- ✅ AI Chat Feature fully implemented with 6 REST endpoints
+- ✅ Supports both general agriculture Q&A and plant-specific conversations
+- ✅ Image upload support using Gemini multimodal API
+- ✅ Agriculture-only guardrails (politely rejects non-farming questions)
+- ✅ Token tracking with 120k limit (warns at 100k)
+- ✅ Auto-expiration after 6 hours
+- ✅ Message history buffer (last 30 messages for context)
+
+**Database Models Added:**
+- ✅ UserPlantChat model (`app/models/database.py` lines 371-405)
+  - Stores chat sessions (general or plant-specific)
+  - Tracks total_tokens, message_count, expires_at
+  - Links to user_id and optional user_plant_instance_id
+  - 5 indexes for performance and cleanup
+
+- ✅ ChatMessage model (`app/models/database.py` lines 408-435)
+  - Stores individual messages (user + assistant)
+  - Supports image_url and has_image fields
+  - Cascade delete when chat deleted
+  - Tracks tokens_used per message
+
+**Migration Created:**
+- ✅ Alembic migration: `alembic/versions/b9d2f7e8a3c1_add_chat_tables.py`
+  - Creates user_plant_chats table with 5 indexes
+  - Creates chat_messages table with cascade delete
+  - Includes proper downgrade() for rollback
+
+**Repository Layer:**
+- ✅ Created `app/repositories/chat_repository.py` (350+ lines)
+  - 17 methods for comprehensive chat/message management
+  - create_chat(), get_chat_by_id(), get_user_chats()
+  - update_chat(), delete_chat(), update_token_count()
+  - add_message(), get_chat_messages(), get_recent_messages()
+  - count_messages(), delete_expired_chats(), deactivate_chat()
+  - get_chat_with_instance(), count_user_chats()
+
+**Service Layer:**
+- ✅ Created `app/services/plant_chat_service.py` (500+ lines)
+  - 6 public methods + 4 private helper methods
+  - start_general_chat() - Creates general Q&A session
+  - start_plant_chat() - Creates plant-specific session with context
+  - send_message() - Processes message with Gemini AI
+  - get_chat_history() - Returns full conversation
+  - end_chat() - Deactivates chat session
+  - cleanup_expired_chats() - Background cleanup job
+
+  **Key Features Implemented:**
+  - Agriculture guardrails system prompt (350+ words)
+  - Token estimation (~1.3x word count)
+  - Token limit enforcement (warn at 100k, reject at 120k)
+  - Image upload via base64 decode + PIL
+  - Message history buffer (last 30 messages)
+  - Plant context building (includes stage, timeline, tips)
+  - Gemini API integration with error handling
+  - Ownership validation for all operations
+
+**Pydantic Schemas:**
+- ✅ Added 7 chat schemas to `app/schemas/plant_tracking.py` (lines 266-329)
+  - StartChatRequest, ChatMessageRequest, ChatMessageResponse
+  - ChatHistoryMessage, ChatHistoryResponse
+  - StartChatResponse, EndChatResponse
+
+**API Endpoints:**
+- ✅ Created `app/api/endpoints/plant_chat.py` (300+ lines, 6 endpoints)
+  - POST /chat/general/start - Start general chat (201)
+  - POST /chat/general/message - Send general message (200)
+  - POST /chat/plant/{instance_id}/start - Start plant chat (201)
+  - POST /chat/plant/message - Send plant message (200)
+  - GET /chat/{chat_id}/history - Get full history (200)
+  - DELETE /chat/{chat_id} - End chat (200)
+
+  **Error Handling:**
+  - 404: Chat/instance not found or expired
+  - 403: User doesn't own chat
+  - 400: Token limit exceeded
+  - 500: AI processing failed
+
+- ✅ Registered plant_chat router in `app/api/endpoints/__init__.py` (line 20)
+
+**Testing:**
+- ✅ Created comprehensive testing guide: `tests/CHAT_TESTING_GUIDE.md`
+  - Repository layer: 14 methods to test
+  - Service layer: 10 methods to test
+  - Integration: 6 endpoints to test
+  - Includes mock strategies, edge cases, performance notes
+  - 13-item manual testing checklist
+
+**Documentation:**
+- ✅ Updated `Iteration_3_Documentation/frontend_integration_guide.md`
+  - Added complete "AI Chat Feature" section (365+ lines)
+  - 6 endpoint examples with request/response formats
+  - UI/UX guidelines for chat interface
+  - Image upload implementation code examples
+  - Agriculture guardrails behavior explanation
+  - Token management best practices
+  - Error handling strategies
+  - Performance optimization tips
+  - 13-item frontend testing checklist
+  - Database schema summary
+  - Deployment notes and known limitations
+
+**Technical Implementation Details:**
+
+**Model Used:** gemini-2.5-flash-lite
+- Consistent with Session 2 update
+- Supports text + image multimodal inputs
+- Fast response times (~2-5 seconds)
+
+**Agriculture Guardrails:**
+- Implemented in system prompt (PlantChatService line 32-58)
+- Allows: plant care, gardening, soil, pests, farming, horticulture, diseases, harvesting
+- Rejects: Any non-farming topics with polite message
+- Self-enforcing via AI (no backend validation needed)
+
+**Token Tracking:**
+- Input estimation: word_count * 1.3 (fast approximation)
+- Response tokens: Tracked from Gemini response
+- Cumulative total: Stored in chat.total_tokens
+- Warning threshold: 100,000 tokens
+- Hard limit: 120,000 tokens
+
+**Image Support:**
+- Frontend sends base64-encoded image
+- Backend decodes to bytes
+- Converts to PIL Image object
+- Sends to Gemini with text prompt
+- Returns combined text response
+- Reference: https://ai.google.dev/gemini-api/docs/image-understanding
+
+**Message History Buffer:**
+- Only last 30 messages sent to Gemini
+- Prevents token bloat in long conversations
+- Ordered chronologically (oldest to newest)
+- Includes both user and assistant messages
+
+**Chat Expiration:**
+- expires_at = created_at + 6 hours
+- Validated on every message send
+- Background cleanup job deletes expired chats
+- Cascade delete removes all messages
+
+**Plant Context Integration:**
+- Plant-specific chats fetch full instance details
+- Includes: plant name, nickname, current stage, days elapsed, progress %
+- Adds current care tips (up to 5)
+- Builds formatted context string for Gemini
+- Location details included if available
+
+**Files Created This Session:**
+1. `app/models/database.py` - Added 2 new models (lines 367-435)
+2. `alembic/versions/b9d2f7e8a3c1_add_chat_tables.py` - Migration (75 lines)
+3. `app/repositories/chat_repository.py` - Repository (350+ lines)
+4. `app/services/plant_chat_service.py` - Service (500+ lines)
+5. `app/api/endpoints/plant_chat.py` - Endpoints (300+ lines)
+6. `tests/CHAT_TESTING_GUIDE.md` - Testing documentation (250+ lines)
+
+**Files Modified This Session:**
+1. `app/schemas/plant_tracking.py` - Added 7 chat schemas (lines 266-329)
+2. `app/api/endpoints/__init__.py` - Registered plant_chat router (lines 3, 20)
+3. `Iteration_3_Documentation/frontend_integration_guide.md` - Added chat docs (365+ lines)
+4. `IT3_PROGRESS.md` - This update
+
+**Code Statistics - Session 3:**
+- Lines of Code: ~1,500 lines
+- Repository: 350 lines
+- Service: 500 lines
+- Endpoints: 300 lines
+- Schemas: 65 lines
+- Migration: 75 lines
+- Documentation: 600+ lines
+- Testing Guide: 250 lines
+
+**Total Implementation Time:** ~3 hours (Session 3)
+
 ---
 
 ## Questions & Decisions Log

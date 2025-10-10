@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.endpoints import health, recommendations, plants, climate, admin, markdown_content, quantification, uhi, auth, favorites, plant_tracking
+from app.api.endpoints import health, recommendations, plants, climate, admin, markdown_content, quantification, uhi, auth, favorites, plant_tracking, plant_chat
 
 # Create main API router
 api_router = APIRouter()
@@ -17,3 +17,4 @@ api_router.include_router(admin.router, prefix="", tags=["admin"])  # admin rout
 api_router.include_router(markdown_content.router, prefix="", tags=["markdown-content"])
 api_router.include_router(uhi.router, prefix="/uhi", tags=["uhi"])
 api_router.include_router(plant_tracking.router, prefix="", tags=["plant-tracking"])
+api_router.include_router(plant_chat.router, prefix="", tags=["plant-chat"])

@@ -17,7 +17,8 @@ The backend expects the following user data from the frontend:
   "experience_level": "beginner",
   "garden_type": "balcony",
   "available_space": 5.0,
-  "climate_goal": "sustainable gardening"
+  "climate_goal": "sustainable gardening",
+  "start_date": "2024-03-15"
 }
 ```
 
@@ -29,6 +30,7 @@ The backend expects the following user data from the frontend:
 - `garden_type` - "balcony", "backyard", "indoor", "courtyard", "community_garden" (String)
 - `available_space` - Space in square meters (Float)
 - `climate_goal` - User's environmental preferences (String)
+- 'start_date' - The start date that the user is going to start their planting journey
 
 ### Default Values
 If user doesn't provide optional data, frontend should send these defaults:
@@ -617,6 +619,373 @@ pytest tests/integration/test_plant_tracking_endpoints.py
 
 **Known Limitations:**
 - Migration testing pending (will test on GCP deployment)
-- No image upload endpoints yet (future iteration)
-- No push notifications (future iteration)
 - Gemini API costs need monitoring in production
+
+---
+
+## AI Chat Feature (NEW - Session 3)
+
+### Overview
+The chat feature provides AI-powered agriculture Q&A with two modes:
+1. **General Chat**: Ask any farming/gardening questions
+2. **Plant-Specific Chat**: Get personalized advice for your tracked plants
+
+### Chat Feature Capabilities
+- **Gemini 2.5 Flash-Lite** AI model with agriculture expertise
+- **Image Upload**: Upload plant photos for diagnosis (base64 encoded)
+- **Agriculture Guardrails**: AI politely rejects non-farming questions
+- **Token Tracking**: 120k limit per conversation (warns at 100k)
+- **Auto-Expiration**: Chats expire after 6 hours
+- **Context Memory**: Last 15 message pairs maintained in conversation
+
+### Chat API Endpoints
+
+#### 1. Start General Chat
+**Endpoint**: `POST /chat/general/start`
+
+**Request Body**:
+```json
+{
+  "user_id": 123
+}
+```
+
+**Response**:
+```json
+{
+  "chat_id": 456,
+  "chat_type": "general",
+  "expires_at": "2025-01-10T18:00:00",
+  "message": "General agriculture chat started. Ask me anything about gardening, farming, or plant care!"
+}
+```
+
+#### 2. Send General Message
+**Endpoint**: `POST /chat/general/message`
+
+**Request Body** (Text Only):
+```json
+{
+  "chat_id": 456,
+  "message": "How do I compost kitchen waste?"
+}
+```
+
+**Request Body** (With Image):
+```json
+{
+  "chat_id": 456,
+  "message": "What's wrong with my plant leaves?",
+  "image": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEA..."
+}
+```
+
+**Response**:
+```json
+{
+  "chat_id": 456,
+  "user_message": "How do I compost kitchen waste?",
+  "ai_response": "Composting kitchen waste is a great sustainable practice! Here's how...",
+  "tokens_used": 250,
+  "total_tokens": 1250,
+  "token_warning": false,
+  "message": null
+}
+```
+
+**Response** (With Token Warning):
+```json
+{
+  "chat_id": 456,
+  "user_message": "...",
+  "ai_response": "...",
+  "tokens_used": 2500,
+  "total_tokens": 105000,
+  "token_warning": true,
+  "message": "Warning: You have used 105000 tokens out of 120000. Consider starting a new conversation soon."
+}
+```
+
+#### 3. Start Plant-Specific Chat
+**Endpoint**: `POST /chat/plant/{instance_id}/start`
+
+**Request Body**:
+```json
+{
+  "user_id": 123
+}
+```
+
+**Response**:
+```json
+{
+  "chat_id": 789,
+  "chat_type": "plant_specific",
+  "instance_id": 456,
+  "plant_name": "Cherry Tomato",
+  "plant_nickname": "My First Tomato",
+  "expires_at": "2025-01-10T18:00:00",
+  "message": "Plant-specific chat started for My First Tomato (Cherry Tomato). I have full context about your plant!"
+}
+```
+
+#### 4. Send Plant-Specific Message
+**Endpoint**: `POST /chat/plant/message`
+
+Same request/response format as general message endpoint.
+AI will have full plant context: current stage, timeline, care tips, location.
+
+#### 5. Get Chat History
+**Endpoint**: `GET /chat/{chat_id}/history?user_id={user_id}`
+
+**Response**:
+```json
+{
+  "chat_id": 456,
+  "chat_type": "general",
+  "created_at": "2025-01-10T12:00:00",
+  "expires_at": "2025-01-10T18:00:00",
+  "total_tokens": 5250,
+  "message_count": 10,
+  "is_active": true,
+  "messages": [
+    {
+      "id": 1,
+      "role": "user",
+      "content": "How do I compost?",
+      "has_image": false,
+      "created_at": "2025-01-10T12:01:00"
+    },
+    {
+      "id": 2,
+      "role": "assistant",
+      "content": "Composting is a natural process...",
+      "has_image": false,
+      "created_at": "2025-01-10T12:01:05"
+    }
+  ]
+}
+```
+
+#### 6. End Chat
+**Endpoint**: `DELETE /chat/{chat_id}?user_id={user_id}`
+
+**Response**:
+```json
+{
+  "success": true,
+  "message": "Chat 456 ended successfully",
+  "chat_id": 456
+}
+```
+
+### Chat UI/UX Guidelines
+
+#### Chat Interface Requirements
+1. **Two Entry Points**:
+   - "Ask AI" button in main navigation (general chat)
+   - "Chat about this plant" in plant detail view (plant-specific)
+
+2. **Message Display**:
+   - User messages: Right-aligned, distinct color
+   - AI messages: Left-aligned, different color
+   - Timestamps for each message
+   - Image thumbnails for messages with photos
+
+3. **Input Controls**:
+   - Text input field (multiline, auto-resize)
+   - Image upload button (camera icon)
+   - Send button (disabled while waiting for response)
+   - Character/token counter (optional)
+
+4. **Status Indicators**:
+   - Typing indicator while AI responds ("AI is thinking...")
+   - Token usage warning (at 100k tokens)
+   - Expiration countdown (show when <30 mins left)
+   - "Chat expired" message if expired
+
+5. **Image Upload**:
+   - Accept JPEG, PNG formats
+   - Max size: 5MB
+   - Preview before sending
+   - Convert to base64 for API
+
+#### Mobile Considerations
+- Full-screen chat view on mobile
+- "Back" button to exit chat
+- Keyboard management (auto-focus, proper scrolling)
+- Image camera/gallery selection
+
+### Image Upload Implementation
+
+**Frontend JavaScript Example**:
+```javascript
+async function uploadImage(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      // Get base64 string (remove data:image/...;base64, prefix)
+      const base64 = reader.result.split(',')[1];
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// Usage
+const file = imageInput.files[0];
+const base64Image = await uploadImage(file);
+
+const response = await fetch('/api/v1/chat/general/message', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    chat_id: currentChatId,
+    message: "What's wrong with my plant?",
+    image: base64Image
+  })
+});
+```
+
+### Agriculture Guardrails Behavior
+
+**Accepted Topics**:
+- Plant growing and care
+- Gardening techniques
+- Soil and composting
+- Pest management
+- Agriculture and farming
+- Horticulture
+- Plant diseases
+- Harvesting
+
+**Example of Rejection**:
+```
+User: "What's the weather tomorrow?"
+
+AI: "I'm designed specifically to help with agriculture, farming, and plant-related questions. I cannot assist with other topics. Please ask me anything about growing plants, gardening techniques, or farming practices!"
+```
+
+### Token Management
+
+**Token Estimation**:
+- Input: ~1.3x word count
+- Response: Tracked from AI
+- Cumulative total stored per chat
+
+**Limits**:
+- **100,000 tokens**: Warning displayed
+- **120,000 tokens**: New messages rejected
+
+**Frontend Recommendations**:
+- Show token usage in chat header: "5,250 / 120,000 tokens used"
+- Yellow warning at 100k
+- Red warning + disable input at 120k
+- "Start New Chat" button when limit reached
+
+### Error Handling
+
+**Chat Errors**:
+- `404` - Chat not found or expired
+- `403` - User doesn't own this chat
+- `400` - Token limit exceeded
+- `500` - AI processing failed
+
+**Example Error Handling**:
+```javascript
+try {
+  const response = await sendChatMessage(chatId, message);
+  displayAIResponse(response.ai_response);
+
+  if (response.token_warning) {
+    showTokenWarning(response.total_tokens);
+  }
+} catch (error) {
+  if (error.status === 404) {
+    showError("This chat has expired. Please start a new conversation.");
+    disableChatInput();
+  } else if (error.status === 400 && error.message.includes('token limit')) {
+    showError("Token limit reached. Please start a new chat.");
+    disableChatInput();
+  } else {
+    showError("Failed to send message. Please try again.");
+  }
+}
+```
+
+### Performance Optimization
+
+**Chat Loading**:
+- Load only recent messages on chat open (last 20-30)
+- Implement "Load More" for older messages
+- Cache chat list locally
+
+**Image Optimization**:
+- Compress images before base64 encoding
+- Show thumbnail in chat, full size on tap
+- Lazy load message images
+
+**Real-time Updates**:
+- Poll for new messages if multi-device support needed
+- Or use WebSocket for real-time chat (future enhancement)
+
+### Testing Checklist
+
+- [ ] Start general chat successfully
+- [ ] Send text messages and get AI responses
+- [ ] Upload image and get analysis
+- [ ] Test agriculture guardrails (ask non-farming question)
+- [ ] Start plant-specific chat from plant detail page
+- [ ] Verify plant context appears in AI responses
+- [ ] Send 50+ messages to test token tracking
+- [ ] Verify warning appears at 100k tokens
+- [ ] Verify rejection at 120k tokens
+- [ ] Get chat history (all messages appear)
+- [ ] End chat manually
+- [ ] Try accessing expired chat (should fail)
+- [ ] Verify expired chat shows in inactive list
+
+### Chat Database Schema
+
+**Two New Tables**:
+
+1. **user_plant_chats**
+   - Stores chat sessions
+   - Links to user_id and optionally user_plant_instance_id
+   - Tracks total_tokens, message_count, expires_at
+
+2. **chat_messages**
+   - Stores individual messages
+   - Links to chat_id (cascade delete)
+   - Stores role (user/assistant), content, has_image
+
+### Deployment Notes
+
+**Before Deploying Chat Feature**:
+1. Run migration: `alembic upgrade head`
+2. Verify Gemini API keys are valid
+3. Test agriculture guardrails work correctly
+4. Monitor token usage in first week
+5. Set up cleanup job for expired chats (cron: hourly)
+
+**Cleanup Job** (Run hourly):
+```bash
+# Deletes chats where expires_at < NOW()
+# Automatically cascades to delete all messages
+# Returns count of deleted chats
+```
+
+### Known Chat Limitations
+- No multi-device sync (chat tied to session)
+- No push notifications for AI responses
+- No voice input/output
+- Image analysis may be slower than text (5-10 seconds)
+- English language only (for now)
+
+### Future Chat Enhancements
+- Voice input for questions
+- Multi-language support
+- Chat sharing/export
+- AI proactive suggestions
+- Integration with plant disease database

@@ -261,3 +261,69 @@ class ErrorDetail(BaseModel):
 class ErrorResponse(BaseModel):
     """Error response wrapper"""
     error: ErrorDetail = Field(..., description="Error information")
+
+
+# ============================================================================
+# CHAT SCHEMAS (Iteration 3 - Session 3)
+# ============================================================================
+
+class StartChatRequest(BaseModel):
+    """Request to start a chat session"""
+    user_id: int = Field(..., description="User ID")
+
+
+class ChatMessageRequest(BaseModel):
+    """Request to send a message in a chat"""
+    chat_id: int = Field(..., description="Chat session ID")
+    message: str = Field(..., description="Message text content")
+    image: Optional[str] = Field(None, description="Optional base64-encoded image")
+
+
+class ChatMessageResponse(BaseModel):
+    """Response after sending a chat message"""
+    chat_id: int = Field(..., description="Chat session ID")
+    user_message: str = Field(..., description="User's message")
+    ai_response: str = Field(..., description="AI assistant's response")
+    tokens_used: int = Field(..., description="Tokens used for this exchange")
+    total_tokens: int = Field(..., description="Total tokens used in conversation")
+    token_warning: bool = Field(..., description="Whether approaching token limit")
+    message: Optional[str] = Field(None, description="Warning message if applicable")
+
+
+class ChatHistoryMessage(BaseModel):
+    """Individual message in chat history"""
+    id: int = Field(..., description="Message ID")
+    role: str = Field(..., description="Message role (user or assistant)")
+    content: str = Field(..., description="Message content")
+    has_image: bool = Field(..., description="Whether message included an image")
+    created_at: str = Field(..., description="Message creation timestamp")
+
+
+class ChatHistoryResponse(BaseModel):
+    """Response with full chat history"""
+    chat_id: int = Field(..., description="Chat session ID")
+    chat_type: str = Field(..., description="Chat type (general or plant_specific)")
+    created_at: str = Field(..., description="Chat creation timestamp")
+    expires_at: str = Field(..., description="Chat expiration timestamp")
+    total_tokens: int = Field(..., description="Total tokens used in conversation")
+    message_count: int = Field(..., description="Number of messages exchanged")
+    is_active: bool = Field(..., description="Whether chat is active")
+    messages: List[ChatHistoryMessage] = Field(..., description="List of messages")
+
+
+class StartChatResponse(BaseModel):
+    """Response after starting a chat session"""
+    chat_id: int = Field(..., description="Created chat session ID")
+    chat_type: str = Field(..., description="Chat type (general or plant_specific)")
+    instance_id: Optional[int] = Field(None, description="Plant instance ID if plant-specific")
+    plant_name: Optional[str] = Field(None, description="Plant name if plant-specific")
+    plant_nickname: Optional[str] = Field(None, description="Plant nickname if plant-specific")
+    expires_at: str = Field(..., description="Chat expiration timestamp")
+    message: str = Field(..., description="Welcome message")
+
+
+class EndChatResponse(BaseModel):
+    """Response after ending a chat session"""
+    success: bool = Field(..., description="Whether chat was ended successfully")
+    message: str = Field(..., description="Status message")
+    chat_id: int = Field(..., description="Chat session ID that was ended")

@@ -362,3 +362,74 @@ class UserProgressTracking(Base):
         Index('idx_user_progress_tracking_completed', 'user_plant_instance_id', 'is_completed'),
         UniqueConstraint('user_plant_instance_id', 'checklist_item_key', name='unique_instance_checklist_item'),
     )
+
+
+# ============================================================================
+# AI CHAT MODELS (Iteration 3 - Session 3)
+# ============================================================================
+
+class UserPlantChat(Base):
+    """
+    User plant chat model - Stores AI chat sessions for users.
+    Supports both general agriculture Q&A and plant-specific conversations.
+    Auto-expires after 6 hours for privacy and token management.
+    """
+    __tablename__ = 'user_plant_chats'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    user_plant_instance_id = Column(Integer, ForeignKey('user_plant_instances.id'), nullable=True)
+    # NULL = general chat, NOT NULL = plant-specific chat
+
+    chat_type = Column(String(20), nullable=False)  # 'general' or 'plant_specific'
+    total_tokens = Column(Integer, default=0)  # Cumulative token count for conversation
+    message_count = Column(Integer, default=0)  # Total messages in conversation
+    is_active = Column(Boolean, default=True)  # Whether chat is still active
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+    last_message_at = Column(DateTime, default=datetime.utcnow)
+    expires_at = Column(DateTime, nullable=False)  # created_at + 6 hours
+
+    # Relationships
+    user = relationship("User")
+    plant_instance = relationship("UserPlantInstance")
+    messages = relationship("ChatMessage", back_populates="chat", cascade="all, delete-orphan")
+
+    # Indexes for performance and cleanup
+    __table_args__ = (
+        Index('idx_user_plant_chats_user', 'user_id'),
+        Index('idx_user_plant_chats_type', 'chat_type'),
+        Index('idx_user_plant_chats_active', 'is_active'),
+        Index('idx_user_plant_chats_expires', 'expires_at'),  # For cleanup job
+        Index('idx_user_plant_chats_created', 'created_at'),
+    )
+
+
+class ChatMessage(Base):
+    """
+    Chat message model - Stores individual messages in chat conversations.
+    Supports both text and image inputs with token tracking.
+    """
+    __tablename__ = 'chat_messages'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    chat_id = Column(Integer, ForeignKey('user_plant_chats.id', ondelete='CASCADE'), nullable=False)
+
+    role = Column(String(20), nullable=False)  # 'user' or 'assistant'
+    content = Column(Text, nullable=False)  # Message text content
+
+    # Image support
+    image_url = Column(String(500), nullable=True)  # GCS URL if image uploaded
+    has_image = Column(Boolean, default=False)
+
+    tokens_used = Column(Integer, default=0)  # Tokens consumed by this message
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    chat = relationship("UserPlantChat", back_populates="messages")
+
+    # Indexes for performance
+    __table_args__ = (
+        Index('idx_chat_messages_chat', 'chat_id'),
+        Index('idx_chat_messages_created', 'created_at'),
+    )
