@@ -46,7 +46,8 @@ class DatabasePlantRepository:
         )
 
         result = await self.db.execute(query)
-        plant = result.scalar_one_or_none()
+        # Use first() instead of scalar_one_or_none() to handle duplicate plant names
+        plant = result.scalars().first()
 
         return self._plant_to_dict(plant) if plant else None
 
