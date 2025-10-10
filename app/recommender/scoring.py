@@ -16,7 +16,12 @@ weights = {
 
 def season_score(climate_zone: str, month_now: str, plant: Dict[str, Any]) -> float:
     """Calculate season compatibility score."""
-    sowing_months = plant.get("sowing_months_by_climate", {}).get(climate_zone, [])
+    if not plant or not isinstance(plant, dict):
+        return 0.0
+
+    # Handle None value for sowing_months_by_climate (use 'or {}' to convert None to {})
+    sowing_data = plant.get("sowing_months_by_climate") or {}
+    sowing_months = sowing_data.get(climate_zone, [])
     
     if month_now in sowing_months:
         return 1.0
@@ -61,6 +66,10 @@ def sun_score(user_sun: str, plant_sun: str) -> float:
 
 def maintainability_score(user_pref: str, plant_maint_score: float) -> float:
     """Calculate maintainability score."""
+    # Handle None value for plant_maint_score
+    if plant_maint_score is None:
+        plant_maint_score = 0.6  # Default score
+
     if user_pref == "low":
         # Prefer high plant score for low maintenance
         return plant_maint_score
@@ -70,7 +79,7 @@ def maintainability_score(user_pref: str, plant_maint_score: float) -> float:
     elif user_pref == "high":
         # Baseline + plant score
         return 0.7 + 0.3 * plant_maint_score
-    
+
     return plant_maint_score
 
 def time_to_results_score(user_time_pref: str, t_days: int) -> float:
@@ -200,22 +209,30 @@ def eco_bonus_score(plant: Dict[str, Any]) -> float:
 
 def calculate_scores(plant: Dict[str, Any], user: Dict[str, Any], env: Dict[str, Any]) -> Tuple[float, Dict[str, float]]:
     """Calculate all scores for a plant."""
+    # Defensive check for None or invalid plant
+    if not plant or not isinstance(plant, dict) or not plant.get("plant_name"):
+        return 0.0, {
+            "season": 0.0, "sun": 0.0, "maintainability": 0.0,
+            "time_to_results": 0.0, "site_fit": 0.0, "preferences": 0.0,
+            "wind_penalty": 0.0, "eco_bonus": 0.0
+        }
+
     # Extract user preferences
     user_site = user.get("site", {})
     user_preferences = user.get("preferences", {})
     climate_zone = env.get("climate_zone", "temperate")
     month_now = env.get("month_now", datetime.now().strftime("%B"))
     
-    # Calculate sub-scores
+    # Calculate sub-scores (use 'or' to handle None values from database)
     s_season = season_score(climate_zone, month_now, plant)
-    s_sun = sun_score(user_site.get("sun_exposure", "part_sun"), plant.get("sun_need", "part_sun"))
+    s_sun = sun_score(user_site.get("sun_exposure", "part_sun"), plant.get("sun_need") or "part_sun")
     s_maintainability = maintainability_score(
-        user_preferences.get("maintainability", "medium"), 
-        plant.get("maintainability_score", 0.6)
+        user_preferences.get("maintainability", "medium"),
+        plant.get("maintainability_score") or 0.6
     )
     s_time = time_to_results_score(
-        user_preferences.get("time_to_results", "standard"), 
-        plant.get("time_to_maturity_days")
+        user_preferences.get("time_to_results", "standard"),
+        plant.get("time_to_maturity_days")  # Already handles None inside the function
     )
     s_site = site_fit_score(user_site, plant)
     s_preferences = preferences_score(user_preferences, plant)
