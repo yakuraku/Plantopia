@@ -6,7 +6,7 @@ This document outlines the integration strategy with external APIs for generatin
 ## API Selection & Configuration
 
 ### Primary API: Gemini 2.5 Flash-Lite
-**Model**: `gemini-2.0-flash-exp`
+**Model**: `gemini-2.5-flash-lite`
 **Reason**: High request limits, fast response times, structured output support
 
 **Rate Limits Per API Key**:
@@ -15,13 +15,13 @@ This document outlines the integration strategy with external APIs for generatin
 - 1,000 requests per day
 
 ### API Key Management
-**File**: `api_keys.txt` (excluded from git)
-**Format**:
+**File**: `gemini_api_keys.txt` (exclude this from git)
+**Sample Format**:
 ```
-key1=AIzaSyD...example_key_1
-key2=AIzaSyD...example_key_2
-key3=AIzaSyD...example_key_3
-key4=AIzaSyD...example_key_4
+user1,API_key_1
+user2,API_key_2
+user3,API_key_3
+user4,API_key_4
 ```
 
 **Key Rotation Strategy**:

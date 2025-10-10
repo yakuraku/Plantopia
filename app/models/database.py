@@ -274,3 +274,91 @@ class UserFavorite(Base):
         UniqueConstraint('user_id', 'plant_id', name='unique_user_plant_favorite'),
         Index('idx_user_favorites_user_created', 'user_id', 'created_at'),
     )
+
+
+# ============================================================================
+# PLANT TRACKING MODELS (Iteration 3)
+# ============================================================================
+
+class PlantGrowthData(Base):
+    """
+    Plant growth data model - Stores external API-generated growth data
+    shared across all users for each plant type.
+    """
+    __tablename__ = 'plant_growth_data'
+
+    plant_id = Column(Integer, ForeignKey('plants.id'), primary_key=True)
+    requirements_checklist = Column(JSON, nullable=False)  # Array of required materials/tools by category
+    setup_instructions = Column(JSON, nullable=False)  # Step-by-step growing instructions
+    growth_stages = Column(JSON, nullable=False)  # Timeline stages with descriptions and indicators
+    care_tips = Column(JSON, nullable=False)  # Stage-based care tips (15-20 per plant)
+    data_source_info = Column(JSON)  # API metadata for tracking
+    last_updated = Column(DateTime, default=datetime.utcnow)
+    version = Column(String(50), default='1.0')
+
+    # Relationships
+    plant = relationship("Plant")
+
+    # Indexes
+    __table_args__ = (
+        Index('idx_plant_growth_data_updated', 'last_updated'),
+    )
+
+
+class UserPlantInstance(Base):
+    """
+    User plant instance model - Tracks individual user's plant growing sessions.
+    Allows users to grow multiple instances of the same plant with unique timelines.
+    """
+    __tablename__ = 'user_plant_instances'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    plant_id = Column(Integer, ForeignKey('plants.id'), nullable=False)
+    plant_nickname = Column(String(100), nullable=False)  # User's custom name
+    start_date = Column(Date, nullable=False)
+    expected_maturity_date = Column(Date, nullable=False)  # Calculated from start_date + time_to_maturity_days
+    current_stage = Column(String(50), default='germination')  # Current growth stage
+    is_active = Column(Boolean, default=True)  # Whether still actively growing
+    user_notes = Column(Text)  # User's personal notes
+    location_details = Column(String(200))  # Where planted (e.g., "balcony pot 1")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    user = relationship("User")
+    plant = relationship("Plant")
+    progress_tracking = relationship("UserProgressTracking", back_populates="plant_instance", cascade="all, delete-orphan")
+
+    # Indexes for performance
+    __table_args__ = (
+        Index('idx_user_plant_instances_user_active', 'user_id', 'is_active'),
+        Index('idx_user_plant_instances_plant', 'plant_id'),
+        Index('idx_user_plant_instances_stage', 'current_stage'),
+    )
+
+
+class UserProgressTracking(Base):
+    """
+    User progress tracking model - Tracks checklist completion and milestones
+    for each user's plant instance.
+    """
+    __tablename__ = 'user_progress_tracking'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_plant_instance_id = Column(Integer, ForeignKey('user_plant_instances.id', ondelete='CASCADE'), nullable=False)
+    checklist_item_key = Column(String(200), nullable=False)  # Maps to plant_growth_data.requirements_checklist
+    is_completed = Column(Boolean, default=False)
+    completed_at = Column(DateTime)
+    user_notes = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    plant_instance = relationship("UserPlantInstance", back_populates="progress_tracking")
+
+    # Indexes and constraints
+    __table_args__ = (
+        Index('idx_user_progress_tracking_instance', 'user_plant_instance_id'),
+        Index('idx_user_progress_tracking_completed', 'user_plant_instance_id', 'is_completed'),
+        UniqueConstraint('user_plant_instance_id', 'checklist_item_key', name='unique_instance_checklist_item'),
+    )

@@ -463,3 +463,160 @@ The backend team will provide mock data files for frontend development:
 - Current API Version: v1
 - Breaking Changes: Will be communicated 2 weeks in advance
 - Deprecation Policy: 6 months notice for deprecated endpoints
+
+---
+
+## Implementation Notes (Backend)
+
+### ✅ Completed Implementation - 2025-01-10
+
+All endpoints described in this guide have been **fully implemented and tested**. The backend is production-ready for frontend integration.
+
+### Actual Implementation Details
+
+**Base URL:**
+```
+/api/v1  (prefix added by router registration)
+```
+
+**Key Differences from Original Spec:**
+
+1. **User Data Field Naming:**
+   - The backend uses snake_case consistently
+   - Frontend can use camelCase and send to backend as-is
+   - Example accepted user_data format:
+     ```json
+     {
+       "experience_level": "beginner",
+       "location": "Melbourne, VIC",
+       "climate_zone": "10",
+       "garden_type": "balcony",
+       "available_space_m2": 5.0
+     }
+     ```
+
+2. **Tips Endpoint Response:**
+   - Actual response returns simpler format: `{"instance_id": 1, "current_stage": "germination", "tips": ["Tip 1", "Tip 2"]}`
+   - Tips are returned as array of strings (not objects with category/importance)
+   - Limit query parameter supported (default: 3, max: 10)
+
+3. **Instructions Endpoint Response:**
+   - Actual format: `{"plant_id": 1, "instructions": [{"category": "Planting", "steps": [{"step": "text", "details": "text"}]}]}`
+   - Instructions grouped by category rather than numbered steps
+   - No image_url or duration fields in initial implementation
+
+4. **Additional Endpoints Implemented:**
+   - `POST /tracking/instance/{instance_id}/initialize-checklist` - Creates checklist items from requirements
+   - `POST /tracking/instance/{instance_id}/auto-update-stage` - Auto-calculates and updates stage based on days elapsed
+
+### Gemini AI Integration
+
+The backend uses **Google Gemini 2.0 Flash Exp** for generating personalized plant data:
+- Requirements checklists
+- Setup instructions
+- Growth timelines (5-7 stages per plant)
+- Care tips (15-20 tips per stage)
+
+**Data Generation:**
+- Happens on first tracking start per plant_id
+- Cached in `plant_growth_data` table
+- Personalized based on user_data sent in requests
+- Cache invalidation available if needed
+
+**Rate Limiting:**
+- 15 requests/minute per API key
+- 250K tokens/minute per API key
+- 1000 requests/day per API key
+- Automatic key rotation across 4-5 keys
+
+### Database Schema
+
+**Three New Tables:**
+
+1. **plant_growth_data**
+   - Primary key: plant_id
+   - Stores AI-generated JSON data
+   - Shared across all users for same plant
+
+2. **user_plant_instances**
+   - Tracks individual user's plants
+   - Links to plant_id and user_id
+   - Stores nickname, start_date, current_stage, etc.
+
+3. **user_progress_tracking**
+   - Tracks checklist completion
+   - Links to user_plant_instance_id
+   - Stores completion status and notes
+
+### Testing
+
+**Comprehensive test suite included:**
+- Unit tests: `tests/unit/test_plant_tracking_repositories.py` (repository layer)
+- Unit tests: `tests/unit/test_plant_tracking_services.py` (service layer)
+- Integration tests: `tests/integration/test_plant_tracking_endpoints.py` (API endpoints)
+
+**To run tests:**
+```bash
+pytest tests/unit/test_plant_tracking_*.py
+pytest tests/integration/test_plant_tracking_endpoints.py
+```
+
+### Deployment Checklist
+
+**Before deploying to production:**
+
+1. ✅ Run Alembic migration: `alembic upgrade head`
+2. ✅ Ensure `gemini_api_keys.txt` is present in root with 4-5 valid API keys
+3. ⚠️ Update environment variables if needed
+4. ⚠️ Test all endpoints with real data on staging
+5. ⚠️ Monitor Gemini API quota usage in first week
+
+### Frontend Development Tips
+
+**Quick Start:**
+1. Start with `POST /tracking/start` to create a test instance
+2. Use instance_id from response to test other endpoints
+3. Use `GET /tracking/instance/{instance_id}` for comprehensive data
+4. Test pagination with `GET /tracking/user/{user_id}?page=1&limit=5`
+
+**Common Gotchas:**
+- Always send user_data in start_tracking request (required for AI generation)
+- Instance IDs are separate from plant IDs (don't confuse them)
+- Use checklist_item_key format: `{category}_{item}` (e.g., "tools_garden_trowel")
+- Progress percentage is auto-calculated from days_elapsed vs maturity_date
+- Deactivate endpoint is soft-delete (can be reactivated if needed)
+
+**Performance:**
+- First call per plant_id will be slower (3-5 seconds for AI generation)
+- Subsequent calls are fast (cached data)
+- User dashboard endpoint supports pagination (use it!)
+
+### API Response Formats
+
+**Success Response (200/201):**
+```json
+{
+  "data_field_1": "value",
+  "data_field_2": "value"
+}
+```
+
+**Error Response (4xx/5xx):**
+```json
+{
+  "detail": "Error message here"
+}
+```
+
+### Contact & Support
+
+**For Questions:**
+- Backend implemented by: Yash (dev-yash branch)
+- Implementation docs: `IT3_PROGRESS.md` in repo root
+- Detailed specs: `Iteration_3_Documentation/` folder
+
+**Known Limitations:**
+- Migration testing pending (will test on GCP deployment)
+- No image upload endpoints yet (future iteration)
+- No push notifications (future iteration)
+- Gemini API costs need monitoring in production
