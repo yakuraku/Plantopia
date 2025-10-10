@@ -63,6 +63,12 @@ class Settings:
     # Google Cloud Storage
     GCS_BUCKET_URL: str = os.getenv("GCS_BUCKET_URL", "https://storage.googleapis.com/plantopia-images-1757656642/plant_images")
 
+    # Google OAuth Settings
+    GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "")
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "10080"))  # 7 days
+    ALGORITHM: str = "HS256"
+
     # Environment
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
     DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"

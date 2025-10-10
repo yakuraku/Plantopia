@@ -203,3 +203,74 @@ class UserRecommendation(Base):
     __table_args__ = (
         Index('idx_recommendations_created', 'created_at'),
     )
+
+
+class User(Base):
+    """User model for authentication and profile management"""
+    __tablename__ = 'users'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    google_id = Column(String(255), unique=True, nullable=False, index=True)
+    email = Column(String(255), unique=True, nullable=False, index=True)
+    name = Column(String(255))
+    avatar_url = Column(Text)
+    suburb_id = Column(Integer, ForeignKey('suburbs.id'))
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    last_login = Column(DateTime)
+
+    # Relationships
+    suburb = relationship("Suburb")
+    profile = relationship("UserProfile", uselist=False, back_populates="user", cascade="all, delete-orphan")
+    favorites = relationship("UserFavorite", back_populates="user", cascade="all, delete-orphan")
+
+    # Indexes
+    __table_args__ = (
+        Index('idx_user_google_id', 'google_id'),
+        Index('idx_user_email', 'email'),
+    )
+
+
+class UserProfile(Base):
+    """User profile model for personalization and preferences"""
+    __tablename__ = 'user_profiles'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), unique=True, nullable=False)
+    experience_level = Column(String(50))  # beginner/intermediate/advanced
+    garden_type = Column(String(100))  # balcony/backyard/indoor/courtyard/community_garden
+    climate_goals = Column(Text)
+    available_space_m2 = Column(Float)
+    sun_exposure = Column(String(50))  # full_sun/part_sun/bright_shade/low_light
+    has_containers = Column(Boolean, default=False)
+    organic_preference = Column(Boolean, default=True)
+    budget_level = Column(String(50))  # low/medium/high
+    notification_preferences = Column(JSON)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationship
+    user = relationship("User", back_populates="profile")
+
+
+class UserFavorite(Base):
+    """User favorite plants model"""
+    __tablename__ = 'user_favorites'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    plant_id = Column(Integer, ForeignKey('plants.id'), nullable=False)
+    notes = Column(Text)
+    priority_level = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    user = relationship("User", back_populates="favorites")
+    plant = relationship("Plant")
+
+    # Constraints
+    __table_args__ = (
+        UniqueConstraint('user_id', 'plant_id', name='unique_user_plant_favorite'),
+        Index('idx_user_favorites_user_created', 'user_id', 'created_at'),
+    )
