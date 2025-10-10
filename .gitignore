@@ -95,3 +95,6 @@ coverage.xml
 .mypy_cache
 .pytest_cache
 .hypothesis
+
+# Gemini API Keys File
+gemini_api_keys.txt

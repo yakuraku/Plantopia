@@ -203,3 +203,233 @@ class UserRecommendation(Base):
     __table_args__ = (
         Index('idx_recommendations_created', 'created_at'),
     )
+
+
+class User(Base):
+    """User model for authentication and profile management"""
+    __tablename__ = 'users'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    google_id = Column(String(255), unique=True, nullable=False, index=True)
+    email = Column(String(255), unique=True, nullable=False, index=True)
+    name = Column(String(255))
+    avatar_url = Column(Text)
+    suburb_id = Column(Integer, ForeignKey('suburbs.id'))
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    last_login = Column(DateTime)
+
+    # Relationships
+    suburb = relationship("Suburb")
+    profile = relationship("UserProfile", uselist=False, back_populates="user", cascade="all, delete-orphan")
+    favorites = relationship("UserFavorite", back_populates="user", cascade="all, delete-orphan")
+
+    # Indexes
+    __table_args__ = (
+        Index('idx_user_google_id', 'google_id'),
+        Index('idx_user_email', 'email'),
+    )
+
+
+class UserProfile(Base):
+    """User profile model for personalization and preferences"""
+    __tablename__ = 'user_profiles'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), unique=True, nullable=False)
+    experience_level = Column(String(50))  # beginner/intermediate/advanced
+    garden_type = Column(String(100))  # balcony/backyard/indoor/courtyard/community_garden
+    climate_goals = Column(Text)
+    available_space_m2 = Column(Float)
+    sun_exposure = Column(String(50))  # full_sun/part_sun/bright_shade/low_light
+    has_containers = Column(Boolean, default=False)
+    organic_preference = Column(Boolean, default=True)
+    budget_level = Column(String(50))  # low/medium/high
+    notification_preferences = Column(JSON)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationship
+    user = relationship("User", back_populates="profile")
+
+
+class UserFavorite(Base):
+    """User favorite plants model"""
+    __tablename__ = 'user_favorites'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    plant_id = Column(Integer, ForeignKey('plants.id'), nullable=False)
+    notes = Column(Text)
+    priority_level = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    user = relationship("User", back_populates="favorites")
+    plant = relationship("Plant")
+
+    # Constraints
+    __table_args__ = (
+        UniqueConstraint('user_id', 'plant_id', name='unique_user_plant_favorite'),
+        Index('idx_user_favorites_user_created', 'user_id', 'created_at'),
+    )
+
+
+# ============================================================================
+# PLANT TRACKING MODELS (Iteration 3)
+# ============================================================================
+
+class PlantGrowthData(Base):
+    """
+    Plant growth data model - Stores external API-generated growth data
+    shared across all users for each plant type.
+    """
+    __tablename__ = 'plant_growth_data'
+
+    plant_id = Column(Integer, ForeignKey('plants.id'), primary_key=True)
+    requirements_checklist = Column(JSON, nullable=False)  # Array of required materials/tools by category
+    setup_instructions = Column(JSON, nullable=False)  # Step-by-step growing instructions
+    growth_stages = Column(JSON, nullable=False)  # Timeline stages with descriptions and indicators
+    care_tips = Column(JSON, nullable=False)  # Stage-based care tips (15-20 per plant)
+    data_source_info = Column(JSON)  # API metadata for tracking
+    last_updated = Column(DateTime, default=datetime.utcnow)
+    version = Column(String(50), default='1.0')
+
+    # Relationships
+    plant = relationship("Plant")
+
+    # Indexes
+    __table_args__ = (
+        Index('idx_plant_growth_data_updated', 'last_updated'),
+    )
+
+
+class UserPlantInstance(Base):
+    """
+    User plant instance model - Tracks individual user's plant growing sessions.
+    Allows users to grow multiple instances of the same plant with unique timelines.
+    """
+    __tablename__ = 'user_plant_instances'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    plant_id = Column(Integer, ForeignKey('plants.id'), nullable=False)
+    plant_nickname = Column(String(100), nullable=False)  # User's custom name
+    start_date = Column(Date, nullable=False)
+    expected_maturity_date = Column(Date, nullable=False)  # Calculated from start_date + time_to_maturity_days
+    current_stage = Column(String(50), default='germination')  # Current growth stage
+    is_active = Column(Boolean, default=True)  # Whether still actively growing
+    user_notes = Column(Text)  # User's personal notes
+    location_details = Column(String(200))  # Where planted (e.g., "balcony pot 1")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    user = relationship("User")
+    plant = relationship("Plant")
+    progress_tracking = relationship("UserProgressTracking", back_populates="plant_instance", cascade="all, delete-orphan")
+
+    # Indexes for performance
+    __table_args__ = (
+        Index('idx_user_plant_instances_user_active', 'user_id', 'is_active'),
+        Index('idx_user_plant_instances_plant', 'plant_id'),
+        Index('idx_user_plant_instances_stage', 'current_stage'),
+    )
+
+
+class UserProgressTracking(Base):
+    """
+    User progress tracking model - Tracks checklist completion and milestones
+    for each user's plant instance.
+    """
+    __tablename__ = 'user_progress_tracking'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_plant_instance_id = Column(Integer, ForeignKey('user_plant_instances.id', ondelete='CASCADE'), nullable=False)
+    checklist_item_key = Column(String(200), nullable=False)  # Maps to plant_growth_data.requirements_checklist
+    is_completed = Column(Boolean, default=False)
+    completed_at = Column(DateTime)
+    user_notes = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    plant_instance = relationship("UserPlantInstance", back_populates="progress_tracking")
+
+    # Indexes and constraints
+    __table_args__ = (
+        Index('idx_user_progress_tracking_instance', 'user_plant_instance_id'),
+        Index('idx_user_progress_tracking_completed', 'user_plant_instance_id', 'is_completed'),
+        UniqueConstraint('user_plant_instance_id', 'checklist_item_key', name='unique_instance_checklist_item'),
+    )
+
+
+# ============================================================================
+# AI CHAT MODELS (Iteration 3 - Session 3)
+# ============================================================================
+
+class UserPlantChat(Base):
+    """
+    User plant chat model - Stores AI chat sessions for users.
+    Supports both general agriculture Q&A and plant-specific conversations.
+    Auto-expires after 6 hours for privacy and token management.
+    """
+    __tablename__ = 'user_plant_chats'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    user_plant_instance_id = Column(Integer, ForeignKey('user_plant_instances.id'), nullable=True)
+    # NULL = general chat, NOT NULL = plant-specific chat
+
+    chat_type = Column(String(20), nullable=False)  # 'general' or 'plant_specific'
+    total_tokens = Column(Integer, default=0)  # Cumulative token count for conversation
+    message_count = Column(Integer, default=0)  # Total messages in conversation
+    is_active = Column(Boolean, default=True)  # Whether chat is still active
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+    last_message_at = Column(DateTime, default=datetime.utcnow)
+    expires_at = Column(DateTime, nullable=False)  # created_at + 6 hours
+
+    # Relationships
+    user = relationship("User")
+    plant_instance = relationship("UserPlantInstance")
+    messages = relationship("ChatMessage", back_populates="chat", cascade="all, delete-orphan")
+
+    # Indexes for performance and cleanup
+    __table_args__ = (
+        Index('idx_user_plant_chats_user', 'user_id'),
+        Index('idx_user_plant_chats_type', 'chat_type'),
+        Index('idx_user_plant_chats_active', 'is_active'),
+        Index('idx_user_plant_chats_expires', 'expires_at'),  # For cleanup job
+        Index('idx_user_plant_chats_created', 'created_at'),
+    )
+
+
+class ChatMessage(Base):
+    """
+    Chat message model - Stores individual messages in chat conversations.
+    Supports both text and image inputs with token tracking.
+    """
+    __tablename__ = 'chat_messages'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    chat_id = Column(Integer, ForeignKey('user_plant_chats.id', ondelete='CASCADE'), nullable=False)
+
+    role = Column(String(20), nullable=False)  # 'user' or 'assistant'
+    content = Column(Text, nullable=False)  # Message text content
+
+    # Image support
+    image_url = Column(String(500), nullable=True)  # GCS URL if image uploaded
+    has_image = Column(Boolean, default=False)
+
+    tokens_used = Column(Integer, default=0)  # Tokens consumed by this message
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    chat = relationship("UserPlantChat", back_populates="messages")
+
+    # Indexes for performance
+    __table_args__ = (
+        Index('idx_chat_messages_chat', 'chat_id'),
+        Index('idx_chat_messages_created', 'created_at'),
+    )
