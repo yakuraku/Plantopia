@@ -7,6 +7,7 @@ from datetime import date, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.repositories.plant_instance_repository import PlantInstanceRepository
 from app.repositories.progress_tracking_repository import ProgressTrackingRepository
+from app.repositories.user_repository import UserRepository
 from app.services.plant_growth_service import PlantGrowthService
 from sqlalchemy import select
 from app.models.database import Plant
@@ -22,11 +23,12 @@ class PlantInstanceService:
         self.db = db
         self.repository = PlantInstanceRepository(db)
         self.progress_repository = ProgressTrackingRepository(db)
+        self.user_repository = UserRepository(db)
         self.growth_service = PlantGrowthService(db)
 
     async def start_tracking(
         self,
-        user_id: int,
+        email: str,
         plant_id: int,
         plant_nickname: str,
         start_date: date,
@@ -37,11 +39,11 @@ class PlantInstanceService:
         Start tracking a new plant instance
 
         Args:
-            user_id: User ID
+            email: User email (auto-creates user if doesn't exist)
             plant_id: Plant ID
             plant_nickname: User's custom nickname
             start_date: Start date
-            user_data: User context for AI generation
+            user_data: User context for AI generation (includes email, name, suburb_id, etc)
             location_details: Optional location info
 
         Returns:
@@ -50,6 +52,9 @@ class PlantInstanceService:
         Raises:
             ValueError: If plant not found
         """
+        # Get or create user by email
+        user = await self.user_repository.get_or_create_user_by_email(email, user_data)
+
         # Get plant details
         plant = await self.growth_service.get_plant_by_id(plant_id)
         if not plant:
@@ -64,7 +69,7 @@ class PlantInstanceService:
 
         # Create instance
         instance_data = {
-            "user_id": user_id,
+            "user_id": user.id,
             "plant_id": plant_id,
             "plant_nickname": plant_nickname,
             "start_date": start_date,
@@ -76,7 +81,7 @@ class PlantInstanceService:
 
         instance = await self.repository.create(instance_data)
 
-        logger.info(f"Created plant instance {instance.id} for user {user_id}, plant {plant_id}")
+        logger.info(f"Created plant instance {instance.id} for user {email} (ID: {user.id}), plant {plant_id}")
 
         return {
             "instance_id": instance.id,
@@ -89,7 +94,7 @@ class PlantInstanceService:
 
     async def get_user_plants(
         self,
-        user_id: int,
+        email: str,
         active_only: bool = True,
         page: int = 1,
         limit: int = 20
@@ -98,27 +103,35 @@ class PlantInstanceService:
         Get all plant instances for a user
 
         Args:
-            user_id: User ID
+            email: User email
             active_only: Filter for active plants only
             page: Page number (1-indexed)
             limit: Items per page
 
         Returns:
             Dictionary with plant instances and pagination info
+
+        Raises:
+            ValueError: If user not found
         """
+        # Get user by email
+        user = await self.user_repository.get_user_by_email(email)
+        if not user:
+            raise ValueError(f"User with email {email} not found")
+
         offset = (page - 1) * limit
 
         # Get instances
         instances = await self.repository.get_user_instances(
-            user_id,
+            user.id,
             active_only=active_only,
             limit=limit,
             offset=offset
         )
 
         # Get total counts
-        total_count = await self.repository.count_user_instances(user_id, active_only=False)
-        active_count = await self.repository.count_user_instances(user_id, active_only=True)
+        total_count = await self.repository.count_user_instances(user.id, active_only=False)
+        active_count = await self.repository.count_user_instances(user.id, active_only=True)
 
         # Build response with summary data
         plants_summary = []

@@ -210,8 +210,8 @@ class User(Base):
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    google_id = Column(String(255), unique=True, nullable=False, index=True)
-    email = Column(String(255), unique=True, nullable=False, index=True)
+    google_id = Column(String(255), unique=True, nullable=True, index=True)  # Nullable - auth handled by frontend
+    email = Column(String(255), unique=True, nullable=False, index=True)  # Primary identifier
     name = Column(String(255))
     avatar_url = Column(Text)
     suburb_id = Column(Integer, ForeignKey('suburbs.id'))
@@ -273,6 +273,27 @@ class UserFavorite(Base):
     __table_args__ = (
         UniqueConstraint('user_id', 'plant_id', name='unique_user_plant_favorite'),
         Index('idx_user_favorites_user_created', 'user_id', 'created_at'),
+    )
+
+
+class UserGuideFavorite(Base):
+    """User favorite plant guides model"""
+    __tablename__ = 'user_guide_favorites'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    guide_name = Column(String(255), nullable=False)  # Filename of the guide (e.g., "beginner_guide.md")
+    category = Column(String(100))  # Optional category for organization
+    notes = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    user = relationship("User")
+
+    # Constraints
+    __table_args__ = (
+        UniqueConstraint('user_id', 'guide_name', name='unique_user_guide_favorite'),
+        Index('idx_user_guide_favorites_user_created', 'user_id', 'created_at'),
     )
 
 

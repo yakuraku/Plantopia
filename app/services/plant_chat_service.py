@@ -13,6 +13,7 @@ import google.generativeai as genai
 from PIL import Image
 
 from app.repositories.chat_repository import ChatRepository
+from app.repositories.user_repository import UserRepository
 from app.services.plant_instance_service import PlantInstanceService
 from app.services.plant_growth_service import PlantGrowthService
 from app.services.external_api_service import get_gemini_service
@@ -66,28 +67,34 @@ class PlantChatService:
         """
         self.db = db
         self.repository = ChatRepository(db)
+        self.user_repository = UserRepository(db)
         self.gemini_service = get_gemini_service()
         self.plant_instance_service = PlantInstanceService(db)
         self.growth_service = PlantGrowthService(db)
 
-    async def start_general_chat(self, user_id: int) -> Dict[str, Any]:
+    async def start_general_chat(self, email: str) -> Dict[str, Any]:
         """
         Start a new general agriculture Q&A chat session
 
         Args:
-            user_id: User ID
+            email: User email (auto-creates user if doesn't exist)
 
         Returns:
             Dictionary with chat details
         """
-        logger.info(f"Starting general chat for user {user_id}")
+        # Get or create user
+        user = await self.user_repository.get_user_by_email(email)
+        if not user:
+            raise ValueError(f"User with email {email} not found. Please start tracking a plant first.")
+
+        logger.info(f"Starting general chat for user {email} (ID: {user.id})")
 
         # Create chat session
         now = datetime.utcnow()
         expires_at = now + timedelta(hours=self.CHAT_EXPIRATION_HOURS)
 
         chat_data = {
-            'user_id': user_id,
+            'user_id': user.id,
             'user_plant_instance_id': None,  # General chat has no linked plant
             'chat_type': 'general',
             'total_tokens': 0,
@@ -100,7 +107,7 @@ class PlantChatService:
 
         chat = await self.repository.create_chat(chat_data)
 
-        logger.info(f"Created general chat {chat.id} for user {user_id}")
+        logger.info(f"Created general chat {chat.id} for user {email} (ID: {user.id})")
 
         return {
             'chat_id': chat.id,
@@ -109,21 +116,26 @@ class PlantChatService:
             'message': 'General agriculture chat started. Ask me anything about gardening, farming, or plant care!'
         }
 
-    async def start_plant_chat(self, user_id: int, instance_id: int) -> Dict[str, Any]:
+    async def start_plant_chat(self, email: str, instance_id: int) -> Dict[str, Any]:
         """
         Start a new plant-specific chat session with full plant context
 
         Args:
-            user_id: User ID
+            email: User email
             instance_id: Plant instance ID
 
         Returns:
             Dictionary with chat details
 
         Raises:
-            ValueError: If instance not found or doesn't belong to user
+            ValueError: If user not found, instance not found or doesn't belong to user
         """
-        logger.info(f"Starting plant-specific chat for user {user_id}, instance {instance_id}")
+        # Get user by email
+        user = await self.user_repository.get_user_by_email(email)
+        if not user:
+            raise ValueError(f"User with email {email} not found")
+
+        logger.info(f"Starting plant-specific chat for user {email} (ID: {user.id}), instance {instance_id}")
 
         # Validate instance exists and belongs to user
         instance_details = await self.plant_instance_service.get_instance_details(instance_id)
@@ -139,7 +151,7 @@ class PlantChatService:
         expires_at = now + timedelta(hours=self.CHAT_EXPIRATION_HOURS)
 
         chat_data = {
-            'user_id': user_id,
+            'user_id': user.id,
             'user_plant_instance_id': instance_id,
             'chat_type': 'plant_specific',
             'total_tokens': 0,
@@ -155,7 +167,7 @@ class PlantChatService:
         plant_name = instance_details['plant_details']['plant_name']
         nickname = instance_details['tracking_info']['plant_nickname']
 
-        logger.info(f"Created plant chat {chat.id} for user {user_id}, plant: {plant_name}")
+        logger.info(f"Created plant chat {chat.id} for user {email} (ID: {user.id}), plant: {plant_name}")
 
         return {
             'chat_id': chat.id,
@@ -290,13 +302,13 @@ class PlantChatService:
             logger.error(f"Error processing message for chat {chat_id}: {e}")
             raise ValueError(f"Failed to process message: {str(e)}")
 
-    async def get_chat_history(self, chat_id: int, user_id: int) -> Dict[str, Any]:
+    async def get_chat_history(self, chat_id: int, email: str) -> Dict[str, Any]:
         """
         Get full chat history for a chat session
 
         Args:
             chat_id: Chat session ID
-            user_id: User ID (for ownership validation)
+            email: User email (for ownership validation)
 
         Returns:
             Dictionary with chat details and full message history
@@ -304,15 +316,20 @@ class PlantChatService:
         Raises:
             ValueError: If chat not found or user doesn't own chat
         """
-        logger.info(f"Getting chat history for chat {chat_id}, user {user_id}")
+        # Get user by email
+        user = await self.user_repository.get_user_by_email(email)
+        if not user:
+            raise ValueError(f"User with email {email} not found")
+
+        logger.info(f"Getting chat history for chat {chat_id}, user {email}")
 
         chat = await self.repository.get_chat_by_id(chat_id)
         if not chat:
             raise ValueError(f"Chat {chat_id} not found")
 
         # Verify ownership
-        if chat.user_id != user_id:
-            raise ValueError(f"User {user_id} does not own chat {chat_id}")
+        if chat.user_id != user.id:
+            raise ValueError(f"User {email} does not own chat {chat_id}")
 
         # Get all messages
         messages = await self.repository.get_chat_messages(chat_id)
@@ -340,13 +357,13 @@ class PlantChatService:
             'messages': formatted_messages
         }
 
-    async def end_chat(self, chat_id: int, user_id: int) -> bool:
+    async def end_chat(self, chat_id: int, email: str) -> bool:
         """
         End a chat session manually (marks as inactive)
 
         Args:
             chat_id: Chat session ID
-            user_id: User ID (for ownership validation)
+            email: User email (for ownership validation)
 
         Returns:
             True if ended successfully
@@ -354,15 +371,20 @@ class PlantChatService:
         Raises:
             ValueError: If chat not found or user doesn't own chat
         """
-        logger.info(f"Ending chat {chat_id} for user {user_id}")
+        # Get user by email
+        user = await self.user_repository.get_user_by_email(email)
+        if not user:
+            raise ValueError(f"User with email {email} not found")
+
+        logger.info(f"Ending chat {chat_id} for user {email}")
 
         chat = await self.repository.get_chat_by_id(chat_id)
         if not chat:
             raise ValueError(f"Chat {chat_id} not found")
 
         # Verify ownership
-        if chat.user_id != user_id:
-            raise ValueError(f"User {user_id} does not own chat {chat_id}")
+        if chat.user_id != user.id:
+            raise ValueError(f"User {email} does not own chat {chat_id}")
 
         # Deactivate chat (soft delete)
         await self.repository.deactivate_chat(chat_id)

@@ -98,6 +98,7 @@ class UserWithProfileResponse(UserResponse):
 
 class FavoriteCreate(BaseModel):
     """Schema for creating a favorite plant"""
+    email: str = Field(..., description="User email address")
     plant_id: int = Field(..., description="Plant ID to favorite")
     notes: Optional[str] = Field(None, description="User notes about why they favorited this plant")
 
@@ -118,6 +119,7 @@ class FavoriteResponse(BaseModel):
 
 class FavoriteSyncRequest(BaseModel):
     """Schema for syncing favorites from localStorage"""
+    email: str = Field(..., description="User email address")
     favorite_plant_ids: List[int] = Field(..., description="List of plant IDs to sync from localStorage")
 
 

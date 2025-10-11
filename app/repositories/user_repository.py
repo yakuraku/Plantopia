@@ -69,6 +69,32 @@ class UserRepository:
         result = await self.db.execute(query)
         return result.scalar_one_or_none()
 
+    async def get_or_create_user_by_email(self, email: str, user_data: Dict[str, Any]) -> User:
+        """
+        Get user by email or create if doesn't exist
+
+        Args:
+            email: User email (primary identifier)
+            user_data: Dictionary containing user information (name, suburb_id, etc)
+
+        Returns:
+            User instance (existing or newly created)
+        """
+        # Try to get existing user
+        user = await self.get_user_by_email(email)
+
+        if user:
+            # Update last_login timestamp for existing user
+            user.last_login = datetime.utcnow()
+            await self.db.commit()
+            await self.db.refresh(user)
+            return user
+
+        # Create new user if doesn't exist
+        user_data['email'] = email
+        user_data['google_id'] = None  # No Google auth
+        return await self.create_user(user_data)
+
     async def create_user(self, user_data: Dict[str, Any]) -> User:
         """
         Create a new user

@@ -66,13 +66,14 @@ async def start_plant_tracking(
     Start tracking a new plant instance.
 
     This endpoint:
+    - Auto-creates user if email doesn't exist in database
     - Creates a new plant tracking instance for the user
     - Generates AI-powered growth data if not already available
     - Initializes the plant with default growth stage (germination)
     - Calculates expected maturity date based on plant characteristics
 
     Args:
-        request: Start tracking request with user_id, plant_id, nickname, and user context
+        request: Start tracking request with user_data (includes email), plant_id, nickname
 
     Returns:
         StartTrackingResponse with instance details and success message
@@ -82,12 +83,19 @@ async def start_plant_tracking(
         HTTPException 500: If tracking creation fails
     """
     try:
+        # Extract email from user_data
+        user_data_dict = request.user_data.model_dump()
+        email = user_data_dict.get('email')
+
+        if not email:
+            raise HTTPException(status_code=400, detail="Email is required in user_data")
+
         result = await plant_instance_service.start_tracking(
-            user_id=request.user_id,
+            email=email,
             plant_id=request.plant_id,
             plant_nickname=request.plant_nickname,
             start_date=request.start_date or date.today(),
-            user_data=request.user_data.model_dump(),
+            user_data=user_data_dict,
             location_details=request.location_details
         )
 
@@ -105,9 +113,9 @@ async def start_plant_tracking(
         raise HTTPException(status_code=500, detail=f"Error starting plant tracking: {str(e)}")
 
 
-@router.get("/tracking/user/{user_id}", response_model=UserPlantsResponse)
+@router.get("/tracking/user/{email}", response_model=UserPlantsResponse)
 async def get_user_plant_instances(
-    user_id: int,
+    email: str,
     active_only: bool = Query(True, description="Filter for active plants only"),
     page: int = Query(1, ge=1, description="Page number (starts from 1)"),
     limit: int = Query(20, ge=1, le=100, description="Number of items per page"),
@@ -123,7 +131,7 @@ async def get_user_plant_instances(
     - Shows plant details, nickname, and current growth stage
 
     Args:
-        user_id: User ID to get plants for
+        email: User email to get plants for
         active_only: If True, only return active plants
         page: Page number for pagination
         limit: Number of plants per page
@@ -132,17 +140,20 @@ async def get_user_plant_instances(
         UserPlantsResponse with plant list and pagination info
 
     Raises:
+        HTTPException 404: If user not found
         HTTPException 500: If data retrieval fails
     """
     try:
         result = await plant_instance_service.get_user_plants(
-            user_id=user_id,
+            email=email,
             active_only=active_only,
             page=page,
             limit=limit
         )
 
         return UserPlantsResponse(**result)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error loading user plants: {str(e)}")
 

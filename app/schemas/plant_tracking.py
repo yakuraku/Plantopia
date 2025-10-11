@@ -24,8 +24,7 @@ class UserDataInput(BaseModel):
 
 class StartTrackingRequest(BaseModel):
     """Request to start tracking a new plant instance"""
-    user_id: int = Field(..., description="User ID")
-    user_data: UserDataInput = Field(..., description="User context data")
+    user_data: UserDataInput = Field(..., description="User context data including email")
     plant_id: int = Field(..., description="ID of plant to track")
     plant_nickname: str = Field(..., max_length=100, description="User's custom name for this plant")
     start_date: date = Field(..., description="Date when user started growing")
@@ -270,7 +269,7 @@ class ErrorResponse(BaseModel):
 
 class StartChatRequest(BaseModel):
     """Request to start a chat session"""
-    user_id: int = Field(..., description="User ID")
+    email: str = Field(..., description="User email address")
 
 
 class ChatMessageRequest(BaseModel):

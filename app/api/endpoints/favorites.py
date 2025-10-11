@@ -2,38 +2,48 @@
 Favorites API endpoints for managing user's favorite plants
 """
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_async_db
-from app.api.dependencies import get_current_user
 from app.repositories.user_repository import UserRepository
 from app.schemas.user import (
     FavoriteCreate,
     FavoriteResponse,
     FavoriteSyncRequest
 )
-from app.models.database import User
 
 router = APIRouter()
 
 
 @router.get("", response_model=List[FavoriteResponse])
 async def get_user_favorites(
-    current_user: User = Depends(get_current_user),
+    email: str = Query(..., description="User email address"),
     db: AsyncSession = Depends(get_async_db)
 ):
     """
     Get all user's favorite plants
 
     Args:
-        current_user: Current authenticated user
+        email: User email address
         db: Database session
 
     Returns:
         List of user's favorite plants with details
+
+    Raises:
+        HTTPException 404: If user not found
     """
     user_repo = UserRepository(db)
-    favorites = await user_repo.get_user_favorites(current_user.id)
+
+    # Get user by email
+    user = await user_repo.get_user_by_email(email)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with email {email} not found"
+        )
+
+    favorites = await user_repo.get_user_favorites(user.id)
 
     return [
         FavoriteResponse(
@@ -52,31 +62,41 @@ async def get_user_favorites(
 @router.post("", response_model=FavoriteResponse)
 async def add_favorite(
     favorite_data: FavoriteCreate,
-    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_async_db)
 ):
     """
     Add a plant to user's favorites
 
     Args:
-        favorite_data: Favorite creation data
-        current_user: Current authenticated user
+        favorite_data: Favorite creation data (includes email, plant_id, notes)
         db: Database session
 
     Returns:
         Created favorite information
+
+    Raises:
+        HTTPException 404: If user not found
+        HTTPException 500: If operation fails
     """
     user_repo = UserRepository(db)
 
     try:
+        # Get user by email
+        user = await user_repo.get_user_by_email(favorite_data.email)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"User with email {favorite_data.email} not found"
+            )
+
         favorite = await user_repo.add_favorite(
-            user_id=current_user.id,
+            user_id=user.id,
             plant_id=favorite_data.plant_id,
             notes=favorite_data.notes
         )
 
         # Get the favorite with plant data loaded
-        favorites = await user_repo.get_user_favorites(current_user.id)
+        favorites = await user_repo.get_user_favorites(user.id)
         created_favorite = next(
             (fav for fav in favorites if fav.id == favorite.id),
             None
@@ -113,7 +133,7 @@ async def add_favorite(
 @router.delete("/{plant_id}")
 async def remove_favorite(
     plant_id: int,
-    current_user: User = Depends(get_current_user),
+    email: str = Query(..., description="User email address"),
     db: AsyncSession = Depends(get_async_db)
 ):
     """
@@ -121,15 +141,26 @@ async def remove_favorite(
 
     Args:
         plant_id: Plant ID to remove from favorites
-        current_user: Current authenticated user
+        email: User email address
         db: Database session
 
     Returns:
         Success message
+
+    Raises:
+        HTTPException 404: If user or favorite not found
     """
     user_repo = UserRepository(db)
 
-    success = await user_repo.remove_favorite(current_user.id, plant_id)
+    # Get user by email
+    user = await user_repo.get_user_by_email(email)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with email {email} not found"
+        )
+
+    success = await user_repo.remove_favorite(user.id, plant_id)
 
     if not success:
         raise HTTPException(
@@ -143,25 +174,35 @@ async def remove_favorite(
 @router.post("/sync", response_model=List[FavoriteResponse])
 async def sync_favorites(
     sync_data: FavoriteSyncRequest,
-    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_async_db)
 ):
     """
     Sync favorites from localStorage (merge strategy)
 
     Args:
-        sync_data: List of plant IDs to sync from localStorage
-        current_user: Current authenticated user
+        sync_data: Sync data (includes email and list of plant IDs)
         db: Database session
 
     Returns:
         All user's favorites after sync
+
+    Raises:
+        HTTPException 404: If user not found
+        HTTPException 500: If operation fails
     """
     user_repo = UserRepository(db)
 
     try:
+        # Get user by email
+        user = await user_repo.get_user_by_email(sync_data.email)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"User with email {sync_data.email} not found"
+            )
+
         favorites = await user_repo.sync_favorites(
-            user_id=current_user.id,
+            user_id=user.id,
             plant_ids=sync_data.favorite_plant_ids
         )
 
@@ -188,7 +229,7 @@ async def sync_favorites(
 @router.get("/check/{plant_id}")
 async def check_favorite(
     plant_id: int,
-    current_user: User = Depends(get_current_user),
+    email: str = Query(..., description="User email address"),
     db: AsyncSession = Depends(get_async_db)
 ):
     """
@@ -196,14 +237,25 @@ async def check_favorite(
 
     Args:
         plant_id: Plant ID to check
-        current_user: Current authenticated user
+        email: User email address
         db: Database session
 
     Returns:
         Whether the plant is favorited
+
+    Raises:
+        HTTPException 404: If user not found
     """
     user_repo = UserRepository(db)
 
-    is_favorite = await user_repo.is_favorite(current_user.id, plant_id)
+    # Get user by email
+    user = await user_repo.get_user_by_email(email)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with email {email} not found"
+        )
+
+    is_favorite = await user_repo.is_favorite(user.id, plant_id)
 
     return {"is_favorite": is_favorite}

@@ -49,17 +49,20 @@ async def start_general_chat(
     - AI applies agriculture-only guardrails (rejects non-farming topics)
 
     Args:
-        request: Start chat request with user_id
+        request: Start chat request with email
 
     Returns:
         StartChatResponse with chat_id and expiration time
 
     Raises:
+        HTTPException 404: If user not found
         HTTPException 500: If chat creation fails
     """
     try:
-        result = await chat_service.start_general_chat(user_id=request.user_id)
+        result = await chat_service.start_general_chat(email=request.email)
         return StartChatResponse(**result)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error starting general chat: {str(e)}")
 
@@ -131,18 +134,18 @@ async def start_plant_chat(
 
     Args:
         instance_id: Plant instance ID to chat about
-        request: Start chat request with user_id
+        request: Start chat request with email
 
     Returns:
         StartChatResponse with chat details and plant info
 
     Raises:
-        HTTPException 404: If plant instance not found or user doesn't own it
+        HTTPException 404: If user or plant instance not found
         HTTPException 500: If chat creation fails
     """
     try:
         result = await chat_service.start_plant_chat(
-            user_id=request.user_id,
+            email=request.email,
             instance_id=instance_id
         )
         return StartChatResponse(**result)
@@ -204,7 +207,7 @@ async def send_plant_message(
 @router.get("/chat/{chat_id}/history", response_model=ChatHistoryResponse)
 async def get_chat_history(
     chat_id: int,
-    user_id: int = Query(..., description="User ID for ownership validation"),
+    email: str = Query(..., description="User email for ownership validation"),
     chat_service: PlantChatService = Depends(get_plant_chat_service)
 ):
     """
@@ -219,18 +222,18 @@ async def get_chat_history(
 
     Args:
         chat_id: Chat session ID
-        user_id: User ID (for ownership validation)
+        email: User email (for ownership validation)
 
     Returns:
         ChatHistoryResponse with full conversation history
 
     Raises:
-        HTTPException 404: If chat not found
+        HTTPException 404: If chat or user not found
         HTTPException 403: If user doesn't own chat
         HTTPException 500: If data retrieval fails
     """
     try:
-        result = await chat_service.get_chat_history(chat_id=chat_id, user_id=user_id)
+        result = await chat_service.get_chat_history(chat_id=chat_id, email=email)
         return ChatHistoryResponse(**result)
     except ValueError as e:
         error_msg = str(e)
@@ -247,7 +250,7 @@ async def get_chat_history(
 @router.delete("/chat/{chat_id}", response_model=EndChatResponse)
 async def end_chat(
     chat_id: int,
-    user_id: int = Query(..., description="User ID for ownership validation"),
+    email: str = Query(..., description="User email for ownership validation"),
     chat_service: PlantChatService = Depends(get_plant_chat_service)
 ):
     """
@@ -262,7 +265,7 @@ async def end_chat(
 
     Args:
         chat_id: Chat session ID to end
-        user_id: User ID (for ownership validation)
+        email: User email (for ownership validation)
 
     Returns:
         EndChatResponse with success confirmation
@@ -273,7 +276,7 @@ async def end_chat(
         HTTPException 500: If operation fails
     """
     try:
-        success = await chat_service.end_chat(chat_id=chat_id, user_id=user_id)
+        success = await chat_service.end_chat(chat_id=chat_id, email=email)
         return EndChatResponse(
             success=success,
             message=f"Chat {chat_id} ended successfully",
