@@ -8,6 +8,9 @@ echo "🚀 Starting manual deployment..."
 # Navigate to project directory
 cd /opt/plantopia/Plantopia
 
+echo "🔧 Fixing Git permissions..."
+git config --global --add safe.directory /opt/plantopia/Plantopia 2>/dev/null || true
+
 echo "📥 Pulling latest code..."
 git fetch origin
 git reset --hard origin/main
