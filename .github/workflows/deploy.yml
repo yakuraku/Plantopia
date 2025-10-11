@@ -58,6 +58,9 @@ jobs:
         # Fix ownership of entire project directory
         sudo chown -R $(whoami):$(whoami) /opt/plantopia/Plantopia
 
+        # Add git safe directory
+        git config --global --add safe.directory /opt/plantopia/Plantopia 2>/dev/null || true
+
         # Clean any stale lock files
         rm -f .git/index.lock 2>/dev/null || true
         rm -f .git/FETCH_HEAD.lock 2>/dev/null || true
