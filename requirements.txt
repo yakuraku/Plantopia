@@ -6,6 +6,7 @@ uvicorn
 python-multipart
 python-dotenv
 requests
+email-validator
 
 # Database
 sqlalchemy==2.0.23
@@ -13,6 +14,7 @@ asyncpg==0.29.0
 alembic==1.13.1
 psycopg2-binary==2.9.9
 greenlet==3.0.3
+postgresql-client
 
 # Supabase (stable version - DO NOT UPGRADE)
 supabase==2.3.0
