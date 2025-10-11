@@ -63,17 +63,6 @@ jobs:
         echo "🐍 Activating Python environment..."
         source venv/bin/activate
 
-        echo "📦 Installing dependencies..."
-        # Use the dependency fix script to ensure clean installation
-        if [ -f "fix_dependencies.sh" ]; then
-          echo "🔧 Running dependency fix script..."
-          chmod +x fix_dependencies.sh
-          ./fix_dependencies.sh
-        else
-          echo "⚠️  fix_dependencies.sh not found, using pip install..."
-          pip install -q -r requirements.txt
-        fi
-
         echo "🗄️  Running database migrations..."
         alembic upgrade head
 

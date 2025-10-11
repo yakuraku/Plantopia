@@ -1,0 +1,79 @@
+{
+  "test_user": {
+    "email": "iteration3.test@plantopia.com",
+    "name": "Iteration 3 Test User",
+    "suburb_id": 1,
+    "experience_level": "intermediate",
+    "garden_type": "balcony",
+    "available_space": 15.5,
+    "climate_goal": "sustainable gardening",
+    "profile": {
+      "experience_level": "intermediate",
+      "garden_type": "balcony",
+      "climate_goals": "Sustainable urban gardening",
+      "available_space_m2": 15.5,
+      "sun_exposure": "full_sun",
+      "has_containers": true,
+      "organic_preference": true,
+      "budget_level": "medium",
+      "notification_preferences": {
+        "email": true,
+        "push": true
+      }
+    }
+  },
+  "test_plants": [
+    {
+      "plant_name": "Basil",
+      "nickname": "Test Basil - Kitchen Herb",
+      "location": "Kitchen windowsill"
+    },
+    {
+      "plant_name": "Tomato",
+      "nickname": "Test Tomato - Balcony",
+      "location": "Balcony pot #1"
+    },
+    {
+      "plant_name": "Lettuce",
+      "nickname": "Test Lettuce - Container",
+      "location": "Container garden"
+    }
+  ],
+  "test_updates": {
+    "stage_progressions": [
+      "germination",
+      "seedling",
+      "vegetative",
+      "flowering",
+      "fruiting",
+      "harvest"
+    ],
+    "user_notes": [
+      "First leaves appeared today!",
+      "Plant is growing well, added fertilizer",
+      "Noticed some yellowing on lower leaves",
+      "Flowers starting to bloom",
+      "First fruits are forming"
+    ]
+  },
+  "test_checklist_items": [
+    "seeds_basil",
+    "tools_garden_trowel",
+    "supplies_potting_mix",
+    "containers_medium_pot"
+  ],
+  "chat_test_messages": {
+    "general_questions": [
+      "What is the best way to improve soil drainage?",
+      "How often should I water plants in summer?",
+      "Can you explain companion planting?",
+      "What are the signs of nitrogen deficiency in plants?"
+    ],
+    "plant_specific_questions": [
+      "Is my plant growing at the expected rate?",
+      "What should I do at this stage of growth?",
+      "Are there any common problems I should watch for?",
+      "When should I start harvesting?"
+    ]
+  }
+}
