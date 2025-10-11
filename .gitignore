@@ -101,7 +101,3 @@ gemini_api_keys.txt
 
 # Temporary Files for development
 temp.txt
-
-# Test Reports and Results (Iteration 3)
-tests/iteration_3/reports/*.json
-tests/iteration_3/reports/*.txt
