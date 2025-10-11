@@ -105,16 +105,17 @@ class UserRepository:
         Returns:
             Created User instance
         """
-        # Handle suburb lookup if suburb_name is provided
-        suburb_id = None
-        if 'suburb_name' in user_data:
+        # Determine suburb_id from explicit id or suburb_name (prefer explicit id if provided)
+        effective_suburb_id = user_data.pop('suburb_id', None)
+
+        if effective_suburb_id is None and 'suburb_name' in user_data:
             suburb_name = user_data.pop('suburb_name')
             suburb = await self._get_suburb_by_name(suburb_name)
             if suburb:
-                suburb_id = suburb.id
+                effective_suburb_id = suburb.id
 
         user = User(
-            suburb_id=suburb_id,
+            suburb_id=effective_suburb_id,
             **user_data
         )
 

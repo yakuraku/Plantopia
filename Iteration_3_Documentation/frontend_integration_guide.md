@@ -89,7 +89,7 @@ Authorization: Bearer {jwt_token}
 ```
 
 ### 2. Get User's Plant Instances
-**Endpoint**: `GET /tracking/user/{user_id}`
+**Endpoint**: `GET /tracking/user/{email}`
 
 **Query Parameters**:
 - `active_only` (boolean, default: true) - Show only active plants
@@ -281,23 +281,9 @@ Authorization: Bearer {jwt_token}
   "instance_id": 789,
   "current_stage": "flowering",
   "tips": [
-    {
-      "tip": "Ensure 6-8 hours of direct sunlight daily",
-      "category": "sunlight",
-      "importance": "high"
-    },
-    {
-      "tip": "Gently shake plants to aid pollination",
-      "category": "care",
-      "importance": "medium"
-    }
-  ],
-  "stage_info": {
-    "stage_name": "flowering",
-    "description": "Flower buds form and bloom",
-    "days_in_stage": 15,
-    "estimated_days_remaining": 25
-  }
+    "Ensure 6-8 hours of direct sunlight daily",
+    "Gently shake plants to aid pollination"
+  ]
 }
 ```
 
@@ -579,7 +565,7 @@ pytest tests/integration/test_plant_tracking_endpoints.py
 1. Start with `POST /tracking/start` to create a test instance
 2. Use instance_id from response to test other endpoints
 3. Use `GET /tracking/instance/{instance_id}` for comprehensive data
-4. Test pagination with `GET /tracking/user/{user_id}?page=1&limit=5`
+4. Test pagination with `GET /tracking/user/{email}?page=1&limit=5`
 
 **Common Gotchas:**
 - Always send user_data in start_tracking request (required for AI generation)
@@ -646,7 +632,7 @@ The chat feature provides AI-powered agriculture Q&A with two modes:
 **Request Body**:
 ```json
 {
-  "user_id": 123
+  "email": "user@example.com"
 }
 ```
 
@@ -712,7 +698,7 @@ The chat feature provides AI-powered agriculture Q&A with two modes:
 **Request Body**:
 ```json
 {
-  "user_id": 123
+  "email": "user@example.com"
 }
 ```
 
@@ -736,7 +722,7 @@ Same request/response format as general message endpoint.
 AI will have full plant context: current stage, timeline, care tips, location.
 
 #### 5. Get Chat History
-**Endpoint**: `GET /chat/{chat_id}/history?user_id={user_id}`
+**Endpoint**: `GET /chat/{chat_id}/history?email={email}`
 
 **Response**:
 ```json
@@ -768,7 +754,7 @@ AI will have full plant context: current stage, timeline, care tips, location.
 ```
 
 #### 6. End Chat
-**Endpoint**: `DELETE /chat/{chat_id}?user_id={user_id}`
+**Endpoint**: `DELETE /chat/{chat_id}?email={email}`
 
 **Response**:
 ```json
