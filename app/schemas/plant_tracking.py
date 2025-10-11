@@ -24,6 +24,7 @@ class UserDataInput(BaseModel):
 
 class StartTrackingRequest(BaseModel):
     """Request to start tracking a new plant instance"""
+    user_id: int = Field(..., description="User ID")
     user_data: UserDataInput = Field(..., description="User context data")
     plant_id: int = Field(..., description="ID of plant to track")
     plant_nickname: str = Field(..., max_length=100, description="User's custom name for this plant")
