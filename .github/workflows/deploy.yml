@@ -54,14 +54,15 @@ jobs:
         cd /opt/plantopia/Plantopia
         echo "📂 Current directory: $(pwd)"
 
-        echo "📥 Pulling latest code..."
-        # Fix permissions if needed
-        sudo chown -R $(whoami):$(whoami) .git 2>/dev/null || true
+        echo "🔧 Fixing permissions..."
+        # Fix ownership of entire project directory
+        sudo chown -R $(whoami):$(whoami) /opt/plantopia/Plantopia
 
         # Clean any stale lock files
         rm -f .git/index.lock 2>/dev/null || true
         rm -f .git/FETCH_HEAD.lock 2>/dev/null || true
 
+        echo "📥 Pulling latest code..."
         # Ensure we're on the correct branch
         git fetch --prune origin
         git checkout main 2>/dev/null || git checkout -b main origin/main
