@@ -42,19 +42,23 @@ echo "📋 Step 6: Installing auth dependencies with compatible versions..."
 pip install "PyJWT>=2.10.1" "python-jose[cryptography]==3.3.0"
 
 echo ""
-echo "📋 Step 7: Installing supabase with all dependencies (pip will resolve versions)..."
+echo "📋 Step 7: Installing httpx with version constraint FIRST (before supabase)..."
+pip install "httpx>=0.24.1,<0.26.0"
+
+echo ""
+echo "📋 Step 8: Installing supabase with all dependencies (will use existing httpx)..."
 pip install "supabase>=2.22.0"
 
 echo ""
-echo "📋 Step 8: Installing remaining dependencies..."
+echo "📋 Step 9: Installing remaining dependencies..."
 pip install aiohttp==3.9.1 google-auth==2.28.0 pytest==7.4.0 pytest-asyncio==0.21.0 google-generativeai==0.8.0
 
 echo ""
-echo "📋 Step 9: Verifying installation..."
+echo "📋 Step 10: Verifying installation..."
 pip check
 
 echo ""
-echo "📊 Step 10: Showing installed versions of critical packages..."
+echo "📊 Step 11: Showing installed versions of critical packages..."
 echo "----------------------------------------"
 pip list | grep -E "supabase|httpx|PyJWT|gotrue|supafunc|storage3"
 echo "----------------------------------------"
