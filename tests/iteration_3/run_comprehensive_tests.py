@@ -58,7 +58,8 @@ class ComprehensiveTestRunner:
         print("Checking backend server health...")
 
         try:
-            response = requests.get(f"{self.base_url}/health", timeout=5)
+            # Try root endpoint first
+            response = requests.get(f"{self.base_url}/", timeout=5)
 
             if response.status_code == 200:
                 print(f"✓ Server is running at {self.base_url}")
