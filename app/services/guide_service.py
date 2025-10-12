@@ -132,23 +132,36 @@ class GuideService:
         if not user:
             raise ValueError(f"User with email {email} not found")
 
-        # Verify guide exists
-        if category:
-            guide = self.repository.get_guide_content(category, guide_name)
-            if not guide:
-                raise ValueError(f"Guide '{guide_name}' not found in category '{category}'")
-        else:
-            # If no category provided, search all guides
-            all_guides = self.repository.get_all_guides()
-            guide_exists = any(g["guide_name"] == guide_name for g in all_guides)
-            if not guide_exists:
+        # Verify guide exists (accept either exact filename or title, with optional category)
+        resolved_category: Optional[str] = category
+        resolved_name: Optional[str] = None
+
+        all_guides = self.repository.get_all_guides()
+
+        def match(g: Dict[str, Any]) -> bool:
+            same_cat = (resolved_category is None or g["category"].lower() == resolved_category.lower())
+            # Accept either exact filename (.md) or title match (stem)
+            name_or_title = g["guide_name"].lower() == guide_name.lower() or g["title"].lower() == guide_name.lower()
+            return same_cat and name_or_title
+
+        candidates = [g for g in all_guides if match(g)]
+        if not candidates:
+            if resolved_category:
+                raise ValueError(f"Guide '{guide_name}' not found in category '{resolved_category}'")
+            else:
                 raise ValueError(f"Guide '{guide_name}' not found")
+        if len(candidates) > 1:
+            # Ambiguous title across categories; require category
+            raise ValueError("Multiple guides match this title; please specify category")
+
+        resolved_category = candidates[0]["category"]
+        resolved_name = candidates[0]["guide_name"]
 
         # Add to favorites
         favorite = await self.repository.add_guide_favorite(
             user_id=user.id,
-            guide_name=guide_name,
-            category=category,
+            guide_name=resolved_name,
+            category=resolved_category,
             notes=notes
         )
 
@@ -156,8 +169,8 @@ class GuideService:
 
         return {
             "id": favorite.id,
-            "guide_name": favorite.guide_name,
-            "category": favorite.category,
+            "guide_name": resolved_name,
+            "category": resolved_category,
             "notes": favorite.notes,
             "created_at": favorite.created_at,
             "message": "Guide added to favorites successfully"
