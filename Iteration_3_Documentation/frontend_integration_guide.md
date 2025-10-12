@@ -1012,18 +1012,18 @@ try {
 
 ---
 
-## Documentation Sync Policy (必读)
+## Documentation Sync Policy
 
-为确保前后端契约一致性，凡是对集成产生影响的变更，必须同步更新本集成指南（本文件），提交同一条 PR：
+Any integration-impacting change must update this guide in the same PR. Keep the API contract and docs in sync:
 
-- 端点路径与前缀：新增、修改、下线任一 API（含版本前缀、分组）
-- 请求契约：请求体/查询参数/路径参数的字段新增、删除或语义变更
-- 默认值与回退逻辑：如 `user_data.suburb_id` 无效时默认回退为 `1` 等
-- 响应契约：字段结构、字段类型、枚举值、分页格式等变更
-- 认证与限流：认证方式（如 Bearer Token）、需要的 Header、速率限制调整等
-- 错误码：新增/修改/下线错误码与语义
+- Endpoint paths and prefixes: add/modify/deprecate (including version/group changes)
+- Request contract: body/query/path parameters added/removed/changed
+- Defaults and fallbacks: e.g., invalid `user_data.suburb_id` defaults to `1`
+- Response contract: fields, types, enums, pagination
+- Auth and rate limits: auth method, required headers, limit changes
+- Error codes: add/modify/deprecate and semantics
 
-变更流程建议（最少需做）：
-1. 在 PR 中更新代码与本文件的相关小节（示例、字段说明、错误码、注意事项）
-2. 若为破坏性变更，在“Version Information”中记录并注明迁移指引
-3. 同步更新前端 mock/调用示例，确保可直接复制使用
+Minimum process:
+1. Update code and the relevant sections in this file (examples, field notes, errors)
+2. For breaking changes, add a migration note in "Version Information"
+3. Update frontend mocks/examples so they work copy-paste
