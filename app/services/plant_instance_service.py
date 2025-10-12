@@ -253,7 +253,8 @@ class PlantInstanceService:
         instance_id: int,
         current_stage: Optional[str] = None,
         user_notes: Optional[str] = None,
-        location_details: Optional[str] = None
+        location_details: Optional[str] = None,
+        align_to_stage_start: bool = False
     ) -> Dict[str, Any]:
         """
         Update plant instance progress
@@ -267,9 +268,52 @@ class PlantInstanceService:
         Returns:
             Updated instance information
         """
-        update_data = {}
+        update_data: Dict[str, Any] = {}
+
+        # If caller wants to align start_date to the beginning of the chosen stage,
+        # compute the stage's start_day and back-calculate a new start_date so that
+        # days_elapsed equals start_day. Also recompute expected_maturity_date.
         if current_stage is not None:
             update_data["current_stage"] = current_stage
+
+            if align_to_stage_start:
+                instance = await self.repository.get_by_id(instance_id)
+                if not instance:
+                    raise ValueError(f"Plant instance with ID {instance_id} not found")
+
+                # Get timeline for this plant and find the selected stage
+                timeline = await self.growth_service.get_timeline(instance.plant_id)
+                stages: List[Dict[str, Any]] = timeline.get("stages", [])
+
+                stage_start_day: Optional[int] = None
+                for stage in stages:
+                    if stage.get("stage_name") == current_stage:
+                        stage_start_day = stage.get("start_day")
+                        break
+
+                if stage_start_day is None:
+                    # If stage name not found, proceed without alignment
+                    pass
+                else:
+                    # Move start_date backward so that today - start_date == stage_start_day
+                    new_start_date = date.today() - timedelta(days=int(stage_start_day))
+
+                    # Recalculate expected_maturity_date from plant maturity days
+                    plant_timeline = await self.growth_service.get_timeline(instance.plant_id)
+                    total_days = plant_timeline.get("total_days")
+                    if isinstance(total_days, int) and total_days > 0:
+                        new_expected_maturity = new_start_date + timedelta(days=total_days)
+                    else:
+                        # Fallback to previous expected_maturity delta if available
+                        previous_total = (instance.expected_maturity_date - instance.start_date).days
+                        days_to_use = previous_total if previous_total > 0 else 90
+                        new_expected_maturity = new_start_date + timedelta(days=days_to_use)
+
+                    update_data.update({
+                        "start_date": new_start_date,
+                        "expected_maturity_date": new_expected_maturity,
+                        "is_active": True,
+                    })
         if user_notes is not None:
             update_data["user_notes"] = user_notes
         if location_details is not None:

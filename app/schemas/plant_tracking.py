@@ -36,6 +36,12 @@ class UpdateProgressRequest(BaseModel):
     current_stage: Optional[str] = Field(None, max_length=50, description="Current growth stage")
     user_notes: Optional[str] = Field(None, description="User's personal notes")
     location_details: Optional[str] = Field(None, max_length=200, description="Location where planted")
+    align_to_stage_start: Optional[bool] = Field(
+        default=False,
+        description=(
+            "If true and current_stage is provided, align start_date so that days_elapsed equals the stage's start day"
+        ),
+    )
 
 
 class CompleteChecklistItemRequest(BaseModel):

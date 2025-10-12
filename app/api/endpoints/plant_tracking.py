@@ -225,7 +225,8 @@ async def update_plant_progress(
             instance_id=instance_id,
             current_stage=request.current_stage,
             user_notes=request.user_notes,
-            location_details=request.location_details
+            location_details=request.location_details,
+            align_to_stage_start=bool(request.align_to_stage_start)
         )
 
         return MessageResponse(
