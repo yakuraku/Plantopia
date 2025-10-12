@@ -228,6 +228,7 @@ async def update_plant_progress(
         )
 
         return MessageResponse(
+            success=True,
             message=result["message"],
             data={
                 "instance_id": result["instance_id"],
@@ -478,6 +479,7 @@ async def initialize_instance_checklist(
             raise HTTPException(status_code=404, detail=result["message"])
 
         return MessageResponse(
+            success=True,
             message=result["message"],
             data={"items_created": result["items_created"]}
         )
@@ -525,6 +527,7 @@ async def update_plant_nickname(
         )
 
         return MessageResponse(
+            success=True,
             message=result["message"],
             data={
                 "instance_id": result["instance_id"],
@@ -567,6 +570,7 @@ async def deactivate_plant_instance(
         result = await plant_instance_service.deactivate_instance(instance_id)
 
         return MessageResponse(
+            success=True,
             message=result["message"],
             data={
                 "instance_id": result["instance_id"],
@@ -612,6 +616,7 @@ async def auto_update_growth_stage(
 
         if new_stage:
             return MessageResponse(
+                success=True,
                 message=f"Plant stage automatically updated to: {new_stage}",
                 data={
                     "instance_id": instance_id,
@@ -621,6 +626,7 @@ async def auto_update_growth_stage(
             )
         else:
             return MessageResponse(
+                success=True,
                 message="Plant stage is already up to date",
                 data={
                     "instance_id": instance_id,
