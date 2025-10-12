@@ -102,7 +102,7 @@ Note on user_data persistence:
 ```
 
 ### 1.a Upsert User (Create/Update User & Profile)
-**Endpoint**: `POST /auth/users/upsert`
+**Endpoint**: `POST /tracking/user/upsert`
 
 **Request Body**:
 ```json

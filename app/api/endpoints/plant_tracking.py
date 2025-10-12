@@ -27,6 +27,8 @@ from app.services.plant_instance_service import PlantInstanceService
 from app.services.progress_tracking_service import ProgressTrackingService
 from app.services.plant_growth_service import PlantGrowthService
 from app.core.database import get_async_db
+from app.schemas.user import UserUpsertRequest
+from app.repositories.user_repository import UserRepository
 
 router = APIRouter(tags=["plant-tracking"])
 
@@ -629,3 +631,37 @@ async def auto_update_growth_stage(
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error auto-updating stage: {str(e)}")
+
+
+# ============================================================================
+# USER UPSERT ENDPOINT (for frontend to write/update user + profile)
+# ============================================================================
+
+@router.post("/tracking/user/upsert")
+async def upsert_user_from_tracking(
+    user_data: UserUpsertRequest,
+    db: AsyncSession = Depends(get_async_db)
+):
+    """
+    Create or update user and profile from unified user_data payload.
+
+    Only email is required; other fields are optional. Provided fields will be
+    persisted/updated; missing fields keep existing/default values.
+    """
+    try:
+        repo = UserRepository(db)
+        payload = {k: v for k, v in user_data.dict().items() if v is not None}
+        user = await repo.get_or_create_user_by_email(user_data.email, payload)
+
+        return {
+            "success": True,
+            "message": "User upserted successfully",
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "name": user.name,
+                "suburb_id": user.suburb_id
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error upserting user: {str(e)}")
