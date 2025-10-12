@@ -1,0 +1,256 @@
+{
+  "timestamp": "2025-10-12T00:34:42.213624",
+  "base_url": "http://localhost:8000/api/v1",
+  "total_tests": 21,
+  "passed": 15,
+  "failed": 6,
+  "test_results": [
+    {
+      "test_name": "Sarah - Start Carrot (Day 0)",
+      "status": "PASS",
+      "timestamp": "2025-10-12T00:32:26.329011",
+      "details": {
+        "instance_id": 1,
+        "expected": "Auto-create user, call Gemini API for plant data",
+        "response_time_ms": 21495.62,
+        "data": {
+          "instance_id": 1,
+          "plant_nickname": "Purple Beauty",
+          "start_date": "2025-10-12",
+          "expected_maturity_date": "2026-01-05",
+          "current_stage": "germination",
+          "message": "Plant tracking started successfully"
+        }
+      }
+    },
+    {
+      "test_name": "Sarah - Get Carrot Details",
+      "status": "FAIL",
+      "timestamp": "2025-10-12T00:32:28.336365",
+      "details": {
+        "status_code": 404,
+        "elapsed_ms": 4.82,
+        "success": false,
+        "data": {
+          "detail": "Not Found"
+        }
+      }
+    },
+    {
+      "test_name": "Sarah - Get Checklist",
+      "status": "FAIL",
+      "timestamp": "2025-10-12T00:32:28.574996",
+      "details": {
+        "status_code": 404,
+        "elapsed_ms": 238.01,
+        "success": false,
+        "data": {
+          "detail": "Not Found"
+        }
+      }
+    },
+    {
+      "test_name": "Sarah - Complete Checklist Items",
+      "status": "PASS",
+      "timestamp": "2025-10-12T00:32:30.336557",
+      "details": {
+        "items_completed": 3
+      }
+    },
+    {
+      "test_name": "Sarah - Get Setup Guide",
+      "status": "FAIL",
+      "timestamp": "2025-10-12T00:32:30.341379",
+      "details": {
+        "status_code": 404,
+        "elapsed_ms": 4.24,
+        "success": false,
+        "data": {
+          "detail": "Not Found"
+        }
+      }
+    },
+    {
+      "test_name": "Sarah - Add Cherry Tomato",
+      "status": "FAIL",
+      "timestamp": "2025-10-12T00:32:30.575827",
+      "details": {
+        "status_code": 422,
+        "elapsed_ms": 233.93,
+        "success": false,
+        "data": {
+          "detail": [
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "user_data",
+                "suburb_id"
+              ],
+              "msg": "Field required",
+              "input": {
+                "email": "sarah.johnson.test@plantopia.com",
+                "name": "Sarah Johnson"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "test_name": "Sarah - Add Basil",
+      "status": "FAIL",
+      "timestamp": "2025-10-12T00:32:32.582165",
+      "details": {
+        "status_code": 422,
+        "elapsed_ms": 4.86,
+        "success": false,
+        "data": {
+          "detail": [
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "user_data",
+                "suburb_id"
+              ],
+              "msg": "Field required",
+              "input": {
+                "email": "sarah.johnson.test@plantopia.com",
+                "name": "Sarah Johnson"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "test_name": "Sarah - Get All Plants",
+      "status": "PASS",
+      "timestamp": "2025-10-12T00:32:41.330543",
+      "details": {
+        "total_count": 1,
+        "active_count": 1,
+        "response_time_ms": 6746.1
+      }
+    },
+    {
+      "test_name": "Mike - Start Carrot (Data Reuse)",
+      "status": "PASS",
+      "timestamp": "2025-10-12T00:32:50.837969",
+      "details": {
+        "instance_id": 2,
+        "data_reused": false,
+        "response_time_ms": 9507.11,
+        "expected": "Reuse plant_growth_data from Sarah, no Gemini call"
+      }
+    },
+    {
+      "test_name": "Mike - Add Multiple Plants",
+      "status": "PASS",
+      "timestamp": "2025-10-12T00:32:58.864053",
+      "details": {
+        "plants_added": 3
+      }
+    },
+    {
+      "test_name": "Mike - Get All Plants",
+      "status": "PASS",
+      "timestamp": "2025-10-12T00:33:05.299590",
+      "details": {
+        "total_count": 1,
+        "expected_count": 4,
+        "response_time_ms": 6434.95
+      }
+    },
+    {
+      "test_name": "Sarah - Start General Chat",
+      "status": "PASS",
+      "timestamp": "2025-10-12T00:33:10.111420",
+      "details": {
+        "chat_id": 8,
+        "response_time_ms": 4811.36
+      }
+    },
+    {
+      "test_name": "Sarah - Send Chat Messages",
+      "status": "PASS",
+      "timestamp": "2025-10-12T00:33:48.384033",
+      "details": {
+        "messages_sent": 2
+      }
+    },
+    {
+      "test_name": "Sarah - Get Chat History",
+      "status": "PASS",
+      "timestamp": "2025-10-12T00:33:52.140442",
+      "details": {
+        "message_count": 4,
+        "response_time_ms": 3756.1
+      }
+    },
+    {
+      "test_name": "Mike - Start Plant Chat",
+      "status": "PASS",
+      "timestamp": "2025-10-12T00:33:59.389418",
+      "details": {
+        "chat_id": 9,
+        "instance_id": 2,
+        "response_time_ms": 7248.72
+      }
+    },
+    {
+      "test_name": "Mike - Send Plant Chat Message",
+      "status": "PASS",
+      "timestamp": "2025-10-12T00:34:19.671233",
+      "details": {
+        "response_time_ms": 18277.87
+      }
+    },
+    {
+      "test_name": "Sarah - Add Plant Favorites",
+      "status": "PASS",
+      "timestamp": "2025-10-12T00:34:33.698323",
+      "details": {
+        "favorites_added": 2
+      }
+    },
+    {
+      "test_name": "Sarah - Get Plant Favorites",
+      "status": "PASS",
+      "timestamp": "2025-10-12T00:34:36.466117",
+      "details": {
+        "favorite_count": 2,
+        "response_time_ms": 2766.32
+      }
+    },
+    {
+      "test_name": "Get Guide Categories",
+      "status": "PASS",
+      "timestamp": "2025-10-12T00:34:36.712210",
+      "details": {
+        "category_count": 10,
+        "response_time_ms": 244.88
+      }
+    },
+    {
+      "test_name": "Sarah - Browse and Favorite Guide",
+      "status": "PASS",
+      "timestamp": "2025-10-12T00:34:41.961401",
+      "details": {}
+    },
+    {
+      "test_name": "Sarah - Get Guide Favorites",
+      "status": "FAIL",
+      "timestamp": "2025-10-12T00:34:42.005434",
+      "details": {
+        "status_code": 404,
+        "elapsed_ms": 43.76,
+        "success": false,
+        "data": {
+          "detail": "Guide 'user' not found in category 'favorites'"
+        }
+      }
+    }
+  ]
+}

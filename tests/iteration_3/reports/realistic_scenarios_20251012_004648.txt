@@ -1,0 +1,81 @@
+================================================================================
+REALISTIC USER SCENARIOS TEST SUMMARY
+================================================================================
+
+Timestamp: 2025-10-12T00:46:48.805909
+Base URL: http://localhost:8000/api/v1
+
+Total Tests: 20
+Passed: 10
+Failed: 10
+Success Rate: 50.0%
+
+================================================================================
+TEST RESULTS
+================================================================================
+
+[PASS] Sarah - Start Carrot (Day 0)
+  Timestamp: 2025-10-12T00:45:15.464745
+  Response Time: 14224.74ms
+
+[FAIL] Sarah - Get Carrot Details
+  Timestamp: 2025-10-12T00:45:17.490740
+
+[FAIL] Sarah - Get Checklist
+  Timestamp: 2025-10-12T00:45:17.736368
+
+[PASS] Sarah - Complete Checklist Items
+  Timestamp: 2025-10-12T00:45:19.496875
+
+[FAIL] Sarah - Get Setup Guide
+  Timestamp: 2025-10-12T00:45:19.501188
+
+[FAIL] Sarah - Add Cherry Tomato
+  Timestamp: 2025-10-12T00:45:19.736462
+
+[FAIL] Sarah - Add Basil
+  Timestamp: 2025-10-12T00:45:21.745855
+
+[PASS] Sarah - Get All Plants
+  Timestamp: 2025-10-12T00:45:30.747755
+  Response Time: 6999.23ms
+
+[PASS] Mike - Start Carrot (Data Reuse)
+  Timestamp: 2025-10-12T00:45:44.756382
+  Response Time: 14008.13ms
+
+[PASS] Mike - Add Multiple Plants
+  Timestamp: 2025-10-12T00:45:53.014146
+
+[PASS] Mike - Get All Plants
+  Timestamp: 2025-10-12T00:46:00.271173
+  Response Time: 7255.04ms
+
+[PASS] Sarah - Start General Chat
+  Timestamp: 2025-10-12T00:46:04.803331
+  Response Time: 4531.77ms
+
+[PASS] Sarah - Send Chat Messages
+  Timestamp: 2025-10-12T00:46:44.568022
+
+[FAIL] Sarah - Get Chat History
+  Timestamp: 2025-10-12T00:46:44.569728
+
+[FAIL] Mike - Start Plant Chat
+  Timestamp: 2025-10-12T00:46:44.791773
+
+[PASS] Sarah - Add Plant Favorites
+  Timestamp: 2025-10-12T00:46:48.798016
+
+[FAIL] Sarah - Get Plant Favorites
+  Timestamp: 2025-10-12T00:46:48.800204
+
+[FAIL] Get Guide Categories
+  Timestamp: 2025-10-12T00:46:48.801677
+
+[PASS] Sarah - Browse and Favorite Guide
+  Timestamp: 2025-10-12T00:46:48.802842
+
+[FAIL] Sarah - Get Guide Favorites
+  Timestamp: 2025-10-12T00:46:48.804319
+

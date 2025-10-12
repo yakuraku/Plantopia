@@ -1,0 +1,121 @@
+{
+  "workflows": {
+    "New User Complete Journey": {
+      "steps": [
+        {
+          "workflow": "New User Complete Journey",
+          "step": "Start Tracking",
+          "status": "FAIL",
+          "timestamp": "2025-10-11T07:29:15.025679",
+          "details": {
+            "error": "{\"detail\":\"Error starting plant tracking: 'StartTrackingRequest' object has no attribute 'user_id'\"}"
+          }
+        }
+      ],
+      "passed": 0,
+      "failed": 1
+    },
+    "Progress Tracking Through Stages": {
+      "steps": [
+        {
+          "workflow": "Progress Tracking Through Stages",
+          "step": "Start Tracking",
+          "status": "FAIL",
+          "timestamp": "2025-10-11T07:29:16.033867",
+          "details": {
+            "error": "{\"detail\":\"Error starting plant tracking: 'StartTrackingRequest' object has no attribute 'user_id'\"}"
+          }
+        }
+      ],
+      "passed": 0,
+      "failed": 1
+    },
+    "Multi-Plant Management": {
+      "steps": [
+        {
+          "workflow": "Multi-Plant Management",
+          "step": "Start Multiple Plants",
+          "status": "PASS",
+          "timestamp": "2025-10-11T07:29:18.774717",
+          "details": {
+            "plants_started": 0
+          }
+        },
+        {
+          "workflow": "Multi-Plant Management",
+          "step": "Get Plant List",
+          "status": "PASS",
+          "timestamp": "2025-10-11T07:29:21.535034",
+          "details": {
+            "total_count": 0,
+            "active_count": 0
+          }
+        },
+        {
+          "workflow": "Multi-Plant Management",
+          "step": "Compare Progress",
+          "status": "PASS",
+          "timestamp": "2025-10-11T07:29:21.535079",
+          "details": {
+            "plants_compared": 0
+          }
+        }
+      ],
+      "passed": 3,
+      "failed": 0
+    }
+  },
+  "test_artifacts": {
+    "instances": [],
+    "chats": [],
+    "user_id": 1
+  },
+  "all_results": [
+    {
+      "workflow": "New User Complete Journey",
+      "step": "Start Tracking",
+      "status": "FAIL",
+      "timestamp": "2025-10-11T07:29:15.025679",
+      "details": {
+        "error": "{\"detail\":\"Error starting plant tracking: 'StartTrackingRequest' object has no attribute 'user_id'\"}"
+      }
+    },
+    {
+      "workflow": "Progress Tracking Through Stages",
+      "step": "Start Tracking",
+      "status": "FAIL",
+      "timestamp": "2025-10-11T07:29:16.033867",
+      "details": {
+        "error": "{\"detail\":\"Error starting plant tracking: 'StartTrackingRequest' object has no attribute 'user_id'\"}"
+      }
+    },
+    {
+      "workflow": "Multi-Plant Management",
+      "step": "Start Multiple Plants",
+      "status": "PASS",
+      "timestamp": "2025-10-11T07:29:18.774717",
+      "details": {
+        "plants_started": 0
+      }
+    },
+    {
+      "workflow": "Multi-Plant Management",
+      "step": "Get Plant List",
+      "status": "PASS",
+      "timestamp": "2025-10-11T07:29:21.535034",
+      "details": {
+        "total_count": 0,
+        "active_count": 0
+      }
+    },
+    {
+      "workflow": "Multi-Plant Management",
+      "step": "Compare Progress",
+      "status": "PASS",
+      "timestamp": "2025-10-11T07:29:21.535079",
+      "details": {
+        "plants_compared": 0
+      }
+    }
+  ]
+}

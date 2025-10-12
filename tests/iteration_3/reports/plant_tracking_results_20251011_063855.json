@@ -1,0 +1,28 @@
+{
+  "total_tests": 2,
+  "passed": 0,
+  "failed": 2,
+  "pass_rate": 0.0,
+  "created_instances": [],
+  "results": [
+    {
+      "test_name": "Start Plant Tracking - Success",
+      "status": "FAIL",
+      "timestamp": "2025-10-11T06:38:55.035410",
+      "details": {
+        "status_code": 500,
+        "error": "{\"detail\":\"Error starting plant tracking: 'StartTrackingRequest' object has no attribute 'user_id'\"}"
+      }
+    },
+    {
+      "test_name": "Start Plant Tracking - Invalid Plant ID",
+      "status": "FAIL",
+      "timestamp": "2025-10-11T06:38:55.041037",
+      "details": {
+        "status_code": 500,
+        "expected": 404,
+        "error": "Should return 404 for non-existent plant"
+      }
+    }
+  ]
+}

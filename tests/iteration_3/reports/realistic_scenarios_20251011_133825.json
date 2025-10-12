@@ -1,0 +1,221 @@
+{
+  "timestamp": "2025-10-11T13:38:25.823196",
+  "base_url": "http://localhost:8000/api/v1",
+  "total_tests": 13,
+  "passed": 3,
+  "failed": 10,
+  "test_results": [
+    {
+      "test_name": "Sarah - Start Carrot",
+      "status": "FAIL",
+      "timestamp": "2025-10-11T13:38:05.858104",
+      "details": {
+        "status_code": 500,
+        "elapsed_ms": 42.76,
+        "success": false,
+        "data": {
+          "detail": "Error starting plant tracking: 'StartTrackingRequest' object has no attribute 'user_id'"
+        }
+      }
+    },
+    {
+      "test_name": "Sarah - Add Cherry Tomato",
+      "status": "FAIL",
+      "timestamp": "2025-10-11T13:38:07.864264",
+      "details": {
+        "status_code": 422,
+        "elapsed_ms": 3.82,
+        "success": false,
+        "data": {
+          "detail": [
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "user_data",
+                "suburb_id"
+              ],
+              "msg": "Field required",
+              "input": {
+                "email": "sarah.johnson.test@plantopia.com",
+                "name": "Sarah Johnson"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "test_name": "Sarah - Add Basil",
+      "status": "FAIL",
+      "timestamp": "2025-10-11T13:38:10.075972",
+      "details": {
+        "status_code": 422,
+        "elapsed_ms": 209.19,
+        "success": false,
+        "data": {
+          "detail": [
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "user_data",
+                "suburb_id"
+              ],
+              "msg": "Field required",
+              "input": {
+                "email": "sarah.johnson.test@plantopia.com",
+                "name": "Sarah Johnson"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "test_name": "Sarah - Get All Plants",
+      "status": "FAIL",
+      "timestamp": "2025-10-11T13:38:12.084561",
+      "details": {
+        "status_code": 422,
+        "elapsed_ms": 6.21,
+        "success": false,
+        "data": {
+          "detail": [
+            {
+              "type": "int_parsing",
+              "loc": [
+                "path",
+                "user_id"
+              ],
+              "msg": "Input should be a valid integer, unable to parse string as an integer",
+              "input": "sarah.johnson.test@plantopia.com"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "test_name": "Mike - Start Carrot (Data Reuse)",
+      "status": "FAIL",
+      "timestamp": "2025-10-11T13:38:12.323575",
+      "details": {
+        "status_code": 500,
+        "elapsed_ms": 238.35,
+        "success": false,
+        "data": {
+          "detail": "Error starting plant tracking: 'StartTrackingRequest' object has no attribute 'user_id'"
+        }
+      }
+    },
+    {
+      "test_name": "Mike - Add Multiple Plants",
+      "status": "PASS",
+      "timestamp": "2025-10-11T13:38:20.588008",
+      "details": {
+        "plants_added": 3
+      }
+    },
+    {
+      "test_name": "Mike - Get All Plants",
+      "status": "FAIL",
+      "timestamp": "2025-10-11T13:38:20.594298",
+      "details": {
+        "status_code": 422,
+        "elapsed_ms": 5.4,
+        "success": false,
+        "data": {
+          "detail": [
+            {
+              "type": "int_parsing",
+              "loc": [
+                "path",
+                "user_id"
+              ],
+              "msg": "Input should be a valid integer, unable to parse string as an integer",
+              "input": "mike.chen.test@plantopia.com"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "test_name": "Sarah - Start General Chat",
+      "status": "FAIL",
+      "timestamp": "2025-10-11T13:38:20.823528",
+      "details": {
+        "status_code": 422,
+        "elapsed_ms": 228.62,
+        "success": false,
+        "data": {
+          "detail": [
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "user_id"
+              ],
+              "msg": "Field required",
+              "input": {
+                "email": "sarah.johnson.test@plantopia.com"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "test_name": "Sarah - Add Plant Favorites",
+      "status": "PASS",
+      "timestamp": "2025-10-11T13:38:24.836969",
+      "details": {
+        "favorites_added": 2
+      }
+    },
+    {
+      "test_name": "Sarah - Get Plant Favorites",
+      "status": "FAIL",
+      "timestamp": "2025-10-11T13:38:24.841143",
+      "details": {
+        "status_code": 403,
+        "elapsed_ms": 3.95,
+        "success": false,
+        "data": {
+          "detail": "Not authenticated"
+        }
+      }
+    },
+    {
+      "test_name": "Get Guide Categories",
+      "status": "FAIL",
+      "timestamp": "2025-10-11T13:38:25.074010",
+      "details": {
+        "status_code": 404,
+        "elapsed_ms": 232.4,
+        "success": false,
+        "data": {
+          "detail": "Not Found"
+        }
+      }
+    },
+    {
+      "test_name": "Sarah - Browse and Favorite Guide",
+      "status": "PASS",
+      "timestamp": "2025-10-11T13:38:25.323356",
+      "details": {}
+    },
+    {
+      "test_name": "Sarah - Get Guide Favorites",
+      "status": "FAIL",
+      "timestamp": "2025-10-11T13:38:25.573593",
+      "details": {
+        "status_code": 404,
+        "elapsed_ms": 249.12,
+        "success": false,
+        "data": {
+          "detail": "Not Found"
+        }
+      }
+    }
+  ]
+}

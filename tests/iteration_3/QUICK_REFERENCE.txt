@@ -1,0 +1,162 @@
+================================================================================
+ITERATION 3 TESTING - QUICK REFERENCE CARD
+================================================================================
+
+CURRENT STATUS: Schema Fix Deployed - Awaiting Test Verification
+COMMIT: a08cda9 - "fix: add user_id field to StartTrackingRequest schema"
+
+================================================================================
+IMMEDIATE ACTIONS
+================================================================================
+
+1. CHECK DEPLOYMENT
+   URL: https://github.com/yakuraku/Plantopia/actions
+   Wait for: Green checkmark ✓ on "Deploy to GCP" workflow
+
+2. SSH TO VM & RUN TESTS
+   ssh ykur@YOUR_VM_IP
+   sudo bash /opt/plantopia/Plantopia/tests/iteration_3/run_tests_on_vm.sh
+
+   EXPECTED: 10/11 tests pass (90.91%) - Up from 6/11 (54.55%)
+
+3. DOWNLOAD REPORTS (FileZilla)
+   Remote: /opt/plantopia/Plantopia/tests/iteration_3/reports/
+   Local:  D:\MAIN_PROJECT\Plantopia\tests\iteration_3\reports\
+
+4. CREATE TEST USER (For 100%)
+   On VM:
+   sudo -u postgres psql plantopia_db -f \
+       /opt/plantopia/Plantopia/tests/iteration_3/create_test_user.sql
+
+5. RUN TESTS AGAIN
+   sudo bash /opt/plantopia/Plantopia/tests/iteration_3/run_tests_on_vm.sh
+
+   EXPECTED: 11/11 tests pass (100%)
+
+================================================================================
+WHAT WAS FIXED
+================================================================================
+
+FIX #1 - Schema Mismatch (DONE)
+  File:   app/schemas/plant_tracking.py
+  Change: Added "user_id: int" field to StartTrackingRequest (line 27)
+  Impact: Fixes 4 test failures (2 tracking + 2 workflow)
+
+FIX #2 - Missing Test User (PENDING)
+  File:   tests/iteration_3/create_test_user.sql
+  Action: Creates user_id=1 for chat tests
+  Impact: Fixes 1 test failure (chat)
+
+================================================================================
+TEST RESULTS PROGRESSION
+================================================================================
+
+INITIAL (Before Fixes):
+  Pass Rate: 54.55% (6/11 tests)
+  - Plant Tracking: 0/2 (0%)
+  - Plant Chat:     3/4 (75%)
+  - Workflows:      3/5 (60%)
+
+AFTER SCHEMA FIX (Expected):
+  Pass Rate: 90.91% (10/11 tests)
+  - Plant Tracking: 2/2 (100%) ✓
+  - Plant Chat:     3/4 (75%)
+  - Workflows:      5/5 (100%) ✓
+
+AFTER USER FIX (Target):
+  Pass Rate: 100% (11/11 tests)
+  - Plant Tracking: 2/2 (100%) ✓
+  - Plant Chat:     4/4 (100%) ✓
+  - Workflows:      5/5 (100%) ✓
+
+================================================================================
+KEY COMMANDS
+================================================================================
+
+On VM:
+  # Run tests
+  sudo bash /opt/plantopia/Plantopia/tests/iteration_3/run_tests_on_vm.sh
+
+  # Create test user
+  sudo -u postgres psql plantopia_db -f /opt/plantopia/Plantopia/tests/iteration_3/create_test_user.sql
+
+  # View backend logs
+  sudo journalctl -u supervisor -n 100
+
+  # Restart backend
+  sudo supervisorctl restart plantopia-backend
+
+  # Check schema deployed
+  cat /opt/plantopia/Plantopia/app/schemas/plant_tracking.py | grep -A 5 "class StartTrackingRequest"
+
+  # Cleanup test data (after testing)
+  python /opt/plantopia/Plantopia/tests/iteration_3/cleanup_test_data.py
+
+================================================================================
+FILE LOCATIONS
+================================================================================
+
+Local PC:
+  Test Reports:   D:\MAIN_PROJECT\Plantopia\tests\iteration_3\reports\
+  Primary Report: D:\MAIN_PROJECT\Plantopia\tests\iteration_3\IT3_PRIMARY_TEST_REPORT.md
+  Full Summary:   D:\MAIN_PROJECT\Plantopia\tests\iteration_3\TESTING_SUMMARY.md
+  Next Steps:     D:\MAIN_PROJECT\Plantopia\tests\iteration_3\NEXT_STEPS.md
+
+VM:
+  Test Scripts:   /opt/plantopia/Plantopia/tests/iteration_3/
+  Test Reports:   /opt/plantopia/Plantopia/tests/iteration_3/reports/
+  Backend Code:   /opt/plantopia/Plantopia/app/
+  Schemas:        /opt/plantopia/Plantopia/app/schemas/plant_tracking.py
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+Tests still fail after schema fix:
+  1. Check deployment: git log -1 (on VM)
+  2. Check backend logs: sudo journalctl -u supervisor -n 100
+  3. Restart backend: sudo supervisorctl restart plantopia-backend
+  4. Verify schema: cat app/schemas/plant_tracking.py | grep user_id
+
+Deployment fails:
+  1. Check GitHub Actions logs
+  2. Check VM permissions: ls -la /opt/plantopia/Plantopia
+  3. Check supervisor: sudo supervisorctl status
+
+User creation fails:
+  1. Check table exists: sudo -u postgres psql plantopia_db -c "\dt users"
+  2. Check table structure: sudo -u postgres psql plantopia_db -c "\d users"
+  3. Find existing user: sudo -u postgres psql plantopia_db -c "SELECT id, email FROM users LIMIT 5"
+
+================================================================================
+SUCCESS INDICATORS
+================================================================================
+
+You'll know it's working when you see:
+
+  ITERATION 3 - COMPREHENSIVE TEST SUMMARY
+  ======================================================================
+  OVERALL SUMMARY
+  ======================================================================
+  Total Tests: 11
+  Passed: 11
+  Failed: 0
+  Pass Rate: 100.00%
+
+================================================================================
+TIMELINE
+================================================================================
+
+  NOW:        Monitor GitHub Actions deployment
+  +5-10 min:  Run tests on VM (expect 10/11 pass)
+  +15 min:    Create test user
+  +20 min:    Run tests again (expect 11/11 pass)
+  +25 min:    Download reports & update team documentation
+
+================================================================================
+
+GitHub Actions: https://github.com/yakuraku/Plantopia/actions
+Last Commit:    a08cda9 - fix: add user_id field to StartTrackingRequest schema
+Status:         Awaiting deployment verification
+
+================================================================================

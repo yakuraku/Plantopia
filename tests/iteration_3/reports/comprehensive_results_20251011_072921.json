@@ -1,0 +1,39 @@
+{
+  "start_time": "2025-10-11T07:29:02.984884",
+  "end_time": "2025-10-11T07:29:21.535705",
+  "duration_seconds": 18.54,
+  "server_status": "running",
+  "modules": {
+    "plant_tracking": {
+      "status": "completed",
+      "duration_seconds": 0.25,
+      "total_tests": 2,
+      "passed": 0,
+      "failed": 2,
+      "pass_rate": 0.0
+    },
+    "plant_chat": {
+      "status": "completed",
+      "duration_seconds": 7.77,
+      "total_tests": 4,
+      "passed": 3,
+      "failed": 1,
+      "pass_rate": 75.0
+    },
+    "workflows": {
+      "status": "completed",
+      "duration_seconds": 6.52,
+      "total_workflows": 3,
+      "total_steps": 5,
+      "passed_steps": 3,
+      "failed_steps": 2,
+      "pass_rate": 60.0
+    }
+  },
+  "summary": {
+    "total_tests": 11,
+    "total_passed": 6,
+    "total_failed": 5,
+    "pass_rate": 54.54545454545454
+  }
+}

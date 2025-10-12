@@ -1,0 +1,89 @@
+================================================================================
+REALISTIC USER SCENARIOS TEST SUMMARY
+================================================================================
+
+Timestamp: 2025-10-12T00:34:42.214594
+Base URL: http://localhost:8000/api/v1
+
+Total Tests: 21
+Passed: 15
+Failed: 6
+Success Rate: 71.43%
+
+================================================================================
+TEST RESULTS
+================================================================================
+
+[PASS] Sarah - Start Carrot (Day 0)
+  Timestamp: 2025-10-12T00:32:26.329011
+  Response Time: 21495.62ms
+
+[FAIL] Sarah - Get Carrot Details
+  Timestamp: 2025-10-12T00:32:28.336365
+
+[FAIL] Sarah - Get Checklist
+  Timestamp: 2025-10-12T00:32:28.574996
+
+[PASS] Sarah - Complete Checklist Items
+  Timestamp: 2025-10-12T00:32:30.336557
+
+[FAIL] Sarah - Get Setup Guide
+  Timestamp: 2025-10-12T00:32:30.341379
+
+[FAIL] Sarah - Add Cherry Tomato
+  Timestamp: 2025-10-12T00:32:30.575827
+
+[FAIL] Sarah - Add Basil
+  Timestamp: 2025-10-12T00:32:32.582165
+
+[PASS] Sarah - Get All Plants
+  Timestamp: 2025-10-12T00:32:41.330543
+  Response Time: 6746.1ms
+
+[PASS] Mike - Start Carrot (Data Reuse)
+  Timestamp: 2025-10-12T00:32:50.837969
+  Response Time: 9507.11ms
+
+[PASS] Mike - Add Multiple Plants
+  Timestamp: 2025-10-12T00:32:58.864053
+
+[PASS] Mike - Get All Plants
+  Timestamp: 2025-10-12T00:33:05.299590
+  Response Time: 6434.95ms
+
+[PASS] Sarah - Start General Chat
+  Timestamp: 2025-10-12T00:33:10.111420
+  Response Time: 4811.36ms
+
+[PASS] Sarah - Send Chat Messages
+  Timestamp: 2025-10-12T00:33:48.384033
+
+[PASS] Sarah - Get Chat History
+  Timestamp: 2025-10-12T00:33:52.140442
+  Response Time: 3756.1ms
+
+[PASS] Mike - Start Plant Chat
+  Timestamp: 2025-10-12T00:33:59.389418
+  Response Time: 7248.72ms
+
+[PASS] Mike - Send Plant Chat Message
+  Timestamp: 2025-10-12T00:34:19.671233
+  Response Time: 18277.87ms
+
+[PASS] Sarah - Add Plant Favorites
+  Timestamp: 2025-10-12T00:34:33.698323
+
+[PASS] Sarah - Get Plant Favorites
+  Timestamp: 2025-10-12T00:34:36.466117
+  Response Time: 2766.32ms
+
+[PASS] Get Guide Categories
+  Timestamp: 2025-10-12T00:34:36.712210
+  Response Time: 244.88ms
+
+[PASS] Sarah - Browse and Favorite Guide
+  Timestamp: 2025-10-12T00:34:41.961401
+
+[FAIL] Sarah - Get Guide Favorites
+  Timestamp: 2025-10-12T00:34:42.005434
+

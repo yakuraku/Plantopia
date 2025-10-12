@@ -139,8 +139,8 @@ class PlantopiaTestRunner:
             self.log("❌ Skipping - no instance_id from previous test", "ERROR")
             return
 
-        self.log(f"GET /tracking/{instance_id}/details")
-        result = self.make_request("GET", f"/tracking/{instance_id}/details")
+        self.log(f"GET /tracking/instance/{instance_id}")
+        result = self.make_request("GET", f"/tracking/instance/{instance_id}")
 
         if result['success']:
             data = result['data']
@@ -169,30 +169,31 @@ class PlantopiaTestRunner:
         self.log("\n" + "-" * 80)
         self.log("Testing: Get requirements checklist")
 
-        instance_id = self.plant_instances.get('sarah_carrot')
-        if not instance_id:
-            self.log("❌ Skipping - no instance_id", "ERROR")
-            return
+        # Use plant_id=1 for Carrot
+        plant_id = 1
 
-        self.log(f"GET /tracking/{instance_id}/checklist")
-        result = self.make_request("GET", f"/tracking/{instance_id}/checklist")
+        self.log(f"GET /tracking/requirements/{plant_id}")
+        result = self.make_request("GET", f"/tracking/requirements/{plant_id}")
 
         if result['success']:
             data = result['data']
-            checklist = data.get('checklist', [])
+            requirements = data.get('requirements', [])
             self.log("✅ SUCCESS: Got requirements checklist", "SUCCESS")
-            self.log(f"  Total Items: {len(checklist)}")
+            self.log(f"  Total Categories: {len(requirements)}")
 
             # Show first few items
-            for item in checklist[:3]:
-                self.log(f"  - {item.get('item_key')}: {item.get('description')}")
+            for cat in requirements[:2]:
+                self.log(f"  Category: {cat.get('category')}")
+                items = cat.get('items', [])
+                for item in items[:2]:
+                    self.log(f"    - {item.get('item')}: {item.get('quantity')}")
 
             self.record_test(
                 "Sarah - Get Checklist",
                 "PASS",
                 {
-                    "instance_id": instance_id,
-                    "total_items": len(checklist),
+                    "plant_id": plant_id,
+                    "total_categories": len(requirements),
                     "response_time_ms": result['elapsed_ms']
                 }
             )
@@ -243,13 +244,11 @@ class PlantopiaTestRunner:
         self.log("\n" + "-" * 80)
         self.log("Testing: Get setup instructions")
 
-        instance_id = self.plant_instances.get('sarah_carrot')
-        if not instance_id:
-            self.log("❌ Skipping - no instance_id", "ERROR")
-            return
+        # Use plant_id=1 for Carrot
+        plant_id = 1
 
-        self.log(f"GET /tracking/{instance_id}/setup-guide")
-        result = self.make_request("GET", f"/tracking/{instance_id}/setup-guide")
+        self.log(f"GET /tracking/instructions/{plant_id}")
+        result = self.make_request("GET", f"/tracking/instructions/{plant_id}")
 
         if result['success']:
             data = result['data']
@@ -261,7 +260,7 @@ class PlantopiaTestRunner:
                 "Sarah - Get Setup Guide",
                 "PASS",
                 {
-                    "instance_id": instance_id,
+                    "plant_id": plant_id,
                     "total_steps": len(instructions),
                     "response_time_ms": result['elapsed_ms']
                 }

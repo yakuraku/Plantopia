@@ -14,12 +14,12 @@ from datetime import date, datetime
 class UserDataInput(BaseModel):
     """User data input from frontend for API context building"""
     email: str = Field(..., description="User email for identification")
-    name: str = Field(..., description="User display name")
-    suburb_id: int = Field(..., description="Location ID for climate data")
-    experience_level: str = Field(default="beginner", description="Gardening expertise level")
-    garden_type: str = Field(default="backyard", description="Growing environment type")
-    available_space: float = Field(default=10.0, description="Available space in square meters")
-    climate_goal: str = Field(default="general gardening", description="Environmental preferences")
+    name: Optional[str] = Field(None, description="User display name")
+    suburb_id: Optional[int] = Field(None, description="Location ID for climate data")
+    experience_level: Optional[str] = Field(default="beginner", description="Gardening expertise level")
+    garden_type: Optional[str] = Field(default="backyard", description="Growing environment type")
+    available_space: Optional[float] = Field(default=10.0, description="Available space in square meters")
+    climate_goal: Optional[str] = Field(default="general gardening", description="Environmental preferences")
 
 
 class StartTrackingRequest(BaseModel):

@@ -136,7 +136,8 @@ class PlantInstanceService:
         # Build response with summary data
         plants_summary = []
         for instance in instances:
-            days_elapsed = await self.repository.calculate_days_elapsed(instance.id)
+            # Calculate days_elapsed directly from instance data (avoid extra DB query)
+            days_elapsed = (date.today() - instance.start_date).days
             progress_pct = await self.calculate_progress_percentage(instance)
 
             plants_summary.append({

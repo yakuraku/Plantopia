@@ -1,0 +1,45 @@
+{
+  "total_tests": 4,
+  "passed": 3,
+  "failed": 1,
+  "pass_rate": 75.0,
+  "created_chats": [],
+  "results": [
+    {
+      "test_name": "Start General Chat - Success",
+      "status": "FAIL",
+      "timestamp": "2025-10-11T07:29:07.182096",
+      "details": {
+        "status_code": 500,
+        "error": "{\"detail\":\"Error starting general chat: (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.ForeignKeyViolationError'>: insert or update on table \\\"user_plant_chats\\\" violates foreign key constraint \\\"user_plant_chats_user_id_fkey\\\"\\nDETAIL:  Key (user_id)=(1) is not present in table \\\"users\\\".\\n[SQL: INSERT INTO user_plant_chats (user_id, user_plant_instance_id, chat_type, total_tokens, message_count, is_active, created_at, last_message_at, expires_at) VALUES ($1::INTEGER, $2::INTEGER, $3::VARCHAR, $4::INTEGER, $5::INTEGER, $6::BOOLEAN, $7::TIMESTAMP WITHOUT TIME ZONE, $8::TIMESTAMP WITHOUT TIME ZONE, $9::TIMESTAMP WITHOUT TIME ZONE) RETURNING user_plant_chats.id]\\n[parameters: (1, None, 'general', 0, 0, True, datetime.datetime(2025, 10, 11, 7, 29, 5, 249027), datetime.datetime(2025, 10, 11, 7, 29, 5, 249027), datetime.datetime(2025, 10, 11, 13, 29, 5, 249027))]\\n(Background on this error at: https://sqlalche.me/e/20/gkpj)\"}"
+      }
+    },
+    {
+      "test_name": "Send Message - Invalid Chat ID",
+      "status": "PASS",
+      "timestamp": "2025-10-11T07:29:09.014514",
+      "details": {
+        "status_code": 404,
+        "expected": "404 Not Found"
+      }
+    },
+    {
+      "test_name": "Start Plant Chat - Invalid Instance",
+      "status": "PASS",
+      "timestamp": "2025-10-11T07:29:11.014427",
+      "details": {
+        "status_code": 404,
+        "expected": "404 Not Found"
+      }
+    },
+    {
+      "test_name": "Get Chat History - Not Found",
+      "status": "PASS",
+      "timestamp": "2025-10-11T07:29:13.015263",
+      "details": {
+        "status_code": 404,
+        "expected": "404 Not Found"
+      }
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+================================================================================
+REALISTIC USER SCENARIOS TEST SUMMARY
+================================================================================
+
+Timestamp: 2025-10-11T13:38:25.824784
+Base URL: http://localhost:8000/api/v1
+
+Total Tests: 13
+Passed: 3
+Failed: 10
+Success Rate: 23.08%
+
+================================================================================
+TEST RESULTS
+================================================================================
+
+[FAIL] Sarah - Start Carrot
+  Timestamp: 2025-10-11T13:38:05.858104
+
+[FAIL] Sarah - Add Cherry Tomato
+  Timestamp: 2025-10-11T13:38:07.864264
+
+[FAIL] Sarah - Add Basil
+  Timestamp: 2025-10-11T13:38:10.075972
+
+[FAIL] Sarah - Get All Plants
+  Timestamp: 2025-10-11T13:38:12.084561
+
+[FAIL] Mike - Start Carrot (Data Reuse)
+  Timestamp: 2025-10-11T13:38:12.323575
+
+[PASS] Mike - Add Multiple Plants
+  Timestamp: 2025-10-11T13:38:20.588008
+
+[FAIL] Mike - Get All Plants
+  Timestamp: 2025-10-11T13:38:20.594298
+
+[FAIL] Sarah - Start General Chat
+  Timestamp: 2025-10-11T13:38:20.823528
+
+[PASS] Sarah - Add Plant Favorites
+  Timestamp: 2025-10-11T13:38:24.836969
+
+[FAIL] Sarah - Get Plant Favorites
+  Timestamp: 2025-10-11T13:38:24.841143
+
+[FAIL] Get Guide Categories
+  Timestamp: 2025-10-11T13:38:25.074010
+
+[PASS] Sarah - Browse and Favorite Guide
+  Timestamp: 2025-10-11T13:38:25.323356
+
+[FAIL] Sarah - Get Guide Favorites
+  Timestamp: 2025-10-11T13:38:25.573593
+

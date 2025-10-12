@@ -1,0 +1,248 @@
+{
+  "timestamp": "2025-10-12T00:46:48.805184",
+  "base_url": "http://localhost:8000/api/v1",
+  "total_tests": 20,
+  "passed": 10,
+  "failed": 10,
+  "test_results": [
+    {
+      "test_name": "Sarah - Start Carrot (Day 0)",
+      "status": "PASS",
+      "timestamp": "2025-10-12T00:45:15.464745",
+      "details": {
+        "instance_id": 4,
+        "expected": "Auto-create user, call Gemini API for plant data",
+        "response_time_ms": 14224.74,
+        "data": {
+          "instance_id": 4,
+          "plant_nickname": "Purple Beauty",
+          "start_date": "2025-10-12",
+          "expected_maturity_date": "2026-01-05",
+          "current_stage": "germination",
+          "message": "Plant tracking started successfully"
+        }
+      }
+    },
+    {
+      "test_name": "Sarah - Get Carrot Details",
+      "status": "FAIL",
+      "timestamp": "2025-10-12T00:45:17.490740",
+      "details": {
+        "status_code": 404,
+        "elapsed_ms": 4.41,
+        "success": false,
+        "data": {
+          "detail": "Not Found"
+        }
+      }
+    },
+    {
+      "test_name": "Sarah - Get Checklist",
+      "status": "FAIL",
+      "timestamp": "2025-10-12T00:45:17.736368",
+      "details": {
+        "status_code": 404,
+        "elapsed_ms": 245.39,
+        "success": false,
+        "data": {
+          "detail": "Not Found"
+        }
+      }
+    },
+    {
+      "test_name": "Sarah - Complete Checklist Items",
+      "status": "PASS",
+      "timestamp": "2025-10-12T00:45:19.496875",
+      "details": {
+        "items_completed": 3
+      }
+    },
+    {
+      "test_name": "Sarah - Get Setup Guide",
+      "status": "FAIL",
+      "timestamp": "2025-10-12T00:45:19.501188",
+      "details": {
+        "status_code": 404,
+        "elapsed_ms": 4.07,
+        "success": false,
+        "data": {
+          "detail": "Not Found"
+        }
+      }
+    },
+    {
+      "test_name": "Sarah - Add Cherry Tomato",
+      "status": "FAIL",
+      "timestamp": "2025-10-12T00:45:19.736462",
+      "details": {
+        "status_code": 422,
+        "elapsed_ms": 234.94,
+        "success": false,
+        "data": {
+          "detail": [
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "user_data",
+                "suburb_id"
+              ],
+              "msg": "Field required",
+              "input": {
+                "email": "sarah.johnson.test@plantopia.com",
+                "name": "Sarah Johnson"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "test_name": "Sarah - Add Basil",
+      "status": "FAIL",
+      "timestamp": "2025-10-12T00:45:21.745855",
+      "details": {
+        "status_code": 422,
+        "elapsed_ms": 5.4,
+        "success": false,
+        "data": {
+          "detail": [
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "user_data",
+                "suburb_id"
+              ],
+              "msg": "Field required",
+              "input": {
+                "email": "sarah.johnson.test@plantopia.com",
+                "name": "Sarah Johnson"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "test_name": "Sarah - Get All Plants",
+      "status": "PASS",
+      "timestamp": "2025-10-12T00:45:30.747755",
+      "details": {
+        "total_count": 2,
+        "active_count": 2,
+        "response_time_ms": 6999.23
+      }
+    },
+    {
+      "test_name": "Mike - Start Carrot (Data Reuse)",
+      "status": "PASS",
+      "timestamp": "2025-10-12T00:45:44.756382",
+      "details": {
+        "instance_id": 5,
+        "data_reused": false,
+        "response_time_ms": 14008.13,
+        "expected": "Reuse plant_growth_data from Sarah, no Gemini call"
+      }
+    },
+    {
+      "test_name": "Mike - Add Multiple Plants",
+      "status": "PASS",
+      "timestamp": "2025-10-12T00:45:53.014146",
+      "details": {
+        "plants_added": 3
+      }
+    },
+    {
+      "test_name": "Mike - Get All Plants",
+      "status": "PASS",
+      "timestamp": "2025-10-12T00:46:00.271173",
+      "details": {
+        "total_count": 2,
+        "expected_count": 4,
+        "response_time_ms": 7255.04
+      }
+    },
+    {
+      "test_name": "Sarah - Start General Chat",
+      "status": "PASS",
+      "timestamp": "2025-10-12T00:46:04.803331",
+      "details": {
+        "chat_id": 10,
+        "response_time_ms": 4531.77
+      }
+    },
+    {
+      "test_name": "Sarah - Send Chat Messages",
+      "status": "PASS",
+      "timestamp": "2025-10-12T00:46:44.568022",
+      "details": {
+        "messages_sent": 2
+      }
+    },
+    {
+      "test_name": "Sarah - Get Chat History",
+      "status": "FAIL",
+      "timestamp": "2025-10-12T00:46:44.569728",
+      "details": {
+        "status_code": 0,
+        "success": false,
+        "error": "HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/v1/chat/10/history?email=sarah.johnson.test%40plantopia.com (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ca456477ca0>: Failed to establish a new connection: [Errno 111] Connection refused'))"
+      }
+    },
+    {
+      "test_name": "Mike - Start Plant Chat",
+      "status": "FAIL",
+      "timestamp": "2025-10-12T00:46:44.791773",
+      "details": {
+        "status_code": 0,
+        "success": false,
+        "error": "HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/v1/chat/plant/5/start (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ca456477fd0>: Failed to establish a new connection: [Errno 111] Connection refused'))"
+      }
+    },
+    {
+      "test_name": "Sarah - Add Plant Favorites",
+      "status": "PASS",
+      "timestamp": "2025-10-12T00:46:48.798016",
+      "details": {
+        "favorites_added": 2
+      }
+    },
+    {
+      "test_name": "Sarah - Get Plant Favorites",
+      "status": "FAIL",
+      "timestamp": "2025-10-12T00:46:48.800204",
+      "details": {
+        "status_code": 0,
+        "success": false,
+        "error": "HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/v1/favorites?email=sarah.johnson.test%40plantopia.com (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ca4564774c0>: Failed to establish a new connection: [Errno 111] Connection refused'))"
+      }
+    },
+    {
+      "test_name": "Get Guide Categories",
+      "status": "FAIL",
+      "timestamp": "2025-10-12T00:46:48.801677",
+      "details": {
+        "status_code": 0,
+        "success": false,
+        "error": "HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/v1/guides/categories (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ca4564e01f0>: Failed to establish a new connection: [Errno 111] Connection refused'))"
+      }
+    },
+    {
+      "test_name": "Sarah - Browse and Favorite Guide",
+      "status": "PASS",
+      "timestamp": "2025-10-12T00:46:48.802842",
+      "details": {}
+    },
+    {
+      "test_name": "Sarah - Get Guide Favorites",
+      "status": "FAIL",
+      "timestamp": "2025-10-12T00:46:48.804319",
+      "details": {
+        "status_code": 0,
+        "success": false,
+        "error": "HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/v1/guides/favorites/user?email=sarah.johnson.test%40plantopia.com (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ca4564e0820>: Failed to establish a new connection: [Errno 111] Connection refused'))"
+      }
+    }
+  ]
+}
