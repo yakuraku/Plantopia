@@ -76,6 +76,19 @@ Authorization: Bearer {jwt_token}
 }
 ```
 
+Note on user_data persistence:
+- On first or subsequent calls, backend will persist user_data into the database:
+  - users table:
+    - email → users.email
+    - name → users.name
+    - suburb_id → users.suburb_id
+  - user_profiles table (created/updated automatically):
+    - experience_level → user_profiles.experience_level
+    - garden_type → user_profiles.garden_type
+    - available_space → user_profiles.available_space_m2
+    - climate_goal → user_profiles.climate_goals
+- Non-model fields are ignored safely.
+
 **Response**:
 ```json
 {

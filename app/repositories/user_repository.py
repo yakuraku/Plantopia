@@ -84,16 +84,59 @@ class UserRepository:
         user = await self.get_user_by_email(email)
 
         if user:
-            # Update last_login timestamp for existing user
+            # Update last_login timestamp and optionally sync basic fields
             user.last_login = datetime.utcnow()
+
+            # Optional basic user fields sync (name, suburb)
+            if 'name' in user_data and user_data['name']:
+                user.name = user_data['name']
+
+            # Prefer explicit suburb_id; else resolve suburb_name if provided
+            if 'suburb_id' in user_data and user_data['suburb_id'] is not None:
+                user.suburb_id = user_data['suburb_id']
+            elif 'suburb_name' in user_data and user_data['suburb_name']:
+                suburb = await self._get_suburb_by_name(user_data['suburb_name'])
+                user.suburb_id = suburb.id if suburb else user.suburb_id
+
             await self.db.commit()
             await self.db.refresh(user)
+
+            # Sync profile fields if provided
+            profile_data = {}
+            if 'experience_level' in user_data:
+                profile_data['experience_level'] = user_data.get('experience_level')
+            if 'garden_type' in user_data:
+                profile_data['garden_type'] = user_data.get('garden_type')
+            if 'available_space' in user_data:
+                profile_data['available_space_m2'] = user_data.get('available_space')
+            if 'climate_goal' in user_data:
+                profile_data['climate_goals'] = user_data.get('climate_goal')
+
+            if any(v is not None for v in profile_data.values()):
+                await self.create_or_update_profile(user.id, profile_data)
+
             return user
 
         # Create new user if doesn't exist
         user_data['email'] = email
         user_data['google_id'] = None  # No Google auth
-        return await self.create_user(user_data)
+        new_user = await self.create_user(user_data)
+
+        # Create profile for new user if user_data contains profile-related fields
+        profile_data = {}
+        if 'experience_level' in user_data:
+            profile_data['experience_level'] = user_data.get('experience_level')
+        if 'garden_type' in user_data:
+            profile_data['garden_type'] = user_data.get('garden_type')
+        if 'available_space' in user_data:
+            profile_data['available_space_m2'] = user_data.get('available_space')
+        if 'climate_goal' in user_data:
+            profile_data['climate_goals'] = user_data.get('climate_goal')
+
+        if any(v is not None for v in profile_data.values()):
+            await self.create_or_update_profile(new_user.id, profile_data)
+
+        return new_user
 
     async def create_user(self, user_data: Dict[str, Any]) -> User:
         """
@@ -114,9 +157,13 @@ class UserRepository:
             if suburb:
                 effective_suburb_id = suburb.id
 
+        # Only pass fields that exist on the User model
+        allowed_user_keys = {"google_id", "email", "name", "avatar_url", "is_active", "last_login"}
+        user_kwargs = {k: v for k, v in user_data.items() if k in allowed_user_keys}
+
         user = User(
             suburb_id=effective_suburb_id,
-            **user_data
+            **user_kwargs
         )
 
         self.db.add(user)
