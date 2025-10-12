@@ -1,14 +1,13 @@
 from fastapi import APIRouter
 
-from app.api.endpoints import health, recommendations, plants, climate, admin, markdown_content, quantification, uhi, favorites, plant_tracking, plant_chat, guides, auth
+from app.api.endpoints import health, recommendations, plants, climate, admin, markdown_content, quantification, uhi, favorites, plant_tracking, plant_chat, guides
 
 # Create main API router
 api_router = APIRouter()
 
 # Include all endpoint routers
 api_router.include_router(health.router, prefix="", tags=["health"])
-# Auth endpoints (only non-OAuth upsert is used; Google OAuth routes remain available)
-api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
+# Note: Auth (Google OAuth) endpoints are intentionally not mounted.
 api_router.include_router(favorites.router, prefix="/favorites", tags=["favorites"])
 api_router.include_router(recommendations.router, prefix="", tags=["recommendations"])
 api_router.include_router(plants.router, prefix="", tags=["plants"])

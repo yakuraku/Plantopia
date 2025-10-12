@@ -1,76 +1,17 @@
 """
-Authentication API endpoints for user management and Google OAuth
+User upsert endpoint (no OAuth). Other auth endpoints are intentionally disabled.
 """
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_async_db
-from app.api.dependencies import get_current_user, get_auth_service
-from app.services.auth_service import AuthService
+from app.api.dependencies import get_current_user
 from app.repositories.user_repository import UserRepository
 from app.schemas.user import (
-    GoogleAuthRequest,
-    AuthResponse,
-    UserResponse,
-    UserUpdate,
-    UserProfileResponse,
-    UserProfileUpdate,
-    UserWithProfileResponse,
     UserUpsertRequest
 )
 from app.models.database import User
 
 router = APIRouter()
-
-
-@router.post("/google", response_model=AuthResponse)
-async def google_login(
-    auth_request: GoogleAuthRequest,
-    auth_service: AuthService = Depends(get_auth_service)
-):
-    """
-    Authenticate user with Google OAuth
-
-    Args:
-        auth_request: Google OAuth credential
-
-    Returns:
-        Authentication response with user data and JWT token
-    """
-    try:
-        user, access_token = await auth_service.authenticate_with_google(auth_request.credential)
-
-        # Convert user to response format
-        user_response = UserResponse(
-            id=user.id,
-            google_id=user.google_id,
-            email=user.email,
-            name=user.name,
-            avatar_url=user.avatar_url,
-            suburb=None if not user.suburb else {
-                "id": user.suburb.id,
-                "name": user.suburb.name,
-                "postcode": user.suburb.postcode,
-                "latitude": user.suburb.latitude,
-                "longitude": user.suburb.longitude
-            },
-            is_active=user.is_active,
-            created_at=user.created_at,
-            last_login=user.last_login
-        )
-
-        return AuthResponse(
-            user=user_response,
-            access_token=access_token,
-            token_type="bearer"
-        )
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Authentication failed: {str(e)}"
-        )
 
 
 @router.post("/users/upsert")
@@ -118,9 +59,9 @@ async def upsert_user(
         raise HTTPException(status_code=500, detail=f"Error upserting user: {str(e)}")
 
 
-@router.get("/me", response_model=UserWithProfileResponse)
+@router.get("/me")
 async def get_current_user_info(
-    current_user: User = Depends(get_current_user),
+    current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_async_db)
 ):
     """
@@ -139,23 +80,16 @@ async def get_current_user_info(
     profile = await user_repo.get_user_profile(current_user.id)
 
     # Convert to response format
-    user_response = UserResponse(
-        id=current_user.id,
-        google_id=current_user.google_id,
-        email=current_user.email,
-        name=current_user.name,
-        avatar_url=current_user.avatar_url,
-        suburb=None if not current_user.suburb else {
-            "id": current_user.suburb.id,
-            "name": current_user.suburb.name,
-            "postcode": current_user.suburb.postcode,
-            "latitude": current_user.suburb.latitude,
-            "longitude": current_user.suburb.longitude
-        },
-        is_active=current_user.is_active,
-        created_at=current_user.created_at,
-        last_login=current_user.last_login
-    )
+    user_response = {
+        "id": current_user.id,
+        "email": current_user.email,
+        "name": current_user.name,
+        "avatar_url": current_user.avatar_url,
+        "suburb_id": current_user.suburb_id,
+        "is_active": current_user.is_active,
+        "created_at": current_user.created_at,
+        "last_login": current_user.last_login
+    }
 
     profile_response = None
     if profile:
@@ -175,16 +109,13 @@ async def get_current_user_info(
             updated_at=profile.updated_at
         )
 
-    return UserWithProfileResponse(
-        **user_response.dict(),
-        profile=profile_response
-    )
+    return {**user_response, "profile": profile_response}
 
 
-@router.put("/me", response_model=UserResponse)
+@router.put("/me")
 async def update_current_user(
     user_update: UserUpdate,
-    current_user: User = Depends(get_current_user),
+    current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_async_db)
 ):
     """
@@ -215,28 +146,21 @@ async def update_current_user(
         updated_user = current_user
 
     # Convert to response format
-    return UserResponse(
-        id=updated_user.id,
-        google_id=updated_user.google_id,
-        email=updated_user.email,
-        name=updated_user.name,
-        avatar_url=updated_user.avatar_url,
-        suburb=None if not updated_user.suburb else {
-            "id": updated_user.suburb.id,
-            "name": updated_user.suburb.name,
-            "postcode": updated_user.suburb.postcode,
-            "latitude": updated_user.suburb.latitude,
-            "longitude": updated_user.suburb.longitude
-        },
-        is_active=updated_user.is_active,
-        created_at=updated_user.created_at,
-        last_login=updated_user.last_login
-    )
+    return {
+        "id": updated_user.id,
+        "email": updated_user.email,
+        "name": updated_user.name,
+        "avatar_url": updated_user.avatar_url,
+        "suburb_id": updated_user.suburb_id,
+        "is_active": updated_user.is_active,
+        "created_at": updated_user.created_at,
+        "last_login": updated_user.last_login
+    }
 
 
-@router.get("/profile", response_model=UserProfileResponse)
+@router.get("/profile")
 async def get_user_profile(
-    current_user: User = Depends(get_current_user),
+    current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_async_db)
 ):
     """
@@ -256,27 +180,27 @@ async def get_user_profile(
         # Create empty profile if it doesn't exist
         profile = await user_repo.create_or_update_profile(current_user.id, {})
 
-    return UserProfileResponse(
-        id=profile.id,
-        user_id=profile.user_id,
-        experience_level=profile.experience_level,
-        garden_type=profile.garden_type,
-        climate_goals=profile.climate_goals,
-        available_space_m2=profile.available_space_m2,
-        sun_exposure=profile.sun_exposure,
-        has_containers=profile.has_containers,
-        organic_preference=profile.organic_preference,
-        budget_level=profile.budget_level,
-        notification_preferences=profile.notification_preferences,
-        created_at=profile.created_at,
-        updated_at=profile.updated_at
-    )
+    return {
+        "id": profile.id,
+        "user_id": profile.user_id,
+        "experience_level": profile.experience_level,
+        "garden_type": profile.garden_type,
+        "climate_goals": profile.climate_goals,
+        "available_space_m2": profile.available_space_m2,
+        "sun_exposure": profile.sun_exposure,
+        "has_containers": profile.has_containers,
+        "organic_preference": profile.organic_preference,
+        "budget_level": profile.budget_level,
+        "notification_preferences": profile.notification_preferences,
+        "created_at": profile.created_at,
+        "updated_at": profile.updated_at
+    }
 
 
-@router.put("/profile", response_model=UserProfileResponse)
+@router.put("/profile")
 async def update_user_profile(
     profile_update: UserProfileUpdate,
-    current_user: User = Depends(get_current_user),
+    current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_async_db)
 ):
     """
@@ -300,29 +224,20 @@ async def update_user_profile(
 
     profile = await user_repo.create_or_update_profile(current_user.id, update_data)
 
-    return UserProfileResponse(
-        id=profile.id,
-        user_id=profile.user_id,
-        experience_level=profile.experience_level,
-        garden_type=profile.garden_type,
-        climate_goals=profile.climate_goals,
-        available_space_m2=profile.available_space_m2,
-        sun_exposure=profile.sun_exposure,
-        has_containers=profile.has_containers,
-        organic_preference=profile.organic_preference,
-        budget_level=profile.budget_level,
-        notification_preferences=profile.notification_preferences,
-        created_at=profile.created_at,
-        updated_at=profile.updated_at
-    )
+    return {
+        "id": profile.id,
+        "user_id": profile.user_id,
+        "experience_level": profile.experience_level,
+        "garden_type": profile.garden_type,
+        "climate_goals": profile.climate_goals,
+        "available_space_m2": profile.available_space_m2,
+        "sun_exposure": profile.sun_exposure,
+        "has_containers": profile.has_containers,
+        "organic_preference": profile.organic_preference,
+        "budget_level": profile.budget_level,
+        "notification_preferences": profile.notification_preferences,
+        "created_at": profile.created_at,
+        "updated_at": profile.updated_at
+    }
 
 
-@router.post("/logout")
-async def logout():
-    """
-    Logout endpoint (client-side token removal)
-
-    Returns:
-        Success message
-    """
-    return {"message": "Successfully logged out"}
