@@ -91,9 +91,19 @@ class UserRepository:
             if 'name' in user_data and user_data['name']:
                 user.name = user_data['name']
 
-            # Prefer explicit suburb_id; else resolve suburb_name if provided
+            # Prefer explicit suburb_id; else resolve suburb_name if provided (validate id exists)
             if 'suburb_id' in user_data and user_data['suburb_id'] is not None:
-                user.suburb_id = user_data['suburb_id']
+                new_sid = user_data['suburb_id']
+                if isinstance(new_sid, int) and new_sid > 0:
+                    suburb = await self._get_suburb_by_id(new_sid)
+                    if suburb:
+                        user.suburb_id = new_sid
+                    else:
+                        # Default to suburb_id=1 when referenced id does not exist
+                        user.suburb_id = 1
+                else:
+                    # Default to suburb_id=1 when provided id is invalid (e.g., 0)
+                    user.suburb_id = 1
             elif 'suburb_name' in user_data and user_data['suburb_name']:
                 suburb = await self._get_suburb_by_name(user_data['suburb_name'])
                 user.suburb_id = suburb.id if suburb else user.suburb_id
@@ -151,11 +161,24 @@ class UserRepository:
         # Determine suburb_id from explicit id or suburb_name (prefer explicit id if provided)
         effective_suburb_id = user_data.pop('suburb_id', None)
 
+        # Validate explicit id; if invalid/non-existent, we will default to 1 later
+        if effective_suburb_id is not None:
+            if not isinstance(effective_suburb_id, int) or effective_suburb_id <= 0:
+                effective_suburb_id = None
+            else:
+                suburb = await self._get_suburb_by_id(effective_suburb_id)
+                if not suburb:
+                    effective_suburb_id = None
+
         if effective_suburb_id is None and 'suburb_name' in user_data:
             suburb_name = user_data.pop('suburb_name')
             suburb = await self._get_suburb_by_name(suburb_name)
             if suburb:
                 effective_suburb_id = suburb.id
+
+        # Default to suburb_id=1 when still unresolved
+        if effective_suburb_id is None:
+            effective_suburb_id = 1
 
         # Only pass fields that exist on the User model
         allowed_user_keys = {"google_id", "email", "name", "avatar_url", "is_active", "last_login"}
@@ -432,5 +455,11 @@ class UserRepository:
         query = select(Suburb).where(
             func.lower(Suburb.name) == suburb_name.lower()
         )
+        result = await self.db.execute(query)
+        return result.scalar_one_or_none()
+
+    async def _get_suburb_by_id(self, suburb_id: int) -> Optional[Suburb]:
+        """Helper method to get suburb by id"""
+        query = select(Suburb).where(Suburb.id == suburb_id)
         result = await self.db.execute(query)
         return result.scalar_one_or_none()

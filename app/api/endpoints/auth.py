@@ -14,7 +14,8 @@ from app.schemas.user import (
     UserUpdate,
     UserProfileResponse,
     UserProfileUpdate,
-    UserWithProfileResponse
+    UserWithProfileResponse,
+    UserUpsertRequest
 )
 from app.models.database import User
 
@@ -70,6 +71,51 @@ async def google_login(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Authentication failed: {str(e)}"
         )
+
+
+@router.post("/users/upsert")
+async def upsert_user(
+    user_data: UserUpsertRequest,
+    db: AsyncSession = Depends(get_async_db)
+):
+    """
+    Create or update user and profile from unified user_data payload.
+
+    Request body (user_data):
+    {
+      "email": "string",
+      "name": "string",
+      "suburb_id": 0,
+      "experience_level": "beginner",
+      "garden_type": "backyard",
+      "available_space": 10,
+      "climate_goal": "general gardening"
+    }
+    """
+    try:
+        repo = UserRepository(db)
+        email = user_data.email
+        if not email:
+            raise HTTPException(status_code=400, detail="email is required")
+
+        # Convert model to dict with only provided (non-None) fields
+        payload = {k: v for k, v in user_data.dict().items() if v is not None}
+        user = await repo.get_or_create_user_by_email(email, payload)
+
+        return {
+            "success": True,
+            "message": "User upserted successfully",
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "name": user.name,
+                "suburb_id": user.suburb_id
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error upserting user: {str(e)}")
 
 
 @router.get("/me", response_model=UserWithProfileResponse)

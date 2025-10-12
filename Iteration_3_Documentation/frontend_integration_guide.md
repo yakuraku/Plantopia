@@ -101,6 +101,27 @@ Note on user_data persistence:
 }
 ```
 
+### 1.a Upsert User (Create/Update User & Profile)
+**Endpoint**: `POST /auth/users/upsert`
+
+**Request Body**:
+```json
+{
+  "email": "user@example.com",
+  "name": "John Doe",
+  "suburb_id": 123,
+  "experience_level": "beginner",
+  "garden_type": "balcony",
+  "available_space": 5.0,
+  "climate_goal": "sustainable gardening"
+}
+```
+
+**Behavior**:
+- Creates user if not exists; otherwise updates `name`/`suburb_id` (invalid `suburb_id` defaults to 1 or resolves from `suburb_name`).
+- Creates/updates `user_profiles` with `experience_level`, `garden_type`, `available_space_m2`, `climate_goals`.
+- Safe to call before `/tracking/start` to persist user context separately.
+
 ### 2. Get User's Plant Instances
 **Endpoint**: `GET /tracking/user/{email}`
 
@@ -988,3 +1009,21 @@ try {
 - Chat sharing/export
 - AI proactive suggestions
 - Integration with plant disease database
+
+---
+
+## Documentation Sync Policy (必读)
+
+为确保前后端契约一致性，凡是对集成产生影响的变更，必须同步更新本集成指南（本文件），提交同一条 PR：
+
+- 端点路径与前缀：新增、修改、下线任一 API（含版本前缀、分组）
+- 请求契约：请求体/查询参数/路径参数的字段新增、删除或语义变更
+- 默认值与回退逻辑：如 `user_data.suburb_id` 无效时默认回退为 `1` 等
+- 响应契约：字段结构、字段类型、枚举值、分页格式等变更
+- 认证与限流：认证方式（如 Bearer Token）、需要的 Header、速率限制调整等
+- 错误码：新增/修改/下线错误码与语义
+
+变更流程建议（最少需做）：
+1. 在 PR 中更新代码与本文件的相关小节（示例、字段说明、错误码、注意事项）
+2. 若为破坏性变更，在“Version Information”中记录并注明迁移指引
+3. 同步更新前端 mock/调用示例，确保可直接复制使用

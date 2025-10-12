@@ -96,6 +96,17 @@ class UserWithProfileResponse(UserResponse):
     profile: Optional[UserProfileResponse] = Field(None, description="User profile information")
 
 
+class UserUpsertRequest(BaseModel):
+    """Schema for upserting user and profile from unified payload (email required, others optional)"""
+    email: EmailStr = Field(..., description="User email address")
+    name: Optional[str] = Field(None, description="User display name")
+    suburb_id: Optional[int] = Field(None, description="Suburb id (optional; invalid id defaults to 1)")
+    suburb_name: Optional[str] = Field(None, description="Suburb name (alternative to suburb_id)")
+    experience_level: Optional[str] = Field(None, description="beginner/intermediate/advanced")
+    garden_type: Optional[str] = Field(None, description="balcony/backyard/indoor/courtyard/community_garden")
+    available_space: Optional[float] = Field(None, description="Available gardening space in square meters")
+    climate_goal: Optional[str] = Field(None, description="User's environmental preference")
+
 class FavoriteCreate(BaseModel):
     """Schema for creating a favorite plant"""
     email: str = Field(..., description="User email address")
