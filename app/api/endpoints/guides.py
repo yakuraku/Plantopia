@@ -78,69 +78,15 @@ async def list_categories(
         raise HTTPException(status_code=500, detail=f"Error loading categories: {str(e)}")
 
 
-@router.get("/{category}", response_model=CategoryGuidesResponse)
-async def list_guides_by_category(
-    category: str,
-    guide_service: GuideService = Depends(get_guide_service)
-):
+@router.get("/favorites", status_code=200)
+async def _favorites_routes_anchor():
     """
-    List all guides in a specific category.
+    Anchor path to ensure all '/guides/favorites*' routes are registered
+    before dynamic '/guides/{category}' routes.
 
-    This endpoint:
-    - Returns guides filtered by category
-    - Useful for category-specific browsing
-    - No authentication required
-
-    Args:
-        category: Category name (e.g., "Composting", "flowers", "grow_guide")
-
-    Returns:
-        CategoryGuidesResponse with guides in that category
-
-    Raises:
-        HTTPException 404: If category not found
+    Note: This endpoint is not intended for public use.
     """
-    try:
-        result = await guide_service.get_guides_by_category(category)
-        return CategoryGuidesResponse(**result)
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error loading guides: {str(e)}")
-
-
-@router.get("/{category}/{guide_name}", response_model=GuideContent)
-async def get_guide_content(
-    category: str,
-    guide_name: str,
-    guide_service: GuideService = Depends(get_guide_service)
-):
-    """
-    Get the full content of a specific guide.
-
-    This endpoint:
-    - Returns complete markdown content
-    - Includes guide metadata (title, category, path)
-    - No authentication required
-    - Useful for displaying guide in reader view
-
-    Args:
-        category: Category name
-        guide_name: Guide filename (e.g., "Composting for Beginners.md")
-
-    Returns:
-        GuideContent with full markdown content
-
-    Raises:
-        HTTPException 404: If guide not found
-    """
-    try:
-        result = await guide_service.get_guide_content(category, guide_name)
-        return GuideContent(**result)
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error loading guide: {str(e)}")
+    return {"ok": True}
 
 
 # ============================================================================
@@ -291,3 +237,72 @@ async def check_guide_favorite_status(
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error checking favorite: {str(e)}")
+
+
+# ============================================================================
+# DYNAMIC CATEGORY AND GUIDE CONTENT ROUTES (placed after favorites)
+# ============================================================================
+
+@router.get("/{category}", response_model=CategoryGuidesResponse)
+async def list_guides_by_category(
+    category: str,
+    guide_service: GuideService = Depends(get_guide_service)
+):
+    """
+    List all guides in a specific category.
+
+    This endpoint:
+    - Returns guides filtered by category
+    - Useful for category-specific browsing
+    - No authentication required
+
+    Args:
+        category: Category name (e.g., "Composting", "flowers", "grow_guide")
+
+    Returns:
+        CategoryGuidesResponse with guides in that category
+
+    Raises:
+        HTTPException 404: If category not found
+    """
+    try:
+        result = await guide_service.get_guides_by_category(category)
+        return CategoryGuidesResponse(**result)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error loading guides: {str(e)}")
+
+
+@router.get("/{category}/{guide_name}", response_model=GuideContent)
+async def get_guide_content(
+    category: str,
+    guide_name: str,
+    guide_service: GuideService = Depends(get_guide_service)
+):
+    """
+    Get the full content of a specific guide.
+
+    This endpoint:
+    - Returns complete markdown content
+    - Includes guide metadata (title, category, path)
+    - No authentication required
+    - Useful for displaying guide in reader view
+
+    Args:
+        category: Category name
+        guide_name: Guide filename (e.g., "Composting for Beginners.md")
+
+    Returns:
+        GuideContent with full markdown content
+
+    Raises:
+        HTTPException 404: If guide not found
+    """
+    try:
+        result = await guide_service.get_guide_content(category, guide_name)
+        return GuideContent(**result)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error loading guide: {str(e)}")
