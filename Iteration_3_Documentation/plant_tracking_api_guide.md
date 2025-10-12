@@ -122,7 +122,9 @@ POST /api/v1/tracking/instance/{instance_id}/auto-update-stage
   - Side effects: sets `is_active=true`, resets stage to first stage if needed, recomputes `expected_maturity_date`.
 
 - PUT `/tracking/instance/{instance_id}/nickname` — Update nickname
-- DELETE `/tracking/instance/{instance_id}` — Deactivate instance (soft delete)
+- DELETE `/tracking/instance/{instance_id}` — Delete instance (hard delete)
+  - Permanently removes the instance and its tracking entries
+  - Response: `{ "success": true, "data": { "instance_id": 1, "deleted": true } }`
 
 ### AI-Generated Growth Data
 

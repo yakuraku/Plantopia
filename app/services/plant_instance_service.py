@@ -396,6 +396,27 @@ class PlantInstanceService:
             "message": "Plant instance deactivated successfully"
         }
 
+    async def delete_instance(self, instance_id: int) -> Dict[str, Any]:
+        """Hard delete a plant instance and its tracking data."""
+        # Best-effort cleanup for tracking entries (also covered by FK cascade)
+        try:
+            await self.progress_repository.delete_by_instance(instance_id)
+        except Exception:
+            # Even if cleanup fails, proceed with deletion; FK cascade should handle
+            pass
+
+        deleted = await self.repository.delete(instance_id)
+        if not deleted:
+            raise ValueError(f"Plant instance with ID {instance_id} not found")
+
+        logger.info(f"Hard deleted plant instance {instance_id}")
+
+        return {
+            "instance_id": instance_id,
+            "deleted": True,
+            "message": "Plant instance deleted successfully"
+        }
+
     async def calculate_progress_percentage(self, instance) -> float:
         """
         Calculate overall progress percentage based on days elapsed

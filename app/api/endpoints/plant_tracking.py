@@ -581,44 +581,43 @@ async def update_plant_nickname(
 
 
 @router.delete("/tracking/instance/{instance_id}", response_model=MessageResponse)
-async def deactivate_plant_instance(
+async def delete_plant_instance(
     instance_id: int,
     plant_instance_service: PlantInstanceService = Depends(get_plant_instance_service)
 ):
     """
-    Deactivate a plant instance (soft delete).
+    Delete a plant instance (hard delete).
 
     This endpoint:
-    - Marks plant instance as inactive without deleting data
-    - Preserves tracking history and progress for reference
-    - Instance won't appear in active plant lists
-    - Can be useful for completed or failed plants
+    - Permanently removes the plant instance and its tracking data
+    - Instance disappears from all lists and detail endpoints
+    - Use with caution
 
     Args:
-        instance_id: Plant instance ID to deactivate
+        instance_id: Plant instance ID to delete
 
     Returns:
         MessageResponse with confirmation
 
     Raises:
         HTTPException 404: If instance not found
-        HTTPException 500: If deactivation fails
+        HTTPException 500: If deletion fails
     """
     try:
-        result = await plant_instance_service.deactivate_instance(instance_id)
+        result = await plant_instance_service.delete_instance(instance_id)
 
         return MessageResponse(
             success=True,
             message=result["message"],
             data={
                 "instance_id": result["instance_id"],
-                "is_active": result["is_active"]
+                "deleted": True
             }
         )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error deactivating instance: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error deleting instance: {str(e)}")
 
 
 # ============================================================================
