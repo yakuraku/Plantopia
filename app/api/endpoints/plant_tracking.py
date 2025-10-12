@@ -653,6 +653,26 @@ async def upsert_user_from_tracking(
         payload = {k: v for k, v in user_data.dict().items() if v is not None}
         user = await repo.get_or_create_user_by_email(user_data.email, payload)
 
+        # Fetch latest profile after upsert
+        profile = await repo.get_user_profile(user.id)
+        profile_dict = None
+        if profile:
+            profile_dict = {
+                "id": profile.id,
+                "user_id": profile.user_id,
+                "experience_level": profile.experience_level,
+                "garden_type": profile.garden_type,
+                "climate_goals": profile.climate_goals,
+                "available_space_m2": profile.available_space_m2,
+                "sun_exposure": profile.sun_exposure,
+                "has_containers": profile.has_containers,
+                "organic_preference": profile.organic_preference,
+                "budget_level": profile.budget_level,
+                "notification_preferences": profile.notification_preferences,
+                "created_at": profile.created_at,
+                "updated_at": profile.updated_at,
+            }
+
         return {
             "success": True,
             "message": "User upserted successfully",
@@ -660,8 +680,12 @@ async def upsert_user_from_tracking(
                 "id": user.id,
                 "email": user.email,
                 "name": user.name,
-                "suburb_id": user.suburb_id
-            }
+                "suburb_id": user.suburb_id,
+                "created_at": user.created_at,
+                "updated_at": user.updated_at,
+                "last_login": user.last_login,
+            },
+            "profile": profile_dict,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error upserting user: {str(e)}")

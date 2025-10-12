@@ -121,6 +121,39 @@ Note on user_data persistence:
 - Creates user if not exists; otherwise updates `name`/`suburb_id` (invalid `suburb_id` defaults to 1 or resolves from `suburb_name`).
 - Creates/updates `user_profiles` with `experience_level`, `garden_type`, `available_space_m2`, `climate_goals`.
 - Safe to call before `/tracking/start` to persist user context separately.
+- Only `email` is required; all other fields are optional. Missing fields are left unchanged.
+
+**Response**:
+```json
+{
+  "success": true,
+  "message": "User upserted successfully",
+  "user": {
+    "id": 1,
+    "email": "user@example.com",
+    "name": "John Doe",
+    "suburb_id": 123,
+    "created_at": "2025-01-10T12:00:00",
+    "updated_at": "2025-01-10T12:05:00",
+    "last_login": "2025-01-10T12:05:00"
+  },
+  "profile": {
+    "id": 1,
+    "user_id": 1,
+    "experience_level": "beginner",
+    "garden_type": "balcony",
+    "climate_goals": "sustainable gardening",
+    "available_space_m2": 5.0,
+    "sun_exposure": null,
+    "has_containers": false,
+    "organic_preference": true,
+    "budget_level": null,
+    "notification_preferences": null,
+    "created_at": "2025-01-10T12:00:00",
+    "updated_at": "2025-01-10T12:05:00"
+  }
+}
+```
 
 ### 2. Get User's Plant Instances
 **Endpoint**: `GET /tracking/user/{email}`
