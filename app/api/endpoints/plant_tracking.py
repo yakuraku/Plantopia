@@ -21,7 +21,8 @@ from app.schemas.plant_tracking import (
     CompleteChecklistItemRequest,
     ChecklistCompleteResponse,
     UpdateNicknameRequest,
-    ErrorResponse
+    ErrorResponse,
+    StartGrowingRequest
 )
 from app.services.plant_instance_service import PlantInstanceService
 from app.services.progress_tracking_service import ProgressTrackingService
@@ -241,6 +242,42 @@ async def update_plant_progress(
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error updating progress: {str(e)}")
+
+
+@router.post("/tracking/instance/{instance_id}/start-growing", response_model=MessageResponse)
+async def start_growing_instance(
+    instance_id: int,
+    request: Optional[StartGrowingRequest] = None,
+    plant_instance_service: PlantInstanceService = Depends(get_plant_instance_service)
+):
+    """
+    Mark an instance as officially started growing.
+
+    This endpoint:
+    - Sets start_date to provided value or today's date
+    - Ensures is_active is True
+    - Resets current_stage to first stage if needed (germination)
+    - Recalculates expected_maturity_date
+    """
+    try:
+        start_date = (request.start_date if (request and request.start_date) else None)
+        result = await plant_instance_service.start_growing(instance_id, start_date)
+
+        return MessageResponse(
+            success=True,
+            message=result["message"],
+            data={
+                "instance_id": result["instance_id"],
+                "start_date": result["start_date"],
+                "expected_maturity_date": result["expected_maturity_date"],
+                "current_stage": result["current_stage"],
+                "is_active": result["is_active"]
+            }
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error starting growing: {str(e)}")
 
 
 # ============================================================================

@@ -196,7 +196,24 @@ This document summarizes all endpoints under the plant-tracking feature, includi
 { "message": "Plant stage automatically updated to: flowering", "data": { "instance_id": 789, "new_stage": "flowering", "updated": true } }
 ```
 
-## 14) POST /tracking/user/upsert — Upsert User From Tracking
+## 14) POST /tracking/instance/{instance_id}/start-growing — Start Growing (Official Start)
+- Purpose: Mark an instance as officially started growing or restart it.
+- Request Body (optional; can be omitted):
+```json
+{ "start_date": "2025-10-12" }
+```
+- Response (200):
+```json
+{
+  "success": true,
+  "message": "Instance activated and started",
+  "data": { "instance_id": 789, "start_date": "2025-10-12", "expected_maturity_date": "2026-01-10", "current_stage": "germination", "is_active": true }
+}
+```
+Notes:
+- `is_active` is set to true only if `start_date` is provided in the request.
+
+## 15) POST /tracking/user/upsert — Upsert User From Tracking
 - Purpose: Create or update user and profile from a unified payload before/without starting tracking.
 - Request Body (only `email` required; others optional):
 ```json

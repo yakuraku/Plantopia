@@ -75,7 +75,7 @@ class PlantInstanceService:
             "start_date": start_date,
             "expected_maturity_date": expected_maturity_date,
             "current_stage": "germination",  # Default first stage
-            "is_active": True,
+            "is_active": False,
             "location_details": location_details
         }
 
@@ -285,6 +285,49 @@ class PlantInstanceService:
             "user_notes": instance.user_notes,
             "location_details": instance.location_details,
             "message": "Progress updated successfully"
+        }
+
+    async def start_growing(self, instance_id: int, new_start_date: Optional[date]) -> Dict[str, Any]:
+        """
+        Mark an existing instance as officially started growing (or restart).
+
+        - Sets start_date to the provided date
+        - Ensures is_active = True
+        - Resets current_stage to 'germination'
+        - Recalculates expected_maturity_date based on plant time_to_maturity_days
+        """
+        instance = await self.repository.get_by_id(instance_id)
+        if not instance:
+            raise ValueError(f"Plant instance with ID {instance_id} not found")
+
+        update_payload: Dict[str, Any] = {}
+
+        # If a start date is explicitly provided, set it and recompute maturity + reset stage
+        if new_start_date is not None:
+            plant_query = select(Plant).where(Plant.id == instance.plant_id)
+            result = await self.db.execute(plant_query)
+            plant: Optional[Plant] = result.scalar_one_or_none()
+
+            maturity_days = (plant.time_to_maturity_days if plant and plant.time_to_maturity_days else 90)
+            expected_maturity_date = new_start_date + timedelta(days=maturity_days)
+
+            update_payload.update({
+                "start_date": new_start_date,
+                "expected_maturity_date": expected_maturity_date,
+                "current_stage": "germination"
+            })
+            # Instance becomes active only when a start_date is explicitly set now
+            update_payload["is_active"] = True
+
+        updated = await self.repository.update(instance_id, update_payload)
+
+        return {
+            "instance_id": updated.id,
+            "start_date": updated.start_date,
+            "expected_maturity_date": updated.expected_maturity_date,
+            "current_stage": updated.current_stage,
+            "is_active": updated.is_active,
+            "message": "Instance activated and started" if new_start_date is not None else "Instance activated"
         }
 
     async def update_nickname(self, instance_id: int, new_nickname: str) -> Dict[str, Any]:

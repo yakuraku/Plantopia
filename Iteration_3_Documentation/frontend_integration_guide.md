@@ -394,7 +394,34 @@ Note on user_data persistence:
 }
 ```
 
-### 10. Update Plant Nickname
+### 10. Start Growing (Official Start)
+**Endpoint**: `POST /tracking/instance/{instance_id}/start-growing`
+
+**Request Body** (optional; can be omitted):
+```json
+{ "start_date": "2025-10-12" }
+```
+
+**Behavior**:
+- If `start_date` is provided: set `start_date`, reset `current_stage = "germination"`, set `is_active = true`, and recalculate `expected_maturity_date` based on plant `time_to_maturity_days`
+- If `start_date` is omitted: only keep current values (including `is_active = false` by default), no recalculation
+
+**Response**:
+```json
+{
+  "success": true,
+  "message": "Instance marked as started",
+  "data": {
+    "instance_id": 789,
+    "start_date": "2025-10-12",
+    "expected_maturity_date": "2026-01-10",
+    "current_stage": "germination",
+    "is_active": true
+  }
+}
+```
+
+### 11. Update Plant Nickname
 **Endpoint**: `PUT /tracking/instance/{instance_id}/nickname`
 
 **Request Body**:

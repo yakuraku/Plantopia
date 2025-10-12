@@ -51,6 +51,11 @@ class UpdateNicknameRequest(BaseModel):
     plant_nickname: str = Field(..., max_length=100, description="New nickname for the plant")
 
 
+class StartGrowingRequest(BaseModel):
+    """Request to mark an instance as officially started growing"""
+    start_date: Optional[date] = Field(None, description="Date when growing officially starts; defaults to today if omitted")
+
+
 # ============================================================================
 # RESPONSE SCHEMAS - JSON Data Structures
 # ============================================================================
