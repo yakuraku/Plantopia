@@ -138,6 +138,11 @@ async def get_recommendations_with_quantified_impact(
                     "community_impact_potential": quantified_impact.community_impact_potential
                 }
 
+                # Add companion planting data from plant object
+                enhanced_rec["beneficial_companions"] = plant.beneficial_companions or ""
+                enhanced_rec["harmful_companions"] = plant.harmful_companions or ""
+                enhanced_rec["neutral_companions"] = plant.neutral_companions or ""
+
                 enhanced_recommendations.append(enhanced_rec)
 
             except Exception as e:
