@@ -290,6 +290,87 @@ class ProgressTrackingService:
             for entry in entries
         ]
 
+    async def get_checklist_with_details(
+        self,
+        instance_id: int,
+        plant_id: int
+    ) -> Dict[str, Any]:
+        """
+        Get checklist items with full details from requirements data
+
+        Args:
+            instance_id: Plant instance ID
+            plant_id: Plant ID
+
+        Returns:
+            Dictionary with detailed checklist items and progress summary
+        """
+        # Get requirements data to get item details
+        try:
+            requirements_data = await self.growth_service.get_requirements(plant_id)
+        except ValueError:
+            return {
+                "instance_id": instance_id,
+                "checklist_items": [],
+                "progress_summary": {
+                    "total_items": 0,
+                    "completed_items": 0,
+                    "completion_percentage": 0.0
+                }
+            }
+
+        # Get tracking data for this instance
+        tracking_entries = await self.repository.get_by_instance(instance_id)
+
+        # Build a map of item_key -> tracking entry
+        tracking_map = {entry.checklist_item_key: entry for entry in tracking_entries}
+
+        # Build detailed checklist items
+        checklist_items = []
+        requirements = requirements_data.get("requirements", [])
+
+        for category in requirements:
+            category_name = category.get("category", "")
+            items = category.get("items", [])
+
+            for item in items:
+                item_name = item.get("item", "")
+                quantity = item.get("quantity", "")
+                optional = item.get("optional", False)
+                notes = item.get("notes")
+
+                # Create unique key matching initialization logic
+                key = f"{category_name.lower().replace(' ', '_')}_{item_name.lower().replace(' ', '_')}"
+
+                # Check if this item has tracking data
+                tracking_entry = tracking_map.get(key)
+
+                checklist_items.append({
+                    "item_key": key,
+                    "category": category_name,
+                    "item_name": item_name,
+                    "quantity": quantity,
+                    "optional": optional,
+                    "is_completed": tracking_entry.is_completed if tracking_entry else False,
+                    "completed_at": tracking_entry.completed_at if tracking_entry else None,
+                    "user_notes": tracking_entry.user_notes if tracking_entry else None
+                })
+
+        # Calculate progress summary
+        total_items = len(checklist_items)
+        completed_items = sum(1 for item in checklist_items if item["is_completed"])
+        completion_percentage = (completed_items / total_items * 100) if total_items > 0 else 0.0
+
+        return {
+            "instance_id": instance_id,
+            "checklist_items": checklist_items,
+            "progress_summary": {
+                "total_items": total_items,
+                "completed_items": completed_items,
+                "completion_percentage": round(completion_percentage, 2)
+            }
+        }
+
     async def delete_all_tracking(self, instance_id: int) -> int:
         """
         Delete all progress tracking for an instance

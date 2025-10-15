@@ -256,6 +256,7 @@ class MessageResponse(BaseModel):
     """Generic message response"""
     success: bool = Field(..., description="Whether operation was successful")
     message: str = Field(..., description="Response message")
+    data: Optional[Dict[str, Any]] = Field(None, description="Optional response data")
 
 
 # ============================================================================
@@ -338,3 +339,65 @@ class EndChatResponse(BaseModel):
     success: bool = Field(..., description="Whether chat was ended successfully")
     message: str = Field(..., description="Status message")
     chat_id: int = Field(..., description="Chat session ID that was ended")
+
+
+# ============================================================================
+# PHASE 1 SCHEMAS - Enhanced Journal Tracking
+# ============================================================================
+
+class ChecklistItem(BaseModel):
+    """Individual checklist item with full details"""
+    item_key: str = Field(..., description="Unique key for the checklist item")
+    category: str = Field(..., description="Category name (e.g., 'Tools', 'Materials')")
+    item_name: str = Field(..., description="Name of the item")
+    quantity: str = Field(..., description="Quantity needed")
+    optional: bool = Field(..., description="Whether item is optional")
+    is_completed: bool = Field(..., description="Completion status")
+    completed_at: Optional[datetime] = Field(None, description="When item was completed")
+    user_notes: Optional[str] = Field(None, description="User's notes about this item")
+
+
+class ChecklistResponse(BaseModel):
+    """Response with full checklist state"""
+    instance_id: int = Field(..., description="Plant instance ID")
+    checklist_items: List[ChecklistItem] = Field(..., description="List of checklist items with details")
+    progress_summary: ProgressSummary = Field(..., description="Progress summary")
+
+
+class SetupStatus(BaseModel):
+    """Setup completion status"""
+    completed: bool = Field(..., description="Whether setup is complete")
+    completed_at: Optional[datetime] = Field(None, description="When setup was completed")
+
+
+class ChecklistStatus(BaseModel):
+    """Checklist progress status"""
+    total_items: int = Field(..., description="Total number of checklist items")
+    completed_items: int = Field(..., description="Number of completed items")
+    completion_percentage: float = Field(..., description="Completion percentage")
+    meets_threshold: bool = Field(..., description="Whether completion meets 80% threshold")
+
+
+class GrowingStatus(BaseModel):
+    """Growing progress status"""
+    is_active: bool = Field(..., description="Whether instance is actively growing")
+    start_date: date = Field(..., description="Start date")
+    days_elapsed: int = Field(..., description="Days since start")
+    current_stage: str = Field(..., description="Current growth stage")
+    progress_percentage: float = Field(..., description="Overall progress percentage")
+
+
+class InstanceStatusResponse(BaseModel):
+    """Response with complete instance status summary"""
+    instance_id: int = Field(..., description="Plant instance ID")
+    checklist_status: ChecklistStatus = Field(..., description="Checklist progress status")
+    setup_status: SetupStatus = Field(..., description="Setup completion status")
+    growing_status: GrowingStatus = Field(..., description="Growing progress status")
+
+
+class CompleteSetupResponse(BaseModel):
+    """Response after marking setup complete"""
+    instance_id: int = Field(..., description="Plant instance ID")
+    setup_completed: bool = Field(..., description="Setup completion status")
+    setup_completed_at: datetime = Field(..., description="When setup was completed")
+    message: str = Field(..., description="Success message")

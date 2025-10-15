@@ -22,7 +22,10 @@ from app.schemas.plant_tracking import (
     ChecklistCompleteResponse,
     UpdateNicknameRequest,
     ErrorResponse,
-    StartGrowingRequest
+    StartGrowingRequest,
+    ChecklistResponse,
+    CompleteSetupResponse,
+    InstanceStatusResponse
 )
 from app.services.plant_instance_service import PlantInstanceService
 from app.services.progress_tracking_service import ProgressTrackingService
@@ -674,6 +677,121 @@ async def auto_update_growth_stage(
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error auto-updating stage: {str(e)}")
+
+
+# ============================================================================
+# PHASE 1 ENDPOINTS - Enhanced Journal Tracking
+# ============================================================================
+
+@router.get("/tracking/instance/{instance_id}/checklist", response_model=ChecklistResponse)
+async def get_instance_checklist(
+    instance_id: int,
+    plant_instance_service: PlantInstanceService = Depends(get_plant_instance_service),
+    progress_tracking_service: ProgressTrackingService = Depends(get_progress_tracking_service)
+):
+    """
+    Retrieve the saved checklist state for a plant instance.
+
+    This endpoint:
+    - Returns all checklist items with their completion status
+    - Includes item details (category, name, quantity, optional flag)
+    - Shows completion timestamps and user notes
+    - Provides progress summary (total items, completed items, percentage)
+
+    Args:
+        instance_id: Plant instance ID
+
+    Returns:
+        ChecklistResponse with detailed checklist items and progress summary
+
+    Raises:
+        HTTPException 404: If instance not found
+        HTTPException 500: If data retrieval fails
+    """
+    try:
+        # Get instance details to retrieve plant_id
+        instance = await plant_instance_service.get_instance_details(instance_id)
+        plant_id = instance["plant_details"]["plant_id"]
+
+        # Get checklist with full details
+        result = await progress_tracking_service.get_checklist_with_details(
+            instance_id=instance_id,
+            plant_id=plant_id
+        )
+
+        return ChecklistResponse(**result)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error loading checklist: {str(e)}")
+
+
+@router.post("/tracking/instance/{instance_id}/complete-setup", response_model=CompleteSetupResponse)
+async def complete_setup_instructions(
+    instance_id: int,
+    plant_instance_service: PlantInstanceService = Depends(get_plant_instance_service)
+):
+    """
+    Mark setup instructions as complete for a plant instance.
+
+    This endpoint:
+    - Sets setup_completed flag to True
+    - Records the completion timestamp
+    - Separate from starting growth (is_active status)
+    - Allows tracking setup completion independently
+
+    Args:
+        instance_id: Plant instance ID
+
+    Returns:
+        CompleteSetupResponse with completion status and timestamp
+
+    Raises:
+        HTTPException 404: If instance not found
+        HTTPException 500: If update fails
+    """
+    try:
+        result = await plant_instance_service.complete_setup(instance_id)
+
+        return CompleteSetupResponse(**result)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error completing setup: {str(e)}")
+
+
+@router.get("/tracking/instance/{instance_id}/status", response_model=InstanceStatusResponse)
+async def get_instance_status(
+    instance_id: int,
+    plant_instance_service: PlantInstanceService = Depends(get_plant_instance_service)
+):
+    """
+    Get comprehensive status summary for a plant instance.
+
+    This endpoint:
+    - Returns checklist progress (total, completed, percentage, threshold status)
+    - Shows setup completion status and timestamp
+    - Provides growing status (active, days elapsed, current stage, progress)
+    - Helps determine which step to show in the UI
+
+    Args:
+        instance_id: Plant instance ID
+
+    Returns:
+        InstanceStatusResponse with complete status across all three steps
+
+    Raises:
+        HTTPException 404: If instance not found
+        HTTPException 500: If data retrieval fails
+    """
+    try:
+        result = await plant_instance_service.get_instance_status_summary(instance_id)
+
+        return InstanceStatusResponse(**result)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error loading instance status: {str(e)}")
 
 
 # ============================================================================

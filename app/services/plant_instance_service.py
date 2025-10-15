@@ -469,3 +469,89 @@ class PlantInstanceService:
             return new_stage
 
         return None
+
+    async def complete_setup(self, instance_id: int) -> Dict[str, Any]:
+        """
+        Mark setup instructions as complete for a plant instance
+
+        Args:
+            instance_id: Plant instance ID
+
+        Returns:
+            Dictionary with completion status and timestamp
+
+        Raises:
+            ValueError: If instance not found
+        """
+        from datetime import datetime
+
+        instance = await self.repository.get_by_id(instance_id)
+        if not instance:
+            raise ValueError(f"Plant instance with ID {instance_id} not found")
+
+        # Update setup completion
+        update_data = {
+            "setup_completed": True,
+            "setup_completed_at": datetime.utcnow()
+        }
+
+        updated_instance = await self.repository.update(instance_id, update_data)
+
+        logger.info(f"Marked setup complete for instance {instance_id}")
+
+        return {
+            "instance_id": updated_instance.id,
+            "setup_completed": updated_instance.setup_completed,
+            "setup_completed_at": updated_instance.setup_completed_at,
+            "message": "Setup instructions marked as complete"
+        }
+
+    async def get_instance_status_summary(self, instance_id: int) -> Dict[str, Any]:
+        """
+        Get a comprehensive status summary for a plant instance
+
+        Args:
+            instance_id: Plant instance ID
+
+        Returns:
+            Dictionary with checklist, setup, and growing status
+
+        Raises:
+            ValueError: If instance not found
+        """
+        instance = await self.repository.get_by_id(instance_id)
+        if not instance:
+            raise ValueError(f"Plant instance with ID {instance_id} not found")
+
+        # Get checklist progress
+        completed_count = await self.progress_repository.get_completed_count(instance_id)
+        total_count = await self.progress_repository.get_total_count(instance_id)
+        completion_percentage = await self.progress_repository.get_completion_percentage(instance_id)
+
+        # Determine if meets threshold (80%)
+        meets_threshold = completion_percentage >= 80.0
+
+        # Calculate days elapsed
+        days_elapsed = (date.today() - instance.start_date).days
+
+        # Build status summary
+        return {
+            "instance_id": instance.id,
+            "checklist_status": {
+                "total_items": total_count,
+                "completed_items": completed_count,
+                "completion_percentage": completion_percentage,
+                "meets_threshold": meets_threshold
+            },
+            "setup_status": {
+                "completed": instance.setup_completed,
+                "completed_at": instance.setup_completed_at
+            },
+            "growing_status": {
+                "is_active": instance.is_active,
+                "start_date": instance.start_date,
+                "days_elapsed": days_elapsed,
+                "current_stage": instance.current_stage,
+                "progress_percentage": await self.calculate_progress_percentage(instance)
+            }
+        }

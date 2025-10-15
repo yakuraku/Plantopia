@@ -341,6 +341,8 @@ class UserPlantInstance(Base):
     expected_maturity_date = Column(Date, nullable=False)  # Calculated from start_date + time_to_maturity_days
     current_stage = Column(String(50), default='germination')  # Current growth stage
     is_active = Column(Boolean, default=True)  # Whether still actively growing
+    setup_completed = Column(Boolean, default=False)  # Whether setup instructions are complete
+    setup_completed_at = Column(DateTime, nullable=True)  # When setup was marked complete
     user_notes = Column(Text)  # User's personal notes
     location_details = Column(String(200))  # Where planted (e.g., "balcony pot 1")
     created_at = Column(DateTime, default=datetime.utcnow)
