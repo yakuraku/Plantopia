@@ -274,11 +274,27 @@ class QuantificationService:
         return max(0.5, lai)
 
     def _calculate_canopy_area(self, plant: Plant) -> float:
-        """Calculate canopy area per plant"""
+        """
+        Calculate canopy area per plant
+
+        Note: Caps effective spacing and canopy area to prevent unrealistic values
+        for large-spaced plants (vines, trees) in typical home garden contexts.
+        """
         spacing_cm = self._extract_spacing(plant.plant_spacing)
         spacing_m = spacing_cm / 100
 
-        return 0.75 * (spacing_m ** 2)  # k factor of 0.75
+        # Cap effective spacing at 150cm (1.5m) to prevent exponential scaling
+        # Large spacing values represent ideal commercial spacing, not actual
+        # canopy size of young plants in home gardens
+        effective_spacing_m = min(spacing_m, 1.5)
+
+        # Calculate canopy with k factor of 0.75
+        canopy_area = 0.75 * (effective_spacing_m ** 2)
+
+        # Additional safety cap at 2.0 m² for typical home garden scale
+        # Most home garden plants (including young vines/small trees) have
+        # canopies well below this threshold
+        return min(canopy_area, 2.0)
 
     def _extract_spacing(self, spacing_str: Optional[str]) -> float:
         """Extract spacing in cm from spacing string"""
