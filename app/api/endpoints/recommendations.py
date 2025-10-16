@@ -126,7 +126,7 @@ async def get_recommendations_with_quantified_impact(
                 enhanced_rec["quantified_impact"] = {
                     "temperature_reduction_c": quantified_impact.temperature_reduction_c,
                     "air_quality_points": quantified_impact.air_quality_points,
-                    "co2_absorption_kg_year": quantified_impact.co2_absorption_kg_year,
+                    "co2_absorption_g_year": quantified_impact.co2_absorption_g_year,  # Fixed: now in grams
                     "water_processed_l_week": quantified_impact.water_processed_l_week,
                     "pollinator_support": quantified_impact.pollinator_support,
                     "edible_yield": quantified_impact.edible_yield,

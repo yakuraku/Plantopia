@@ -83,7 +83,7 @@ class QuantifiedImpactResponse(BaseModel):
     """Response containing quantified climate impact for a plant"""
     temperature_reduction_c: float = Field(..., description="Temperature reduction in Celsius")
     air_quality_points: int = Field(..., description="Air quality improvement points")
-    co2_absorption_kg_year: float = Field(..., description="CO2 absorption in kg/year")
+    co2_absorption_g_year: float = Field(..., description="CO2 absorption in grams/year")
     water_processed_l_week: float = Field(..., description="Water processed in L/week")
     pollinator_support: str = Field(..., description="Pollinator support level")
     edible_yield: Optional[str] = Field(default=None, description="Edible yield if applicable")

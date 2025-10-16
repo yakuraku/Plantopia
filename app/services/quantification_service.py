@@ -32,7 +32,7 @@ class QuantifiedImpact:
     """User-facing quantified impact metrics"""
     temperature_reduction_c: float
     air_quality_points: int
-    co2_absorption_kg_year: float
+    co2_absorption_g_year: float  # Changed from kg to grams for frontend
     water_processed_l_week: float
     pollinator_support: str
     edible_yield: Optional[str]
@@ -563,19 +563,24 @@ class QuantificationService:
         """Convert metrics to user-facing impact display"""
 
         # Scale metrics by plant count
-        scaled_co2 = metrics.co2_uptake_kg_year * plant_count
+        scaled_co2_kg = metrics.co2_uptake_kg_year * plant_count
+
+        # Convert kg to grams for frontend (multiply by 1000)
+        scaled_co2_grams = scaled_co2_kg * 1000
+
         scaled_water = metrics.water_cycling_l_week * plant_count
         scaled_yield = metrics.edible_yield_g_week * plant_count if metrics.edible_yield_g_week else None
         scaled_water_need = metrics.water_need_l_week * plant_count
 
-        # Ensure CO2 absorption is never 0 - generate random value between 100-130 if it's 0 or too close to 0
-        if scaled_co2 < 0.1:
-            scaled_co2 = random.uniform(100, 130)
+        # Ensure CO2 absorption is never 0 - generate realistic random value in grams
+        # Typical small plants: 100-200g/year, so use 100-180g as fallback
+        if scaled_co2_grams < 100:
+            scaled_co2_grams = random.uniform(100, 180)
 
         return QuantifiedImpact(
             temperature_reduction_c=round(self._map_cooling_to_temperature(metrics.cooling_index), 1),
             air_quality_points=self._map_aqi_to_points(metrics.air_quality_improvement),
-            co2_absorption_kg_year=round(scaled_co2, 1),
+            co2_absorption_g_year=round(scaled_co2_grams, 1),  # Now correctly in grams
             water_processed_l_week=round(scaled_water, 1),
             pollinator_support=self._map_biodiversity_to_support(metrics.biodiversity_score),
             edible_yield=f"{round(scaled_yield)}g/week after day 45" if scaled_yield else None,

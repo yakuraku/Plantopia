@@ -95,7 +95,7 @@ async def quantify_plant_impact(
         raw_metrics = ImpactMetrics(
             cooling_index=75.0,  # Estimated from quantified impact
             air_quality_improvement=quantified_impact.air_quality_points * 100 / 15,
-            co2_uptake_kg_year=quantified_impact.co2_absorption_kg_year / request.plant_count,
+            co2_uptake_kg_year=(quantified_impact.co2_absorption_g_year / 1000) / request.plant_count,  # Convert grams back to kg
             water_cycling_l_week=quantified_impact.water_processed_l_week / request.plant_count,
             biodiversity_score=80.0 if quantified_impact.pollinator_support == "High" else
                              60.0 if quantified_impact.pollinator_support == "Medium" else
@@ -120,7 +120,7 @@ async def quantify_plant_impact(
             quantified_impact=QuantifiedImpactResponse(
                 temperature_reduction_c=quantified_impact.temperature_reduction_c,
                 air_quality_points=quantified_impact.air_quality_points,
-                co2_absorption_kg_year=quantified_impact.co2_absorption_kg_year,
+                co2_absorption_g_year=quantified_impact.co2_absorption_g_year,  # Fixed: now in grams
                 water_processed_l_week=quantified_impact.water_processed_l_week,
                 pollinator_support=quantified_impact.pollinator_support,
                 edible_yield=quantified_impact.edible_yield,
