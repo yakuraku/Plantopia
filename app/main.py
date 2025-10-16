@@ -38,12 +38,36 @@ app.add_middleware(
 # Smart CORS handling with dynamic origin checking
 @app.middleware("http")
 async def smart_cors_middleware(request: Request, call_next):
+    def is_origin_allowed(origin: str) -> bool:
+        """Check if origin is allowed with pattern matching support"""
+        if not origin:
+            return False
+
+        # Check for wildcard
+        if "*" in settings.BACKEND_CORS_ORIGINS:
+            return True
+
+        # Check exact match first
+        if origin in settings.BACKEND_CORS_ORIGINS:
+            return True
+
+        # Check for wildcard patterns like "https://plantopia-frontend-*.vercel.app"
+        for allowed_origin in settings.BACKEND_CORS_ORIGINS:
+            if "*" in allowed_origin:
+                # Convert wildcard pattern to regex-like matching
+                import re
+                pattern = allowed_origin.replace(".", r"\.").replace("*", ".*")
+                if re.match(f"^{pattern}$", origin):
+                    return True
+
+        return False
+
     # Handle preflight OPTIONS requests first
     if request.method == "OPTIONS":
         origin = request.headers.get("origin")
 
         # Check if origin is in allowed list
-        if origin and (origin in settings.BACKEND_CORS_ORIGINS or "*" in settings.BACKEND_CORS_ORIGINS):
+        if is_origin_allowed(origin):
             return Response(
                 status_code=200,
                 headers={
@@ -64,7 +88,7 @@ async def smart_cors_middleware(request: Request, call_next):
         origin = request.headers.get("origin")
 
         # Dynamic origin checking - return the specific origin that requested, not wildcard
-        if origin and (origin in settings.BACKEND_CORS_ORIGINS or "*" in settings.BACKEND_CORS_ORIGINS):
+        if is_origin_allowed(origin):
             response.headers["Access-Control-Allow-Origin"] = origin  # Specific origin only
             response.headers["Access-Control-Allow-Credentials"] = "true"
             response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"

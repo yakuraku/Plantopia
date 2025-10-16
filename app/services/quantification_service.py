@@ -107,6 +107,52 @@ class QuantificationService:
 
         return impact
 
+    def quantify_plant_impact_with_metrics(
+        self,
+        plant: Plant,
+        site: SitePreferences,
+        preferences: UserPreferences,
+        suburb: Suburb,
+        plant_count: int = 1
+    ) -> Tuple[QuantifiedImpact, ImpactMetrics, SuitabilityScore]:
+        """
+        Quantify plant impact and return both user-facing impact and raw metrics
+
+        This method is optimized for endpoints that need both the impact display
+        and suitability score without reverse-engineering metrics from the impact.
+
+        Args:
+            plant: Plant data from database
+            site: Site preferences and constraints
+            preferences: User preferences
+            suburb: Suburb data for UHI context
+            plant_count: Number of plants being installed
+
+        Returns:
+            Tuple of (QuantifiedImpact, ImpactMetrics, SuitabilityScore)
+        """
+        # 1. Normalize site context
+        context = self._normalize_context(site, suburb, preferences)
+
+        # 2. Derive plant biophysics
+        biophysics = self._derive_plant_biophysics(plant)
+
+        # 3. Calculate core impact indices
+        metrics = self._calculate_impact_indices(plant, biophysics, context)
+
+        # 4. Calculate suitability score
+        suitability = self._calculate_suitability_score(metrics, preferences)
+
+        # 5. Convert to user-facing impact
+        impact = self._convert_to_user_impact(metrics, plant_count)
+
+        # 6. Add community impact potential
+        impact.community_impact_potential = self._calculate_community_impact(
+            impact, suburb, plant_count
+        )
+
+        return impact, metrics, suitability
+
     def _normalize_context(
         self,
         site: SitePreferences,

@@ -79,35 +79,14 @@ async def quantify_plant_impact(
         site_prefs = request.user_preferences.site
         user_prefs = request.user_preferences.preferences
 
-        # Quantify plant impact
-        quantified_impact = quantification_service.quantify_plant_impact(
+        # Quantify plant impact using optimized method that returns metrics and suitability
+        quantified_impact, metrics, suitability = quantification_service.quantify_plant_impact_with_metrics(
             plant=plant,
             site=site_prefs,
             preferences=user_prefs,
             suburb=suburb,
             plant_count=request.plant_count
         )
-
-        # Calculate suitability score
-        from app.services.quantification_service import ImpactMetrics
-
-        # Convert quantified impact back to raw metrics for suitability calculation
-        raw_metrics = ImpactMetrics(
-            cooling_index=75.0,  # Estimated from quantified impact
-            air_quality_improvement=quantified_impact.air_quality_points * 100 / 15,
-            co2_uptake_kg_year=(quantified_impact.co2_absorption_g_year / 1000) / request.plant_count,  # Convert grams back to kg
-            water_cycling_l_week=quantified_impact.water_processed_l_week / request.plant_count,
-            biodiversity_score=80.0 if quantified_impact.pollinator_support == "High" else
-                             60.0 if quantified_impact.pollinator_support == "Medium" else
-                             40.0 if quantified_impact.pollinator_support == "Low" else 20.0,
-            edible_yield_g_week=50.0 if quantified_impact.edible_yield else None,
-            water_need_l_week=float(quantified_impact.water_requirement.split('L/week')[0]),
-            maintenance_mins_week=float(quantified_impact.maintenance_time.split('mins/week')[0]),
-            risk_level=quantified_impact.risk_badge,
-            confidence_score=80.0  # Default confidence
-        )
-
-        suitability = quantification_service._calculate_suitability_score(raw_metrics, user_prefs)
 
         # Determine climate zone
         climate_zone = request.climate_zone or "temperate"
