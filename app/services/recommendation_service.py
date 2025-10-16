@@ -214,13 +214,20 @@ class RecommendationService:
         Returns:
             Enhanced output with GCS image URLs, plant IDs, and companion planting data
         """
-        for recommendation in output.get("recommendations", []):
+        recommendations = output.get("recommendations", [])
+
+        # PERFORMANCE OPTIMIZATION: Batch fetch all plants in a single query (fixes N+1 problem)
+        plant_names = [rec.get("plant_name", "") for rec in recommendations]
+        plants_map = await self.plant_repository.find_plants_by_names_batch(plant_names)
+
+        # Now iterate through recommendations and use the pre-fetched data
+        for recommendation in recommendations:
             plant_name = recommendation.get("plant_name", "")
             plant_category = recommendation.get("plant_category", "flower")
             scientific_name = recommendation.get("scientific_name", "")
 
-            # Look up plant by name to get database ID and companion planting data
-            plant = await self.plant_repository.find_plant_by_name(plant_name)
+            # Look up plant from batch-fetched map (no DB query!)
+            plant = plants_map.get(plant_name.lower().strip())
             if plant:
                 recommendation["id"] = plant.get("id")  # Add database ID
 

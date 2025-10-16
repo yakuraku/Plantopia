@@ -53,6 +53,54 @@ class DatabasePlantRepository:
 
         return self._plant_to_dict(plant) if plant else None
 
+    async def find_plants_by_names_batch(self, plant_names: List[str]) -> Dict[str, Dict[str, Any]]:
+        """Find multiple plants by their names in a single query (batch operation).
+
+        Fixes N+1 query problem by fetching all plants at once instead of individual queries.
+
+        Args:
+            plant_names: List of plant names to find
+
+        Returns:
+            Dictionary mapping plant names (lowercase) to plant dictionaries
+
+        Example:
+            plants = await repo.find_plants_by_names_batch(["Tomato", "Basil", "Rose"])
+            tomato_data = plants.get("tomato")  # Returns plant dict or None
+        """
+        if not plant_names:
+            return {}
+
+        # Normalize plant names for matching
+        plant_names_lower = [name.lower().strip() for name in plant_names]
+
+        # Single query to fetch all plants
+        query = select(Plant).where(
+            or_(
+                *[func.lower(Plant.plant_name) == name for name in plant_names_lower],
+                *[func.lower(Plant.scientific_name) == name for name in plant_names_lower]
+            )
+        )
+
+        result = await self.db.execute(query)
+        plants = result.scalars().all()
+
+        # Build dictionary mapping plant name to plant data
+        plant_map = {}
+        for plant in plants:
+            if plant:
+                plant_dict = self._plant_to_dict(plant)
+                # Map by both plant_name and scientific_name (lowercase) for easy lookup
+                plant_name_key = plant.plant_name.lower().strip() if plant.plant_name else ""
+                scientific_name_key = plant.scientific_name.lower().strip() if plant.scientific_name else ""
+
+                if plant_name_key:
+                    plant_map[plant_name_key] = plant_dict
+                if scientific_name_key and scientific_name_key != plant_name_key:
+                    plant_map[scientific_name_key] = plant_dict
+
+        return plant_map
+
     async def get_plant_object_by_name(self, plant_name: str) -> Optional[Plant]:
         """Get Plant object (not dictionary) by name for services that need the SQLAlchemy model.
 
