@@ -4,6 +4,7 @@ import math
 
 from app.repositories.database_plant_repository import DatabasePlantRepository
 from app.utils.image_utils import image_to_base64
+from app.utils.cache import cached
 from app.schemas.response import PlantMedia, AllPlantsResponse, PaginatedPlantsResponse
 from app.core.config import settings
 
@@ -14,6 +15,7 @@ class PlantService:
     def __init__(self, plant_repository: DatabasePlantRepository):
         self.plant_repository = plant_repository
     
+    @cached(ttl=1800, prefix="plants")  # Cache for 30 minutes
     async def get_all_plants_with_images(self) -> AllPlantsResponse:
         """Get all plants with base64 encoded images.
 
@@ -247,6 +249,7 @@ class PlantService:
             has_previous=has_previous
         )
 
+    @cached(ttl=86400, prefix="companions")  # Cache for 24 hours (static data)
     async def get_plant_companions(self, plant_id: int) -> Optional[Dict[str, Any]]:
         """Get companion planting information for a specific plant.
 

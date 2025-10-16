@@ -6,6 +6,7 @@ from typing import Dict, Any, List, Optional, Tuple
 from app.repositories.database_plant_repository import DatabasePlantRepository
 from app.repositories.climate_repository import ClimateRepository
 from app.utils.image_utils import image_to_base64
+from app.utils.cache import cached
 from app.schemas.request import RecommendationRequest, PlantScoreRequest
 from app.core.config import settings
 from app.schemas.response import (
@@ -28,12 +29,13 @@ class RecommendationService:
         self.climate_repository = climate_repository
         self.quantification_service = QuantificationService()
     
+    @cached(ttl=600, prefix="recommendations")  # Cache for 10 minutes
     async def generate_recommendations(self, request: RecommendationRequest) -> Dict[str, Any]:
         """Generate plant recommendations based on user preferences.
-        
+
         Args:
             request: Recommendation request with user preferences
-            
+
         Returns:
             Dictionary with recommendations and metadata
         """

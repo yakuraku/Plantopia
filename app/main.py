@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request
+from fastapi.middleware.gzip import GZipMiddleware
 from contextlib import asynccontextmanager
 from fastapi.responses import Response
 
@@ -12,11 +13,11 @@ async def lifespan(app: FastAPI):
     """Manage application lifecycle"""
     # Startup
     await init_db()
-    print("✅ Database initialized")
+    print("Database initialized")
     yield
     # Shutdown
     await close_db()
-    print("👋 Database connections closed")
+    print("Database connections closed")
 
 
 # Create FastAPI application
@@ -25,6 +26,13 @@ app = FastAPI(
     description=settings.PROJECT_DESCRIPTION,
     version=settings.VERSION,
     lifespan=lifespan
+)
+
+# Add GZip compression for responses > 1KB (60-80% size reduction)
+app.add_middleware(
+    GZipMiddleware,
+    minimum_size=1000,  # Only compress responses larger than 1KB
+    compresslevel=6  # Balance between speed and compression ratio
 )
 
 # Smart CORS handling with dynamic origin checking

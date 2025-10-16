@@ -22,8 +22,8 @@ else:
 # Sync engine for migrations and data loading
 engine = create_engine(
     DATABASE_URL,
-    pool_size=int(os.getenv("DATABASE_POOL_SIZE", "3")),
-    max_overflow=int(os.getenv("DATABASE_MAX_OVERFLOW", "5")),
+    pool_size=int(os.getenv("DATABASE_POOL_SIZE", "20")),  # Increased from 3 to 20 for better concurrency
+    max_overflow=int(os.getenv("DATABASE_MAX_OVERFLOW", "10")),  # Increased from 5 to 10
     pool_pre_ping=True,  # Verify connections before using
     echo=os.getenv("DEBUG", "False").lower() == "true"  # SQL logging in debug mode
 )
@@ -31,8 +31,8 @@ engine = create_engine(
 # Async engine for API operations
 async_engine = create_async_engine(
     ASYNC_DATABASE_URL,
-    pool_size=int(os.getenv("DATABASE_POOL_SIZE", "3")),
-    max_overflow=int(os.getenv("DATABASE_MAX_OVERFLOW", "5")),
+    pool_size=int(os.getenv("DATABASE_POOL_SIZE", "20")),  # Increased from 3 to 20 for better concurrency
+    max_overflow=int(os.getenv("DATABASE_MAX_OVERFLOW", "10")),  # Increased from 5 to 10
     pool_pre_ping=True,
     echo=os.getenv("DEBUG", "False").lower() == "true",
     connect_args={"statement_cache_size": 0}  # Disable prepared statements for pgbouncer transaction mode
