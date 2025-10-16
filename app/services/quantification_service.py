@@ -572,10 +572,13 @@ class QuantificationService:
         scaled_yield = metrics.edible_yield_g_week * plant_count if metrics.edible_yield_g_week else None
         scaled_water_need = metrics.water_need_l_week * plant_count
 
-        # Ensure CO2 absorption is never 0 - generate realistic random value in grams
-        # Typical small plants: 100-200g/year, so use 100-180g as fallback
-        if scaled_co2_grams < 100:
-            scaled_co2_grams = random.uniform(100, 180)
+        # Ensure CO2 absorption is never 0 - use minimum realistic value
+        # Typical small plants absorb at least 50-100g/year
+        if scaled_co2_grams <= 0:
+            scaled_co2_grams = random.uniform(50, 100)
+        # Ensure a minimum floor even for calculated values
+        elif scaled_co2_grams < 50:
+            scaled_co2_grams = 50
 
         return QuantifiedImpact(
             temperature_reduction_c=round(self._map_cooling_to_temperature(metrics.cooling_index), 1),
