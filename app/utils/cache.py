@@ -73,16 +73,39 @@ def cache_key(*args, **kwargs) -> str:
     # Filter out self/cls from args for class methods
     filtered_args = []
     for arg in args:
-        # Skip class instances (self, cls)
-        if not hasattr(arg, '__class__') or isinstance(arg, (str, int, float, bool, list, dict)):
+        # Skip service/repository instances (self, cls)
+        if hasattr(arg, '__class__'):
+            class_name = arg.__class__.__name__
+            # Skip class instances like RecommendationService, DatabasePlantRepository, etc.
+            if 'Service' in class_name or 'Repository' in class_name:
+                continue
+
+        # Handle Pydantic models (convert to dict for proper serialization)
+        if hasattr(arg, 'dict') and callable(arg.dict):
+            try:
+                filtered_args.append(arg.dict())
+                continue
+            except Exception:
+                pass
+
+        # Handle Pydantic v2 models (model_dump instead of dict)
+        if hasattr(arg, 'model_dump') and callable(arg.model_dump):
+            try:
+                filtered_args.append(arg.model_dump())
+                continue
+            except Exception:
+                pass
+
+        # Include primitive types and collections
+        if isinstance(arg, (str, int, float, bool, list, dict, tuple, type(None))):
             filtered_args.append(arg)
 
     # Create a deterministic string representation
     try:
         key_data = json.dumps({
-            "args": [str(arg) for arg in filtered_args],
-            "kwargs": {k: str(v) for k, v in kwargs.items()}
-        }, sort_keys=True)
+            "args": filtered_args,
+            "kwargs": kwargs
+        }, sort_keys=True, default=str)
     except Exception:
         # Fallback for non-serializable objects
         key_data = f"{filtered_args}:{kwargs}"
